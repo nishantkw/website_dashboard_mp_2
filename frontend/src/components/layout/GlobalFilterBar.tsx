@@ -1,6 +1,6 @@
 import { Filter, RotateCcw, Search } from 'lucide-react'
 import {
-  SCHEMA_OPTIONS, STATE_OPTIONS, DISTRICT_OPTIONS, STATUS_OPTIONS,
+  SCHEMA_OPTIONS, DIVISION_OPTIONS, getDistrictsForDivision, STATUS_OPTIONS,
   GENDER_OPTIONS, URBAN_RURAL_OPTIONS, HOSPITAL_TYPE_OPTIONS,
   CASE_TYPE_OPTIONS, ROLE_OPTIONS, DEPARTMENT_OPTIONS, EKYC_OPTIONS,
   FRAUD_TYPE_OPTIONS, COURSE_OPTIONS, NABH_OPTIONS,
@@ -37,6 +37,7 @@ function FilterSelect({ label, column, value, options, onChange }: FilterSelectP
 
 export default function GlobalFilterBar() {
   const { globalFilters, setGlobalFilter, clearGlobalFilters, activeGlobalCount, search, setSearch } = useGlobalFilters()
+  const dynamicDistrictOptions = getDistrictsForDivision(globalFilters.division)
 
   return (
     <div className="w-full border-t border-[#a8d5b5]/60 pt-2">
@@ -78,8 +79,8 @@ export default function GlobalFilterBar() {
 
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
         <FilterSelect label="Schema" column="schema_name" value={globalFilters.schema} options={SCHEMA_OPTIONS} onChange={(v) => setGlobalFilter('schema', v)} />
-        <FilterSelect label="State" column="state_name" value={globalFilters.state} options={STATE_OPTIONS} onChange={(v) => setGlobalFilter('state', v)} />
-        <FilterSelect label="District" column="district_name" value={globalFilters.district} options={DISTRICT_OPTIONS} onChange={(v) => setGlobalFilter('district', v)} />
+        <FilterSelect label="Division" column="division_name" value={globalFilters.division} options={DIVISION_OPTIONS} onChange={(v) => setGlobalFilter('division', v)} />
+        <FilterSelect label="District" column="district_name" value={globalFilters.district} options={dynamicDistrictOptions} onChange={(v) => setGlobalFilter('district', v)} />
         <FilterSelect label="Status" column="case_status" value={globalFilters.status} options={STATUS_OPTIONS} onChange={(v) => setGlobalFilter('status', v)} />
         <FilterSelect label="Gender" column="gender" value={globalFilters.gender} options={GENDER_OPTIONS} onChange={(v) => setGlobalFilter('gender', v)} />
         <FilterSelect label="Urban/Rural" column="urban_or_rural" value={globalFilters.urban_rural} options={URBAN_RURAL_OPTIONS} onChange={(v) => setGlobalFilter('urban_rural', v)} />

@@ -154,7 +154,7 @@ export function exportToPDF(
   </table>
 
   <div class="footer">
-    <div>Ayushman MP/MH Analytics Portal</div>
+    <div>Ayushman MP Analytics Portal</div>
     <div>Confidential Document</div>
   </div>
 
@@ -226,7 +226,7 @@ export function exportFullPagePDF(title: string, subtitle?: string) {
   </div>
 
   <div class="print-footer">
-    <div>Generated from Ayushman MP/MH Analytics Portal</div>
+    <div>Generated from Ayushman MP Analytics Portal</div>
     <div>Confidential Document</div>
   </div>
 

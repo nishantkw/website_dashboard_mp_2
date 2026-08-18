@@ -237,6 +237,7 @@ interface InteractiveLineChartProps {
   onItemClick?: (payload: ChartClickPayload, chartTitle: string) => void
   chartTitle?: string
   dualAxis?: boolean
+  showLegend?: boolean
 }
 
 export function InteractiveLineChart({
@@ -246,6 +247,7 @@ export function InteractiveLineChart({
   onItemClick,
   chartTitle = 'Chart',
   dualAxis = false,
+  showLegend = true,
 }: InteractiveLineChartProps) {
   const multiLine = lines.length > 1
 
@@ -261,7 +263,7 @@ export function InteractiveLineChart({
         <YAxis yAxisId="left" tick={{ fontSize: 12 }} />
         {dualAxis && <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />}
         <Tooltip />
-        <Legend />
+        {showLegend && <Legend />}
         {lines.map((line, lineIdx) => (
           <Line
             key={line.dataKey}

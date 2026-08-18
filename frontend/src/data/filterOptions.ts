@@ -1,31 +1,104 @@
 export const SCHEMA_OPTIONS = [
   { value: '', label: 'All Schemas' },
   { value: 'bis_raw', label: 'bis_raw — BIS Card Printing' },
-  { value: 'dmart_mh', label: 'dmart_mh — Maharashtra' },
   { value: 'dmart_mp', label: 'dmart_mp — Madhya Pradesh' },
   { value: 'ump_raw', label: 'ump_raw — User Management' },
 ]
 
-export const STATE_OPTIONS = [
-  { value: '', label: 'All States' },
-  { value: 'Madhya Pradesh', label: 'Madhya Pradesh' },
-  { value: 'Maharashtra', label: 'Maharashtra' },
+export interface DivisionData {
+  division: string
+  oic: string
+  districts: string[]
+}
+
+export const MP_DIVISIONS: DivisionData[] = [
+  {
+    division: 'Bhopal',
+    oic: 'Dr. Ravindra Gupta',
+    districts: ['Bhopal'],
+  },
+  {
+    division: 'Narmadapuram',
+    oic: 'Dr. Ashwin Ingle',
+    districts: ['Betul', 'Harda', 'Hoshangabad', 'Raisen', 'Rajgarh', 'Sehore', 'Vidisha'],
+  },
+  {
+    division: 'Gwalior',
+    oic: 'Dr. Naveen Diwan',
+    districts: ['Gwalior', 'Ashoknagar', 'Bhind', 'Datia', 'Guna', 'Morena', 'Sheopur', 'Shivpuri'],
+  },
+  {
+    division: 'Indore',
+    oic: 'Dr. Sachin Kumar Malaiya',
+    districts: ['Indore', 'Alirajpur', 'Barwani', 'Burhanpur', 'Dhar', 'Jhabua', 'Khandwa', 'Khargone'],
+  },
+  {
+    division: 'Jabalpur',
+    oic: 'Dr. Sanjay Sharma',
+    districts: ['Jabalpur', 'Balaghat', 'Chhindwara', 'Dindori', 'Katni', 'Mandla', 'Narsinghpur', 'Seoni', 'Pandhurna'],
+  },
+  {
+    division: 'Rewa',
+    oic: 'Dr. Rahul Kumar Jain',
+    districts: ['Rewa', 'Anuppur', 'Satna', 'Shahdol', 'Sidhi', 'Singrauli', 'Umaria', 'Maihar', 'Mauganj'],
+  },
+  {
+    division: 'Sagar',
+    oic: 'Dr. Rahul Kumar Jain',
+    districts: ['Sagar', 'Chhatarpur', 'Damoh', 'Panna', 'Tikamgarh', 'Niwari'],
+  },
+  {
+    division: 'Ujjain',
+    oic: 'Dr. Rakesh Thakur',
+    districts: ['Ujjain', 'Agarmalwa', 'Dewas', 'Mandsaur', 'Neemuch', 'Ratlam', 'Shajapur'],
+  },
 ]
 
-export const DISTRICT_OPTIONS = [
-  { value: '', label: 'All Districts' },
-  { value: 'Bhopal', label: 'Bhopal' },
-  { value: 'Indore', label: 'Indore' },
-  { value: 'Jabalpur', label: 'Jabalpur' },
-  { value: 'Gwalior', label: 'Gwalior' },
-  { value: 'Ujjain', label: 'Ujjain' },
-  { value: 'Sagar', label: 'Sagar' },
-  { value: 'Mumbai', label: 'Mumbai' },
-  { value: 'Pune', label: 'Pune' },
-  { value: 'Nagpur', label: 'Nagpur' },
-  { value: 'Nashik', label: 'Nashik' },
-  { value: 'Thane', label: 'Thane' },
+export const DIVISION_OPTIONS = [
+  { value: '', label: 'All Divisions' },
+  ...MP_DIVISIONS.map((d) => ({ value: d.division, label: d.division })),
 ]
+
+export function getDistrictsForDivision(divisionName?: string) {
+  if (!divisionName) {
+    const allDistricts = Array.from(
+      new Set(MP_DIVISIONS.flatMap((d) => d.districts))
+    ).sort()
+    return [
+      { value: '', label: 'All Districts' },
+      ...allDistricts.map((d) => ({ value: d, label: d })),
+    ]
+  }
+
+  const divObj = MP_DIVISIONS.find(
+    (d) => d.division.toLowerCase() === divisionName.toLowerCase()
+  )
+
+  if (!divObj) {
+    const allDistricts = Array.from(
+      new Set(MP_DIVISIONS.flatMap((d) => d.districts))
+    ).sort()
+    return [
+      { value: '', label: 'All Districts' },
+      ...allDistricts.map((d) => ({ value: d, label: d })),
+    ]
+  }
+
+  return [
+    { value: '', label: 'All Districts' },
+    ...divObj.districts.map((d) => ({ value: d, label: d })),
+  ]
+}
+
+export function getDivisionForDistrict(districtName: string): string | undefined {
+  if (!districtName) return undefined
+  const divObj = MP_DIVISIONS.find((d) =>
+    d.districts.some((dist) => dist.toLowerCase() === districtName.toLowerCase())
+  )
+  return divObj?.division
+}
+
+export const DISTRICT_OPTIONS = getDistrictsForDivision()
 
 export const STATUS_OPTIONS = [
   { value: '', label: 'All Status' },

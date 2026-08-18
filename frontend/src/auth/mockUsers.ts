@@ -30,14 +30,6 @@ export const mockUsers: MockUserRecord[] = [
     department: 'BIS - Card Printing',
   },
   {
-    id: '3',
-    username: 'mh.user',
-    password: 'demo123',
-    name: 'Amit Patil',
-    role: 'mh_user',
-    department: 'Maharashtra Data Mart',
-  },
-  {
     id: '4',
     username: 'mp.user',
     password: 'demo123',
@@ -79,11 +71,11 @@ export function getDefaultRouteForRole(role: UserRole): string {
       return '/dashboard'
     case 'bis_user':
       return '/dashboard/bis/card-printing'
-    case 'mh_user':
-      return '/dashboard/mh/claims'
     case 'mp_user':
       return '/dashboard/mp/claims-payments'
     case 'ump_user':
       return '/dashboard/ump/users'
+    default:
+      return '/dashboard'
   }
 }

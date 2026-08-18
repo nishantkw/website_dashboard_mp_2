@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { X, Search, RotateCcw, Table as TableIcon, Filter, CheckCircle2, AlertCircle, XCircle } from 'lucide-react'
 import { getConnectedDataset, type ConnectedDataset } from '../../data/connectedDemoData'
 import { useGlobalFilters } from '../../context/FilterContext'
+import { DIVISION_OPTIONS, getDistrictsForDivision, getDivisionForDistrict } from '../../data/filterOptions'
 import ExportDropdown from './ExportDropdown'
 
 export interface DrillDownDetail {
@@ -19,12 +20,37 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
   const { clearGlobalFilters } = useGlobalFilters()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
-  const [stateFilter, setStateFilter] = useState('ALL')
+  const [divisionFilter, setDivisionFilter] = useState('ALL')
+  const [districtFilter, setDistrictFilter] = useState('ALL')
 
   const dataset: ConnectedDataset | null = useMemo(() => {
     if (!detail) return null
     return getConnectedDataset(detail.title, detail.subtitle)
   }, [detail])
+
+  const dynamicDistricts = useMemo(() => {
+    return getDistrictsForDivision(divisionFilter === 'ALL' ? '' : divisionFilter)
+  }, [divisionFilter])
+
+  const handleDivisionChange = (divVal: string) => {
+    setDivisionFilter(divVal)
+    if (divVal !== 'ALL' && districtFilter !== 'ALL') {
+      const allowed = getDistrictsForDivision(divVal).map((d) => d.value)
+      if (!allowed.includes(districtFilter)) {
+        setDistrictFilter('ALL')
+      }
+    }
+  }
+
+  const handleDistrictChange = (distVal: string) => {
+    setDistrictFilter(distVal)
+    if (distVal !== 'ALL' && divisionFilter === 'ALL') {
+      const parentDiv = getDivisionForDistrict(distVal)
+      if (parentDiv) {
+        setDivisionFilter(parentDiv)
+      }
+    }
+  }
 
   const filteredRecords = useMemo(() => {
     if (!dataset) return []
@@ -37,20 +63,26 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
       const matchStatus =
         statusFilter === 'ALL' || recStatus.includes(statusFilter.toLowerCase())
 
-      const recState = String(rec.state || '').toLowerCase()
-      const matchState =
-        stateFilter === 'ALL' || recState.includes(stateFilter.toLowerCase())
+      const recDistrict = String(rec.district || '')
+      const recDivision = String(rec.division || getDivisionForDistrict(recDistrict) || '')
 
-      return matchSearch && matchStatus && matchState
+      const matchDivision =
+        divisionFilter === 'ALL' || recDivision.toLowerCase() === divisionFilter.toLowerCase()
+
+      const matchDistrict =
+        districtFilter === 'ALL' || recDistrict.toLowerCase() === districtFilter.toLowerCase()
+
+      return matchSearch && matchStatus && matchDivision && matchDistrict
     })
-  }, [dataset, searchTerm, statusFilter, stateFilter])
+  }, [dataset, searchTerm, statusFilter, divisionFilter, districtFilter])
 
   if (!detail || !dataset) return null
 
   const handleClearFilters = () => {
     setSearchTerm('')
     setStatusFilter('ALL')
-    setStateFilter('ALL')
+    setDivisionFilter('ALL')
+    setDistrictFilter('ALL')
     clearGlobalFilters()
   }
 
@@ -131,13 +163,28 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
               Filters:
             </div>
             <select
-              value={stateFilter}
-              onChange={(e) => setStateFilter(e.target.value)}
+              value={divisionFilter}
+              onChange={(e) => handleDivisionChange(e.target.value)}
               className="text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 outline-none focus:border-[#2d8a4e]"
             >
-              <option value="ALL">All States</option>
-              <option value="Madhya Pradesh">Madhya Pradesh</option>
-              <option value="Maharashtra">Maharashtra</option>
+              <option value="ALL">All Divisions</option>
+              {DIVISION_OPTIONS.filter((d) => d.value).map((d) => (
+                <option key={d.value} value={d.value}>
+                  {d.label}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={districtFilter}
+              onChange={(e) => handleDistrictChange(e.target.value)}
+              className="text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 outline-none focus:border-[#2d8a4e]"
+            >
+              {dynamicDistricts.map((d) => (
+                <option key={d.value} value={d.value || 'ALL'}>
+                  {d.label}
+                </option>
+              ))}
             </select>
 
             <select

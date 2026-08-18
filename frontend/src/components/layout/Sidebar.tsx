@@ -7,6 +7,7 @@ import {
   Building2,
   Users,
   UserCog,
+  UploadCloud,
   ChevronDown,
   ChevronRight,
   Menu,
@@ -25,6 +26,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Building2,
   Users,
   UserCog,
+  UploadCloud,
 }
 
 function NavIcon({ name }: { name?: string }) {
@@ -131,7 +133,7 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
             />
             <div>
               <p className="text-white font-bold text-sm leading-tight">Analytics Dashboard</p>
-              <p className="text-slate-400 text-xs">MP / MH Data Portal</p>
+              <p className="text-slate-400 text-xs font-medium">Madhya Pradesh Portal</p>
             </div>
           </div>
           <button onClick={onClose} className="lg:hidden text-slate-400 hover:text-white">

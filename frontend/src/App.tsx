@@ -6,7 +6,6 @@ import DashboardLayout from './components/layout/DashboardLayout'
 import Login from './pages/Login'
 import Overview from './pages/Overview'
 import CardPrinting from './pages/bis/CardPrinting'
-import MHClaims from './pages/mh/Claims'
 import ClaimsPayments from './pages/mp/ClaimsPayments'
 import Beneficiaries from './pages/mp/Beneficiaries'
 import Hospitals from './pages/mp/Hospitals'
@@ -16,6 +15,7 @@ import UsersWorkflow from './pages/mp/UsersWorkflow'
 import LmsTraining from './pages/mp/LmsTraining'
 import UserMaster from './pages/ump/UserMaster'
 import UserManagement from './pages/admin/UserManagement'
+import ImportBulkData from './pages/admin/ImportBulkData'
 
 export default function App() {
   return (
@@ -34,8 +34,8 @@ export default function App() {
               <Route path="/dashboard" element={<DashboardLayout />}>
                 <Route index element={<Overview />} />
                 <Route path="admin/user-management" element={<UserManagement />} />
+                <Route path="admin/import-bulk-data" element={<ImportBulkData />} />
                 <Route path="bis/card-printing" element={<CardPrinting />} />
-                <Route path="mh/claims" element={<MHClaims />} />
                 <Route path="mp/claims-payments" element={<ClaimsPayments />} />
                 <Route path="mp/beneficiaries" element={<Beneficiaries />} />
                 <Route path="mp/hospitals" element={<Hospitals />} />

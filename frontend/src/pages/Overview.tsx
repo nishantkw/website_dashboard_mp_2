@@ -1,4 +1,5 @@
 import ChartCard from '../components/ui/ChartCard'
+import DataTable from '../components/ui/DataTable'
 import { PageHeader, KPIGrid } from '../components/ui/PageHeader'
 import { InteractiveBarChart, InteractiveLineChart, InteractivePieChart } from '../components/charts/InteractiveCharts'
 import { useDrillDown } from '../hooks/useDrillDown'
@@ -9,12 +10,30 @@ import {
   stateComparisonData,
   cardPrintingFunnel,
   claimStatusDistribution,
+  claimsWorkflowFunnel,
+  mpDistrictClaimsData,
+  overviewSchemaSummary,
 } from '../data/mockData'
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4']
+const FUNNEL_COLORS = ['#6366f1', '#8b5cf6', '#a78bfa', '#7c3aed', '#5b21b6', '#4c1d95']
+
+const schemaCols = [
+  { key: 'schema', label: 'Schema' },
+  { key: 'table', label: 'Table Name' },
+  { key: 'records', label: 'Records', align: 'right' as const },
+  { key: 'description', label: 'Description' },
+  { key: 'key_columns', label: 'Key Columns' },
+]
+
+const districtCols = [
+  { key: 'name', label: 'District' },
+  { key: 'claims', label: 'Claims', align: 'right' as const },
+  { key: 'amount', label: 'Amount (₹ Cr)', align: 'right' as const },
+]
 
 export default function Overview() {
-  const { openFromChart, openFromKpi, Modal } = useDrillDown()
+  const { openFromChart, openFromKpi, openDetail, Modal } = useDrillDown()
 
   const handleKpiClick = (kpi: KPI) => {
     openFromKpi(kpi.label, kpi.value, { change: kpi.change ?? 0, period: 'vs last month' })
@@ -23,28 +42,68 @@ export default function Overview() {
   return (
     <div>
       <Modal />
-      <PageHeader title="Overview Dashboard" description="Aggregated KPIs across all departments — BIS, Maharashtra, Madhya Pradesh, and UMP" />
+      <PageHeader title="Overview Dashboard" description="Executive summary across all dmart_mp tables — Beneficiaries, Claims, Hospitals, Cards & Fraud Analytics" />
       <KPIGrid kpis={overviewKPIs} onKpiClick={handleKpiClick} />
 
+      {/* Row 1: Claims Trend + District Performance */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <ChartCard title="Claims Trend" subtitle="Monthly claims volume and amount (₹ Cr)">
-          <InteractiveLineChart data={claimsTrendData} chartTitle="Claims Trend" dualAxis onItemClick={openFromChart}
-            lines={[{ dataKey: 'claims', stroke: '#3b82f6', name: 'Claims', yAxisId: 'left' }, { dataKey: 'amount', stroke: '#10b981', name: 'Amount (₹ Cr)', yAxisId: 'right' }]} />
+        <ChartCard title="Monthly Claims Trend" subtitle="Paid, Pending & Preauth volume (Jan–Aug 2025)" exportData={claimsTrendData}>
+          <InteractiveLineChart data={claimsTrendData} chartTitle="Claims Trend" height={250} dualAxis onItemClick={openFromChart}
+            lines={[
+              { dataKey: 'claims', stroke: '#3b82f6', name: 'Total Claims', yAxisId: 'left' },
+              { dataKey: 'paid', stroke: '#10b981', name: 'Preauth', yAxisId: 'left' },
+              { dataKey: 'amount', stroke: '#f59e0b', name: 'Amount (₹ Cr)', yAxisId: 'right' },
+            ]} />
         </ChartCard>
-        <ChartCard title="State Comparison" subtitle="Claims and beneficiaries by state">
-          <InteractiveBarChart data={stateComparisonData} chartTitle="State Comparison" showLegend onItemClick={openFromChart}
-            bars={[{ dataKey: 'claims', fill: '#3b82f6', name: 'Claims' }, { dataKey: 'beneficiaries', fill: '#10b981', name: 'Beneficiaries' }]} />
+        <ChartCard title="District Performance" subtitle="Claims & Beneficiaries by top districts" exportData={stateComparisonData}>
+          <InteractiveBarChart data={stateComparisonData} chartTitle="District Performance" height={250} showLegend onItemClick={openFromChart}
+            bars={[
+              { dataKey: 'claims', fill: '#3b82f6', name: 'Claims' },
+              { dataKey: 'hospitals', fill: '#10b981', name: 'Hospitals' },
+            ]} />
         </ChartCard>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ChartCard title="Card Printing Funnel" subtitle="Beneficiary card lifecycle">
-          <InteractiveBarChart data={cardPrintingFunnel} chartTitle="Card Printing Funnel" layout="vertical" onItemClick={openFromChart}
-            bars={[{ dataKey: 'value', fill: '#8b5cf6', name: 'Count' }]} />
+      {/* Row 2: Card Printing Funnel + Claim Status */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <ChartCard title="Card Printing Lifecycle Funnel" subtitle="t_card_printing_status — Enrolled → Delivered" exportData={cardPrintingFunnel}>
+          <InteractiveBarChart data={cardPrintingFunnel} chartTitle="Card Printing Funnel" layout="vertical" height={280} onItemClick={openFromChart}
+            bars={[{ dataKey: 'value', fill: '#8b5cf6', name: 'Count' }]}
+            cellColors={FUNNEL_COLORS} />
         </ChartCard>
-        <ChartCard title="Claim Status Distribution" subtitle="Current claim status">
+        <ChartCard title="Claim Status Distribution" subtitle="claim_paid_t — Current status breakdown" exportData={claimStatusDistribution}>
           <InteractivePieChart data={claimStatusDistribution} colors={COLORS} innerRadius={60} chartTitle="Claim Status" onItemClick={openFromChart} />
         </ChartCard>
+      </div>
+
+      {/* Row 3: Claims Workflow Funnel + District Claims Table */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <ChartCard title="Claims Processing Workflow" subtitle="Preauth → Surgery → Claim → Payment pipeline" exportData={claimsWorkflowFunnel}>
+          <InteractiveBarChart data={claimsWorkflowFunnel} chartTitle="Workflow Funnel" layout="vertical" height={260} onItemClick={openFromChart}
+            bars={[{ dataKey: 'value', fill: '#0ea5e9', name: 'Volume' }]} />
+        </ChartCard>
+        <ChartCard title="Top Districts by Claims Amount" subtitle="claim_paid_t — Amount paid per district (₹ Cr)" exportData={mpDistrictClaimsData}>
+          <InteractiveBarChart data={mpDistrictClaimsData} chartTitle="District Claims" layout="vertical" height={260} onItemClick={openFromChart}
+            bars={[{ dataKey: 'amount', fill: '#f59e0b', name: '₹ Cr' }]} />
+        </ChartCard>
+      </div>
+
+      {/* Schema Summary Table */}
+      <DataTable
+        columns={schemaCols}
+        data={overviewSchemaSummary}
+        title="dmart_mp Schema — Key Tables Reference (28 tables, 869 columns)"
+        onRowClick={(row) => openDetail({ title: String(row.table), subtitle: String(row.schema), data: row })}
+      />
+
+      {/* District Claims Detail Table */}
+      <div className="mt-4">
+        <DataTable
+          columns={districtCols}
+          data={mpDistrictClaimsData as any}
+          title="District-wise Claims Summary"
+          onRowClick={(row) => openDetail({ title: String(row.name), subtitle: 'District Analytics', data: row })}
+        />
       </div>
     </div>
   )

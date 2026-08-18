@@ -22,7 +22,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored) {
       try {
-        setUser(JSON.parse(stored))
+        const parsed = JSON.parse(stored)
+        if (parsed && parsed.role && (parsed.role === 'super_admin' || parsed.role === 'state_admin' || parsed.role === 'bis_user' || parsed.role === 'mp_user' || parsed.role === 'ump_user')) {
+          setUser(parsed)
+        } else {
+          localStorage.removeItem(STORAGE_KEY)
+        }
       } catch {
         localStorage.removeItem(STORAGE_KEY)
       }

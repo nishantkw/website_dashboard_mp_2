@@ -15,14 +15,7 @@ export const navigation: NavItem[] = [
       { id: 'bis-card', label: 'Card Printing Status', path: '/dashboard/bis/card-printing' },
     ],
   },
-  {
-    id: 'mh',
-    label: 'Maharashtra (dmart_mh)',
-    icon: 'MapPin',
-    children: [
-      { id: 'mh-claims', label: 'Claims Dashboard', path: '/dashboard/mh/claims' },
-    ],
-  },
+
   {
     id: 'mp',
     label: 'Madhya Pradesh (dmart_mp)',
@@ -42,6 +35,12 @@ export const navigation: NavItem[] = [
     label: 'User Management',
     path: '/dashboard/admin/user-management',
     icon: 'UserCog',
+  },
+  {
+    id: 'import_bulk_data',
+    label: 'Import Bulk Data',
+    path: '/dashboard/admin/import-bulk-data',
+    icon: 'UploadCloud',
   },
   {
     id: 'ump',

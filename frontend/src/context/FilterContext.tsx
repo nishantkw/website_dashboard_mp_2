@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
 import type { FilterValues } from '../types'
+import { getDistrictsForDivision, getDivisionForDistrict } from '../data/filterOptions'
 
 interface FilterContextValue {
   globalFilters: FilterValues
@@ -12,7 +13,7 @@ interface FilterContextValue {
 
 export const defaultGlobalFilters: FilterValues = {
   schema: '',
-  state: '',
+  division: '',
   district: '',
   status: '',
   gender: '',
@@ -36,7 +37,25 @@ export function FilterProvider({ children }: { children: ReactNode }) {
   const [search, setSearch] = useState('')
 
   const setGlobalFilter = useCallback((key: string, value: string) => {
-    setGlobalFilters((prev) => ({ ...prev, [key]: value }))
+    setGlobalFilters((prev) => {
+      const updated = { ...prev, [key]: value }
+
+      if (key === 'division') {
+        if (value && prev.district) {
+          const allowedDistricts = getDistrictsForDivision(value).map((d) => d.value)
+          if (!allowedDistricts.includes(prev.district)) {
+            updated.district = ''
+          }
+        }
+      } else if (key === 'district' && value) {
+        const parentDiv = getDivisionForDistrict(value)
+        if (parentDiv && !prev.division) {
+          updated.division = parentDiv
+        }
+      }
+
+      return updated
+    })
   }, [])
 
   const clearGlobalFilters = useCallback(() => {
