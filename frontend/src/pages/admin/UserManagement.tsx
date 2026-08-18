@@ -418,15 +418,15 @@ export default function UserManagement() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">User Management</h1>
-          <p className="text-slate-500 text-sm mt-1">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-4 sm:p-6 rounded-xl border border-slate-200 shadow-sm">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-800">User Management</h1>
+          <p className="text-slate-500 text-xs sm:text-sm mt-1 hidden sm:block">
             Manage administrative users, custom roles, module permissions & audit logs
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 shrink-0">
           <ExportDropdown
             title={`User Management — ${activeTab.toUpperCase()}`}
             filename={`user_management_${activeTab}_export`}
@@ -438,80 +438,85 @@ export default function UserManagement() {
           {activeTab === 'users' && (
             <button
               onClick={() => setShowCreateUserModal(true)}
-              className="flex items-center gap-2 bg-[#2d8a4e] hover:bg-[#247a42] text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm"
+              className="flex items-center gap-2 bg-[#2d8a4e] hover:bg-[#247a42] text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm"
             >
               <UserPlus className="w-4 h-4" />
-              Create User
+              <span className="hidden xs:inline">Create User</span>
             </button>
           )}
 
           {activeTab === 'roles' && (
             <button
               onClick={() => setShowCreateRoleModal(true)}
-              className="flex items-center gap-2 bg-[#2d8a4e] hover:bg-[#247a42] text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm"
+              className="flex items-center gap-2 bg-[#2d8a4e] hover:bg-[#247a42] text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm"
             >
               <Plus className="w-4 h-4" />
-              Create Role
+              <span className="hidden xs:inline">Create Role</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* Tabs Navigation (matching exact UI structure) */}
-      <div className="border-b border-slate-200 bg-white px-6 rounded-xl shadow-sm">
-        <nav className="-mb-px flex space-x-8">
-          <button
-            onClick={() => setActiveTab('users')}
-            className={clsx(
-              'py-4 px-1 inline-flex items-center gap-2 border-b-2 font-semibold text-sm transition-colors',
-              activeTab === 'users'
-                ? 'border-[#2d8a4e] text-[#2d8a4e]'
-                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-            )}
-          >
-            <Users className="w-4 h-4" />
-            User Management
-          </button>
+      {/* Tabs Navigation */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+        <div className="overflow-x-auto scrollbar-hide">
+          <nav className="-mb-px flex whitespace-nowrap px-2 sm:px-6 min-w-max">
+            <button
+              onClick={() => setActiveTab('users')}
+              className={clsx(
+                'py-4 px-3 sm:px-4 inline-flex items-center gap-1.5 border-b-2 font-semibold text-xs sm:text-sm transition-colors shrink-0',
+                activeTab === 'users'
+                  ? 'border-[#2d8a4e] text-[#2d8a4e]'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              )}
+            >
+              <Users className="w-4 h-4 shrink-0" />
+              <span className="hidden sm:inline">User Management</span>
+              <span className="sm:hidden">Users</span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('roles')}
-            className={clsx(
-              'py-4 px-1 inline-flex items-center gap-2 border-b-2 font-semibold text-sm transition-colors',
-              activeTab === 'roles'
-                ? 'border-[#2d8a4e] text-[#2d8a4e]'
-                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-            )}
-          >
-            <Shield className="w-4 h-4" />
-            Role Management
-          </button>
+            <button
+              onClick={() => setActiveTab('roles')}
+              className={clsx(
+                'py-4 px-3 sm:px-4 inline-flex items-center gap-1.5 border-b-2 font-semibold text-xs sm:text-sm transition-colors shrink-0',
+                activeTab === 'roles'
+                  ? 'border-[#2d8a4e] text-[#2d8a4e]'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              )}
+            >
+              <Shield className="w-4 h-4 shrink-0" />
+              <span className="hidden sm:inline">Role Management</span>
+              <span className="sm:hidden">Roles</span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('permissions')}
-            className={clsx(
-              'py-4 px-1 inline-flex items-center gap-2 border-b-2 font-semibold text-sm transition-colors',
-              activeTab === 'permissions'
-                ? 'border-[#2d8a4e] text-[#2d8a4e]'
-                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-            )}
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-            Permissions
-          </button>
+            <button
+              onClick={() => setActiveTab('permissions')}
+              className={clsx(
+                'py-4 px-3 sm:px-4 inline-flex items-center gap-1.5 border-b-2 font-semibold text-xs sm:text-sm transition-colors shrink-0',
+                activeTab === 'permissions'
+                  ? 'border-[#2d8a4e] text-[#2d8a4e]'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              )}
+            >
+              <SlidersHorizontal className="w-4 h-4 shrink-0" />
+              Permissions
+            </button>
 
-          <button
-            onClick={() => setActiveTab('audit')}
-            className={clsx(
-              'py-4 px-1 inline-flex items-center gap-2 border-b-2 font-semibold text-sm transition-colors',
-              activeTab === 'audit'
-                ? 'border-[#2d8a4e] text-[#2d8a4e]'
-                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-            )}
-          >
-            <FileText className="w-4 h-4" />
-            Audit Logs
-          </button>
-        </nav>
+            <button
+              onClick={() => setActiveTab('audit')}
+              className={clsx(
+                'py-4 px-3 sm:px-4 inline-flex items-center gap-1.5 border-b-2 font-semibold text-xs sm:text-sm transition-colors shrink-0',
+                activeTab === 'audit'
+                  ? 'border-[#2d8a4e] text-[#2d8a4e]'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              )}
+            >
+              <FileText className="w-4 h-4 shrink-0" />
+              <span className="hidden sm:inline">Audit Logs</span>
+              <span className="sm:hidden">Audit</span>
+            </button>
+          </nav>
+        </div>
       </div>
 
       {/* TAB 1: USER MANAGEMENT */}
