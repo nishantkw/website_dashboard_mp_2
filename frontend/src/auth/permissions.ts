@@ -5,7 +5,7 @@ const ROLE_ROUTE_ACCESS: Record<UserRole, string[]> = {
   state_admin: ['*'],
   bis_user: ['/dashboard/bis'],
   mp_user: ['/dashboard/mp'],
-  ump_user: ['/dashboard/ump'],
+  ump_user: ['/dashboard/ump', '/dashboard/admin/import-bulk-data'],
 }
 
 export function canAccessRoute(role: UserRole, path: string): boolean {

@@ -4,32 +4,24 @@ import ExportDropdown from './ExportDropdown'
 
 interface PageHeaderProps {
   title: string
-  description: string
-  schema?: string
+  description?: string
 }
 
-export function PageHeader({ title, description, schema }: PageHeaderProps) {
+export function PageHeader({ title, description }: PageHeaderProps) {
   const exportData = [
-    { Page: title, Description: description, Schema: schema || 'General', ExportDate: new Date().toLocaleDateString() },
+    { Page: title, Description: description || title, ExportDate: new Date().toLocaleDateString() },
   ]
 
   return (
     <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <div className="flex items-center gap-3 mb-1">
-          <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-          {schema && (
-            <span className="px-2.5 py-0.5 bg-blue-100 text-blue-700 text-xs font-mono rounded-md">
-              {schema}
-            </span>
-          )}
-        </div>
-        <p className="text-gray-500 text-sm">{description}</p>
+        <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+        {description && <p className="mt-1 text-sm text-gray-500">{description}</p>}
       </div>
 
       <ExportDropdown
         title={title}
-        subtitle={description}
+        subtitle={description || title}
         filename={`${title.toLowerCase().replace(/\s+/g, '_')}_report`}
         data={exportData}
         buttonSize="md"

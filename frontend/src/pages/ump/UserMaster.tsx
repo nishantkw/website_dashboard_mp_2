@@ -21,7 +21,7 @@ export default function UserMaster() {
   return (
     <div>
       <Modal />
-      <PageHeader title="User Master" description="UMP user management — roles, states and access control" schema="ump_raw" />
+      <PageHeader title="User Master" description="UMP user management — roles, states and access control" />
       <KPIGrid kpis={umpKPIs} onKpiClick={(kpi: KPI) => openFromKpi(kpi.label, kpi.value, { change: kpi.change ?? 0 })} />
       <div className="mb-4">
         <ChartCard title="Users by Role"><InteractiveBarChart data={umpRoleDistribution} chartTitle="Users by Role" layout="vertical" height={280} cellColors={COLORS} onItemClick={openFromChart} bars={[{ dataKey: 'value', fill: '#3b82f6', name: 'Users' }]} /></ChartCard>

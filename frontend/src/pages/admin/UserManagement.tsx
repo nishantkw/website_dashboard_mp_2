@@ -152,6 +152,7 @@ const MODULES_LIST = [
   { id: 'mp_beneficiaries', name: 'MP Beneficiaries' },
   { id: 'mp_hospitals', name: 'MP Hospitals' },
   { id: 'mp_fraud', name: 'MP Fraud & Audit' },
+  { id: 'mp_reports', name: 'MP Reports' },
   { id: 'ump', name: 'UMP Legacy User Master' },
 ]
 
@@ -164,6 +165,7 @@ const INITIAL_PERMISSIONS: Record<string, Record<string, boolean>> = {
     mp_beneficiaries: true,
     mp_hospitals: true,
     mp_fraud: true,
+    mp_reports: true,
     ump: true,
   },
   state_admin: {
@@ -174,6 +176,7 @@ const INITIAL_PERMISSIONS: Record<string, Record<string, boolean>> = {
     mp_beneficiaries: true,
     mp_hospitals: true,
     mp_fraud: true,
+    mp_reports: true,
     ump: true,
   },
   bis_user: {
@@ -184,6 +187,7 @@ const INITIAL_PERMISSIONS: Record<string, Record<string, boolean>> = {
     mp_beneficiaries: false,
     mp_hospitals: false,
     mp_fraud: false,
+    mp_reports: false,
     ump: false,
   },
   mp_user: {
@@ -194,6 +198,7 @@ const INITIAL_PERMISSIONS: Record<string, Record<string, boolean>> = {
     mp_beneficiaries: true,
     mp_hospitals: true,
     mp_fraud: true,
+    mp_reports: true,
     ump: false,
   },
   ump_user: {
@@ -204,6 +209,7 @@ const INITIAL_PERMISSIONS: Record<string, Record<string, boolean>> = {
     mp_beneficiaries: false,
     mp_hospitals: false,
     mp_fraud: false,
+    mp_reports: false,
     ump: true,
   },
 }
@@ -356,6 +362,7 @@ export default function UserManagement() {
         mp_beneficiaries: false,
         mp_hospitals: false,
         mp_fraud: false,
+        mp_reports: false,
         ump: false,
       },
     }))

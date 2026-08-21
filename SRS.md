@@ -303,7 +303,9 @@ The dashboard is a **single-page application (SPA)** built with React and served
 | MP-FR-01 | Display fraud KPIs (suspicious cases, confirmed fraud, recovered amount) | High |
 | MP-FR-02 | Display Fraud Cases Trend line chart | High |
 | MP-FR-03 | Display suspicious cases table | High |
-| MP-FR-04 | Data source: `dmart_mp.t_suspicious_api_case_data` | High |
+| MP-FR-04 | Data source: `dmart_mp.t_suspicious_api_case_data` (case header) + `dmart_mp.t_suspicious_api_case_dtls` (rule-trigger details) + `t_workflow_transaction_audit` | High |
+| MP-FR-05 | Display rule-trigger analytics (trigger type, application type) from `t_suspicious_api_case_dtls` | High |
+| MP-FR-06 | Display rule-trigger details table linked by `reference_number` | High |
 
 ### 4.10 MP — Users & Workflow (`/dashboard/mp/users-workflow`)
 
@@ -435,7 +437,7 @@ The dashboard is a **single-page application (SPA)** built with React and served
 | SCL-01 | Backend API shall support pagination for large datasets |
 | SCL-02 | Charts shall aggregate data server-side for date ranges > 1 year |
 | SCL-03 | Filter queries shall be indexed on district, status, and date columns |
-
+0
 ---
 
 ## 6. External Interface Requirements
@@ -484,7 +486,7 @@ None. Web browser only.
 | Schema | Department | Status | Tables (Key) |
 |--------|------------|--------|--------------|
 | `bis_raw` | BIS Card Printing | Active (mock) | `t_card_printing_status` |
-| `dmart_mp` | Madhya Pradesh Data Mart | Active (mock) | `claim_paid_t`, `t_bis_beneficiary_dtls`, `hospital_master_*_final`, `t_payment_dtls`, `t_suspicious_api_case_data`, `lms_user_course_completion_status`, `t_workflow_transaction_audit` |
+| `dmart_mp` | Madhya Pradesh Data Mart | Active (mock) | `claim_paid_t`, `t_bis_beneficiary_dtls`, `hospital_master_*_final`, `t_payment_dtls`, `t_suspicious_api_case_data`, `t_suspicious_api_case_dtls`, `lms_user_course_completion_status`, `t_workflow_transaction_audit` |
 | `ump_raw` | User Management Platform | Active (mock) | User master tables |
 | `dmart_mh` | Maharashtra Data Mart | **Not implemented** | — |
 

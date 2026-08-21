@@ -40,7 +40,7 @@ export default function Hospitals() {
   return (
     <div>
       <Modal />
-      <PageHeader title="Hospitals & Empanelment" description="hospital_master_with_quality_certification_final (36 cols) + t_hem_hospital (53 cols) + t_deempanelment_details" schema="dmart_mp" />
+      <PageHeader title="Hospitals & Empanelment" description="hospital_master_with_quality_certification_final (36 cols) + t_hem_hospital (53 cols) + t_deempanelment_details" />
       <KPIGrid kpis={mpHospitalKPIs} onKpiClick={(kpi: KPI) => openFromKpi(kpi.label, kpi.value, { change: kpi.change ?? 0 })} />
 
       {/* Row 1: Type Distribution + District-wise */}

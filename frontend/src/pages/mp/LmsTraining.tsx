@@ -33,12 +33,11 @@ export default function LmsTraining() {
   return (
     <div>
       <Modal />
-      <PageHeader title="LMS Training" description="lms_user_course_completion_status (16 cols) — AB PM-JAY & ABDM course completion tracking per staff role and entity" schema="dmart_mp" />
+      <PageHeader title="LMS Training" />
       <KPIGrid kpis={mpLmsKPIs} onKpiClick={(kpi: KPI) => openFromKpi(kpi.label, kpi.value, { change: kpi.change ?? 0 })} />
 
-      {/* Row 1: Course Enrollment vs Completion + Monthly Trend */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <ChartCard title="Course Enrollment vs Completion" subtitle="AB-PMJAY and ABDM course completion rates per course" exportData={mpLmsCourseData}>
+      <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <ChartCard title="Course Enrollment vs Completion" exportData={mpLmsCourseData}>
           <InteractiveBarChart
             data={mpLmsCourseData}
             chartTitle="Courses"
@@ -53,7 +52,7 @@ export default function LmsTraining() {
             ]}
           />
         </ChartCard>
-        <ChartCard title="Monthly Completion Trend" subtitle="AB-PMJAY vs ABDM completions per month (Jan–Aug 2025)" exportData={mpLmsCompletionTrend}>
+        <ChartCard title="Monthly Completion Trend" exportData={mpLmsCompletionTrend}>
           <InteractiveLineChart
             data={mpLmsCompletionTrend}
             chartTitle="Completion Trend"
@@ -68,9 +67,8 @@ export default function LmsTraining() {
         </ChartCard>
       </div>
 
-      {/* Row 2: Role-wise Status + Entity Type */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <ChartCard title="Role-wise Completion Status" subtitle="Completed / In Progress / Not Started per user role" exportData={mpLmsRoleStatusData}>
+      <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <ChartCard title="Role-wise Completion Status" exportData={mpLmsRoleStatusData}>
           <InteractiveBarChart
             data={mpLmsRoleStatusData}
             chartTitle="Role Status"
@@ -84,14 +82,13 @@ export default function LmsTraining() {
             ]}
           />
         </ChartCard>
-        <ChartCard title="Entity Type Distribution" subtitle="entitytype — Hospital Staff / District / State admin mix" exportData={mpLmsEntityTypeData}>
+        <ChartCard title="Entity Type Distribution" exportData={mpLmsEntityTypeData}>
           <InteractivePieChart data={mpLmsEntityTypeData} colors={ENTITY_COLORS} innerRadius={55} chartTitle="Entity Types" onItemClick={openFromChart} />
         </ChartCard>
       </div>
 
-      {/* Row 3: State-wise Completion Rate */}
       <div className="mb-4">
-        <ChartCard title="District-wise Training Completion Rate (%)" subtitle="AB-PMJAY overall completion rate per district — target: 100%" exportData={mpLmsStateWiseData}>
+        <ChartCard title="District-wise Training Completion Rate (%)" exportData={mpLmsStateWiseData}>
           <InteractiveBarChart
             data={mpLmsStateWiseData}
             chartTitle="District Completion"
@@ -102,11 +99,10 @@ export default function LmsTraining() {
         </ChartCard>
       </div>
 
-      {/* Full LMS Data Table */}
       <DataTable
         columns={columns}
         data={filtered}
-        title={`Training Records — lms_user_course_completion_status (${filtered.length} records)`}
+        title={`Training Records (${filtered.length})`}
         onRowClick={(row) => openDetail({ title: String(row.name), subtitle: 'LMS Training Record', data: row })}
       />
     </div>

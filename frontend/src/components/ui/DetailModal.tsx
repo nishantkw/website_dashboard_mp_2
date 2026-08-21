@@ -4,6 +4,10 @@ import { getConnectedDataset, type ConnectedDataset } from '../../data/connected
 import { useGlobalFilters } from '../../context/FilterContext'
 import { DIVISION_OPTIONS, getDistrictsForDivision, getDivisionForDistrict } from '../../data/filterOptions'
 import ExportDropdown from './ExportDropdown'
+import ColumnSelector from './ColumnSelector'
+import TablePagination from './TablePagination'
+import DateRangeFilter, { rowMatchesDateRange } from './DateRangeFilter'
+import { useTableControls } from '../../hooks/useTableControls'
 
 export interface DrillDownDetail {
   title: string
@@ -22,6 +26,8 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [divisionFilter, setDivisionFilter] = useState('ALL')
   const [districtFilter, setDistrictFilter] = useState('ALL')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
 
   const dataset: ConnectedDataset | null = useMemo(() => {
     if (!detail) return null
@@ -72,9 +78,27 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
       const matchDistrict =
         districtFilter === 'ALL' || recDistrict.toLowerCase() === districtFilter.toLowerCase()
 
-      return matchSearch && matchStatus && matchDivision && matchDistrict
+      const matchDate = rowMatchesDateRange(rec, dateFrom, dateTo)
+
+      return matchSearch && matchStatus && matchDivision && matchDistrict && matchDate
     })
-  }, [dataset, searchTerm, statusFilter, divisionFilter, districtFilter])
+  }, [dataset, searchTerm, statusFilter, divisionFilter, districtFilter, dateFrom, dateTo])
+
+  const {
+    visibleColumns,
+    visibleKeys,
+    toggleColumn,
+    showAllColumns,
+    page,
+    setPage,
+    totalPages,
+    startIndex,
+    endIndex,
+    paginate,
+    showPagination,
+  } = useTableControls(dataset?.columns ?? [], filteredRecords.length)
+
+  const pageRecords = paginate(filteredRecords)
 
   if (!detail || !dataset) return null
 
@@ -83,6 +107,8 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
     setStatusFilter('ALL')
     setDivisionFilter('ALL')
     setDistrictFilter('ALL')
+    setDateFrom('')
+    setDateTo('')
     clearGlobalFilters()
   }
 
@@ -118,12 +144,18 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
           </div>
 
           <div className="flex items-center gap-2 self-end sm:self-center">
+            <ColumnSelector
+              columns={dataset.columns}
+              visibleKeys={visibleKeys}
+              onToggle={toggleColumn}
+              onShowAll={showAllColumns}
+            />
             <ExportDropdown
               title={dataset.title}
               subtitle={dataset.subtitle}
               filename={`${dataset.title.toLowerCase().replace(/\s+/g, '_')}_export`}
               data={filteredRecords}
-              columns={dataset.columns}
+              columns={visibleColumns}
               buttonSize="sm"
               variant="primary"
             />
@@ -198,26 +230,37 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
               <option value="Approved">Approved</option>
               <option value="Pending">Pending</option>
             </select>
+
+            <DateRangeFilter
+              variant="compact"
+              dateFrom={dateFrom}
+              dateTo={dateTo}
+              onChange={(from, to) => {
+                setDateFrom(from)
+                setDateTo(to)
+              }}
+            />
           </div>
         </div>
 
         {/* Tabular View Content Area */}
-        <div className="flex-1 overflow-y-auto p-6">
-          <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm bg-white">
-            <table className="w-full text-left text-xs sm:text-sm">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[11px] tracking-wider">
-                <tr>
-                  {dataset.columns.map((col) => (
-                    <th key={col.key} className="px-5 py-3.5">
-                      {col.label}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 text-slate-700 font-normal">
-                {filteredRecords.map((row, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
-                    {dataset.columns.map((col) => {
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-6">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div className="min-h-0 flex-1 overflow-x-auto overflow-y-auto">
+              <table className="w-full text-left text-xs sm:text-sm">
+                <thead className="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-600 shadow-sm">
+                  <tr>
+                    {visibleColumns.map((col) => (
+                      <th key={col.key} className="px-5 py-3.5">
+                        {col.label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200 font-normal text-slate-700">
+                  {pageRecords.map((row, idx) => (
+                    <tr key={startIndex + idx} className="transition-colors hover:bg-slate-50/80">
+                      {visibleColumns.map((col) => {
                       const val = row[col.key]
                       const textVal = String(val ?? '—')
 
@@ -273,20 +316,37 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
 
                 {filteredRecords.length === 0 && (
                   <tr>
-                    <td colSpan={dataset.columns.length} className="text-center py-10 text-slate-400">
+                    <td colSpan={visibleColumns.length} className="py-10 text-center text-slate-400">
                       No connected records match your search and filter criteria.
                     </td>
                   </tr>
                 )}
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
+
+            {showPagination && (
+              <TablePagination
+                page={page}
+                totalPages={totalPages}
+                totalRows={filteredRecords.length}
+                startIndex={startIndex}
+                endIndex={endIndex}
+                onPageChange={setPage}
+              />
+            )}
           </div>
         </div>
 
         {/* Modal Footer */}
         <div className="px-6 py-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
-          <p className="text-xs text-slate-500 font-medium">
-            Showing <span className="font-bold text-slate-800">{filteredRecords.length}</span> connected SQL records
+          <p className="text-xs font-medium text-slate-500">
+            Showing{' '}
+            <span className="font-bold text-slate-800">
+              {filteredRecords.length === 0 ? 0 : startIndex + 1}–{endIndex}
+            </span>{' '}
+            of <span className="font-bold text-slate-800">{filteredRecords.length}</span> connected SQL records
+            {showPagination && <span className="text-slate-400"> · 200 per page</span>}
           </p>
 
           <div className="flex items-center gap-2">

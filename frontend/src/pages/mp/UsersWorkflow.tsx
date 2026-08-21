@@ -34,7 +34,7 @@ export default function UsersWorkflow() {
   return (
     <div>
       <Modal />
-      <PageHeader title="Users & Workflow" description="workflow_users_t + pro_workflow_users_t + t_workflow_transaction_audit — User management, transaction audit trail and processing metrics" schema="dmart_mp" />
+      <PageHeader title="Users & Workflow" description="workflow_users_t + pro_workflow_users_t + t_workflow_transaction_audit — User management, transaction audit trail and processing metrics" />
       <KPIGrid kpis={mpUsersKPIs} onKpiClick={(kpi: KPI) => openFromKpi(kpi.label, kpi.value, { change: kpi.change ?? 0 })} />
 
       {/* Row 1: Workflow Status + Role Distribution */}

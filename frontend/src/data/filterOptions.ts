@@ -1,10 +1,3 @@
-export const SCHEMA_OPTIONS = [
-  { value: '', label: 'All Schemas' },
-  { value: 'bis_raw', label: 'bis_raw — BIS Card Printing' },
-  { value: 'dmart_mp', label: 'dmart_mp — Madhya Pradesh' },
-  { value: 'ump_raw', label: 'ump_raw — User Management' },
-]
-
 export interface DivisionData {
   division: string
   oic: string
@@ -100,19 +93,63 @@ export function getDivisionForDistrict(districtName: string): string | undefined
 
 export const DISTRICT_OPTIONS = getDistrictsForDivision()
 
-export const STATUS_OPTIONS = [
-  { value: '', label: 'All Status' },
+export const CLAIM_STATUS_OPTIONS = [
+  { value: '', label: 'All Claim Status' },
   { value: 'Paid', label: 'Paid' },
   { value: 'Approved', label: 'Approved' },
   { value: 'Pending', label: 'Pending' },
   { value: 'Rejected', label: 'Rejected' },
-  { value: 'Delivered', label: 'Delivered' },
+  { value: 'Under Review', label: 'Under Review' },
+]
+
+export const CARD_STATUS_OPTIONS = [
+  { value: '', label: 'All Card Status' },
+  { value: 'Pending', label: 'Pending' },
+  { value: 'Approved', label: 'Approved' },
+  { value: 'Generated', label: 'Generated' },
   { value: 'Printed', label: 'Printed' },
+  { value: 'Distributed', label: 'Distributed' },
+  { value: 'Delivered', label: 'Delivered' },
+]
+
+export const USER_STATUS_OPTIONS = [
+  { value: '', label: 'All User Status' },
   { value: 'Active', label: 'Active' },
   { value: 'Inactive', label: 'Inactive' },
-  { value: 'Under Review', label: 'Under Review' },
+]
+
+export const HOSPITAL_STATUS_OPTIONS = [
+  { value: '', label: 'All Hospital Status' },
+  { value: 'Active', label: 'Active' },
+  { value: 'Inactive', label: 'Inactive' },
+  { value: 'De-empanelled', label: 'De-empanelled' },
+]
+
+export const PATIENT_STATUS_OPTIONS = [
+  { value: '', label: 'All Patient Status' },
+  { value: 'Admitted', label: 'Admitted' },
+  { value: 'Discharged', label: 'Discharged' },
+]
+
+export const INVESTIGATION_STATUS_OPTIONS = [
+  { value: '', label: 'All Investigation Status' },
+  { value: 'Under Investigation', label: 'Under Investigation' },
+  { value: 'Confirmed Fraud', label: 'Confirmed Fraud' },
+  { value: 'Cleared', label: 'Cleared' },
+]
+
+export const TRAINING_STATUS_OPTIONS = [
+  { value: '', label: 'All Training Status' },
   { value: 'Completed', label: 'Completed' },
   { value: 'In Progress', label: 'In Progress' },
+  { value: 'Not Started', label: 'Not Started' },
+]
+
+export const ENROLLMENT_STATUS_OPTIONS = [
+  { value: '', label: 'All Enrollment Status' },
+  { value: 'Active', label: 'Active' },
+  { value: 'Pending Approval', label: 'Pending Approval' },
+  { value: 'Disabled', label: 'Disabled' },
 ]
 
 export const GENDER_OPTIONS = [

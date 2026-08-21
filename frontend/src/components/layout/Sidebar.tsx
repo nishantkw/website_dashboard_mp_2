@@ -162,9 +162,9 @@ export function MobileMenuButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="lg:hidden p-2 rounded-lg text-[#1a5c38] hover:bg-white/60"
+      className="rounded-lg p-2 text-white hover:bg-white/15 lg:hidden"
     >
-      <Menu className="w-5 h-5" />
+      <Menu className="h-5 w-5" />
     </button>
   )
 }

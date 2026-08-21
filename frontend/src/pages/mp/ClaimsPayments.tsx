@@ -40,7 +40,7 @@ export default function ClaimsPayments() {
   return (
     <div>
       <Modal />
-      <PageHeader title="Claims & Payments" description="claim_paid_t — The most important table. Tracks the full journey: Preauth → Surgery → Discharge → Claim → Payment" schema="dmart_mp" />
+      <PageHeader title="Claims & Payments" description="claim_paid_t — The most important table. Tracks the full journey: Preauth → Surgery → Discharge → Claim → Payment" />
       <KPIGrid kpis={mpClaimsKPIs} onKpiClick={(kpi: KPI) => openFromKpi(kpi.label, kpi.value, { change: kpi.change ?? 0 })} />
 
       {/* Row 1: Monthly Claims Trend + Amount Trend */}

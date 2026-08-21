@@ -37,7 +37,7 @@ export default function CardPrinting() {
   return (
     <div>
       <Modal />
-      <PageHeader title="Card Printing Status" description="t_card_printing_status — ABHA card lifecycle: Enroll → Approve → Generate → Print → Distribute → Deliver" schema="bis_raw" />
+      <PageHeader title="Card Printing Status" description="t_card_printing_status — ABHA card lifecycle: Enroll → Approve → Generate → Print → Distribute → Deliver" />
       <KPIGrid kpis={bisKPIs} onKpiClick={(kpi: KPI) => openFromKpi(kpi.label, kpi.value, { change: kpi.change ?? 0 })} />
 
       {/* Row 1: Lifecycle Funnel + Status Distribution */}
