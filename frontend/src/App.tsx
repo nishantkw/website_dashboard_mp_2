@@ -14,6 +14,7 @@ import FraudAudit from './pages/mp/FraudAudit'
 import UsersWorkflow from './pages/mp/UsersWorkflow'
 import LmsTraining from './pages/mp/LmsTraining'
 import Reports from './pages/mp/Reports'
+import ReportDetail from './pages/mp/ReportDetail'
 import UserMaster from './pages/ump/UserMaster'
 import UserManagement from './pages/admin/UserManagement'
 import ImportBulkData from './pages/admin/ImportBulkData'
@@ -45,6 +46,7 @@ export default function App() {
                 <Route path="mp/users-workflow" element={<UsersWorkflow />} />
                 <Route path="mp/lms-training" element={<LmsTraining />} />
                 <Route path="mp/reports" element={<Reports />} />
+                <Route path="mp/reports/:reportId" element={<ReportDetail />} />
                 <Route path="ump/users" element={<UserMaster />} />
               </Route>
             </Route>

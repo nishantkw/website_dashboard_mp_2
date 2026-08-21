@@ -189,7 +189,7 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
             />
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
+          <div className="scrollbar-visible flex w-full items-center gap-2 overflow-x-auto pb-1 sm:w-auto">
             <div className="flex items-center gap-1 text-xs text-slate-500 font-medium">
               <Filter className="w-3.5 h-3.5 text-[#2d8a4e]" />
               Filters:
@@ -246,12 +246,12 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
         {/* Tabular View Content Area */}
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-6">
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            <div className="min-h-0 flex-1 overflow-x-auto overflow-y-auto">
-              <table className="w-full text-left text-xs sm:text-sm">
+            <div className="scrollbar-visible min-h-0 flex-1 overflow-x-auto overflow-y-auto">
+              <table className="w-max min-w-full text-left text-xs sm:text-sm">
                 <thead className="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-600 shadow-sm">
                   <tr>
                     {visibleColumns.map((col) => (
-                      <th key={col.key} className="px-5 py-3.5">
+                      <th key={col.key} className="whitespace-nowrap px-5 py-3.5">
                         {col.label}
                       </th>
                     ))}
@@ -277,7 +277,7 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
                           textVal.includes('Approved') ||
                           textVal.includes('Review')
                         return (
-                          <td key={col.key} className="px-5 py-3.5">
+                          <td key={col.key} className="whitespace-nowrap px-5 py-3.5">
                             <span
                               className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                 isGood
@@ -299,14 +299,14 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
                       // Primary Key / ID formatting
                       if (col.key.endsWith('_id') || col.key === 'code' || col.key === 'txn_id' || col.key === 'batch_id') {
                         return (
-                          <td key={col.key} className="px-5 py-3.5 font-mono text-xs font-bold text-[#1a5c38]">
+                          <td key={col.key} className="whitespace-nowrap px-5 py-3.5 font-mono text-xs font-bold text-[#1a5c38]">
                             {textVal}
                           </td>
                         )
                       }
 
                       return (
-                        <td key={col.key} className="px-5 py-3.5">
+                        <td key={col.key} className="whitespace-nowrap px-5 py-3.5">
                           {textVal}
                         </td>
                       )

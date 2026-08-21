@@ -19,7 +19,7 @@ export default function GovernmentHeader() {
 
               <div className="hidden sm:block min-w-0">
                 <h1 className="text-[13px] sm:text-base lg:text-lg font-bold text-[#1a3a6b] leading-snug tracking-tight">
-                  Ayushman Bharat — Pradhan Mantri Jan Arogya Yojana
+                  Ayushman Bharat | Pradhan Mantri Jan Arogya Yojana
                   <span className="text-[#2d8a4e]"> (PM-JAY)</span>
                 </h1>
                 <p className="text-sm sm:text-base font-semibold text-[#b45309] mt-0.5 leading-none">

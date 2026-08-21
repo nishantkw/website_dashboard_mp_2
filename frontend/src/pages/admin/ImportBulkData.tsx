@@ -366,7 +366,7 @@ export default function ImportBulkData() {
               </span>
             </div>
 
-            <div className="p-6 overflow-x-auto">
+            <div className="scrollbar-visible overflow-x-auto p-6">
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold uppercase">
                   <tr>

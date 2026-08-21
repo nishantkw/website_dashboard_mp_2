@@ -107,7 +107,7 @@ export default function GlobalFilterBar() {
         </div>
       </div>
 
-      <div className="scrollbar-hide flex gap-2.5 overflow-x-auto px-3 py-3 sm:px-4">
+      <div className="scrollbar-visible flex gap-2.5 overflow-x-auto pb-3 pt-3 px-3 sm:px-4">
         <FilterSelect label="Division" value={globalFilters.division} options={DIVISION_OPTIONS} onChange={(v) => setGlobalFilter('division', v)} />
         <FilterSelect label="District" value={globalFilters.district} options={dynamicDistrictOptions} onChange={(v) => setGlobalFilter('district', v)} />
         <FilterSelect label="Claim Status" value={globalFilters.claim_status} options={CLAIM_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('claim_status', v)} />

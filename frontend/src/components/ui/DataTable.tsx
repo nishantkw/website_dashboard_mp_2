@@ -99,14 +99,14 @@ export default function DataTable({ columns, data, title, onRowClick, maxHeight 
         />
       </div>
 
-      <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight }}>
-        <table className="w-full text-sm">
+      <div className="scrollbar-visible overflow-x-auto overflow-y-auto" style={{ maxHeight }}>
+        <table className="w-max min-w-full text-sm">
           <thead className="sticky top-0 z-10 border-b border-gray-200 bg-gray-50 shadow-sm">
             <tr>
               {visibleColumns.map((col) => (
                 <th
                   key={col.key}
-                  className={`px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-600 ${alignClass(col.align)}`}
+                  className={`whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-600 ${alignClass(col.align)}`}
                 >
                   {col.label}
                 </th>
@@ -125,7 +125,7 @@ export default function DataTable({ columns, data, title, onRowClick, maxHeight 
                 }`}
               >
                 {visibleColumns.map((col) => (
-                  <td key={col.key} className={`px-4 py-3 text-gray-700 ${alignClass(col.align)}`}>
+                  <td key={col.key} className={`whitespace-nowrap px-4 py-3 text-gray-700 ${alignClass(col.align)}`}>
                     {col.key === 'status' ? (
                       <StatusBadge status={String(row[col.key])} />
                     ) : (
