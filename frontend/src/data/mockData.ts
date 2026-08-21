@@ -58,17 +58,6 @@ export const claimsWorkflowFunnel: ChartDataPoint[] = [
   { name: 'Payment Paid', value: 35200 },
 ]
 
-export const overviewSchemaSummary = [
-  { schema: 'dmart_mp', table: 'claim_paid_t', records: '48,756', description: 'Primary claims fact table', key_columns: 'case_id, hospital_code, paid_amount, status' },
-  { schema: 'dmart_mp', table: 't_bis_beneficiary_dtls', records: '12,45,320', description: 'Beneficiary master (BIS)', key_columns: 'ben_id, family_id, member_id, enrl_status' },
-  { schema: 'dmart_mp', table: 'hospital_master_*_final', records: '2,185', description: 'Hospital empanelment master', key_columns: 'hosp_id, facility_id, accreditation_status' },
-  { schema: 'bis_raw', table: 't_card_printing_status', records: '9,82,450', description: 'Card printing lifecycle', key_columns: 'card_no, ben_id, card_print_status' },
-  { schema: 'dmart_mp', table: 't_payment_dtls', records: '35,200', description: 'Hospital payment ledger', key_columns: 'reference_number, hosp_id, amount' },
-  { schema: 'dmart_mp', table: 't_suspicious_api_case_data', records: '342', description: 'Fraud monitoring watch-list', key_columns: 'entity_id, entity_type, risk_score' },
-  { schema: 'dmart_mp', table: 'lms_user_course_completion_status', records: '8,450', description: 'Staff training compliance', key_columns: 'userid, ab_pmjay_status, abdm_status' },
-  { schema: 'dmart_mp', table: 't_workflow_transaction_audit', records: '45,600', description: 'Full audit trail', key_columns: 'case_id, user_id, action, timestamp' },
-]
-
 // ─── BIS Card Printing ─────────────────────────────────────────────────────
 
 export const bisKPIs: KPI[] = [
@@ -569,6 +558,38 @@ export const mpFraudTableData = [
   { case_id: 'FRD-2025-006', entity_id: 'USR-00512', hospital: 'System User Fraud', district: 'Bhopal', type: 'Duplicate Claim', status: 'Under Investigation', amount_risk: '₹1,95,000', amount_recovered: '-', start_date: '2025-07-12', investigator: 'Sunita Patel' },
   { case_id: 'FRD-2025-007', entity_id: 'HOS-MP-1612', hospital: 'MNO Hospital Sagar', district: 'Sagar', type: 'Overbilling', status: 'Cleared', amount_risk: '₹3,20,000', amount_recovered: '-', start_date: '2025-05-28', investigator: 'Amit Singh' },
   { case_id: 'FRD-2025-008', entity_id: 'HOS-MP-1218', hospital: 'PQR Medical Rewa', district: 'Rewa', type: 'Fake Documents', status: 'Under Investigation', amount_risk: '₹5,80,000', amount_recovered: '-', start_date: '2025-07-25', investigator: 'Rajesh Kumar' },
+]
+
+/** t_suspicious_api_case_dtls — rule-trigger detail rows linked by reference_number */
+export const mpFraudTriggerTypeData: ChartDataPoint[] = [
+  { name: 'GEO-MISMATCH', value: 86 },
+  { name: 'DUP-CLAIM', value: 74 },
+  { name: 'DEVICE-SHARE', value: 58 },
+  { name: 'PKG-MISMATCH', value: 45 },
+  { name: 'DOC-ANOMALY', value: 39 },
+  { name: 'AMOUNT-SPIKE', value: 28 },
+]
+
+export const mpFraudAppTypeData: ChartDataPoint[] = [
+  { name: 'CLAIM', value: 168 },
+  { name: 'ENROLMENT', value: 92 },
+  { name: 'CARD', value: 54 },
+  { name: 'PREAUTH', value: 36 },
+]
+
+export const mpFraudTriggerTableData = [
+  { id_pk: 10045821, state_lgd_code: '23', reference_number: 'FRD-2025-001', application_type: 'CLAIM', vendor_id: 'VEND001', trigger_type: 'DUP-CLAIM', trigger_code: 'DUP-CLAIM-01', trigger_time: '2025-06-10 09:12:00', trigger_reason: 'Multiple claims with identical package and beneficiary within 48 hrs', crt_date: '2025-06-10', crt_usr: 'sha.reviewer01', flag: 'ACTIVE', district: 'Indore' },
+  { id_pk: 10045822, state_lgd_code: '23', reference_number: 'FRD-2025-001', application_type: 'CLAIM', vendor_id: 'VEND001', trigger_type: 'DEVICE-SHARE', trigger_code: 'DEV-SHARE-03', trigger_time: '2025-06-10 09:14:22', trigger_reason: 'Same device ID used across multiple hospital logins', crt_date: '2025-06-10', crt_usr: 'system.api', flag: 'ACTIVE', district: 'Indore' },
+  { id_pk: 10045830, state_lgd_code: '23', reference_number: 'FRD-2025-002', application_type: 'CLAIM', vendor_id: 'VEND002', trigger_type: 'DOC-ANOMALY', trigger_code: 'DOC-FAKE-02', trigger_time: '2025-05-15 11:05:10', trigger_reason: 'Uploaded documents failed OCR authenticity checks', crt_date: '2025-05-15', crt_usr: 'sha.reviewer02', flag: 'CONFIRMED', district: 'Bhopal' },
+  { id_pk: 10045841, state_lgd_code: '23', reference_number: 'FRD-2025-003', application_type: 'CLAIM', vendor_id: 'VEND001', trigger_type: 'AMOUNT-SPIKE', trigger_code: 'AMT-SPIKE-04', trigger_time: '2025-07-01 14:22:45', trigger_reason: 'Claim amount 3.2x hospital historical average for package', crt_date: '2025-07-01', crt_usr: 'system.api', flag: 'ACTIVE', district: 'Gwalior' },
+  { id_pk: 10045855, state_lgd_code: '23', reference_number: 'FRD-2025-004', application_type: 'CLAIM', vendor_id: 'VEND003', trigger_type: 'GEO-MISMATCH', trigger_code: 'GEO-MIS-01', trigger_time: '2025-04-20 08:40:18', trigger_reason: 'Beneficiary geo location differs from hospital district', crt_date: '2025-04-20', crt_usr: 'system.api', flag: 'CONFIRMED', district: 'Jabalpur' },
+  { id_pk: 10045856, state_lgd_code: '23', reference_number: 'FRD-2025-004', application_type: 'PREAUTH', vendor_id: 'VEND003', trigger_type: 'PKG-MISMATCH', trigger_code: 'PKG-MIS-07', trigger_time: '2025-04-20 08:41:02', trigger_reason: 'Preauth package does not match final claim package', crt_date: '2025-04-20', crt_usr: 'aco.officer03', flag: 'CONFIRMED', district: 'Jabalpur' },
+  { id_pk: 10045870, state_lgd_code: '23', reference_number: 'FRD-2025-005', application_type: 'CLAIM', vendor_id: 'VEND002', trigger_type: 'PKG-MISMATCH', trigger_code: 'PKG-MIS-02', trigger_time: '2025-06-05 16:10:33', trigger_reason: 'Procedure code mismatch with specialty of hospital', crt_date: '2025-06-05', crt_usr: 'system.api', flag: 'CLEARED', district: 'Ujjain' },
+  { id_pk: 10045888, state_lgd_code: '23', reference_number: 'FRD-2025-006', application_type: 'CLAIM', vendor_id: 'VEND001', trigger_type: 'DUP-CLAIM', trigger_code: 'DUP-CLAIM-05', trigger_time: '2025-07-12 10:05:55', trigger_reason: 'Same claim submitted by multiple system users', crt_date: '2025-07-12', crt_usr: 'sha.reviewer01', flag: 'ACTIVE', district: 'Bhopal' },
+  { id_pk: 10045901, state_lgd_code: '23', reference_number: 'FRD-2025-007', application_type: 'ENROLMENT', vendor_id: 'VEND004', trigger_type: 'DEVICE-SHARE', trigger_code: 'DEV-SHARE-01', trigger_time: '2025-05-28 12:30:00', trigger_reason: 'Enrolment device reused across unrelated families', crt_date: '2025-05-28', crt_usr: 'system.api', flag: 'CLEARED', district: 'Sagar' },
+  { id_pk: 10045920, state_lgd_code: '23', reference_number: 'FRD-2025-008', application_type: 'CARD', vendor_id: 'VEND002', trigger_type: 'DOC-ANOMALY', trigger_code: 'DOC-FAKE-08', trigger_time: '2025-07-25 09:48:12', trigger_reason: 'Aadhaar photo mismatch during card generation', crt_date: '2025-07-25', crt_usr: 'bis.operator04', flag: 'ACTIVE', district: 'Rewa' },
+  { id_pk: 10045921, state_lgd_code: '23', reference_number: 'FRD-2025-008', application_type: 'CLAIM', vendor_id: 'VEND001', trigger_type: 'GEO-MISMATCH', trigger_code: 'GEO-MIS-03', trigger_time: '2025-07-25 09:50:40', trigger_reason: 'Claim geo-tag outside assigned district boundary', crt_date: '2025-07-25', crt_usr: 'system.api', flag: 'ACTIVE', district: 'Rewa' },
+  { id_pk: 10045940, state_lgd_code: '23', reference_number: 'FRD-2025-002', application_type: 'CLAIM', vendor_id: 'VEND002', trigger_type: 'AMOUNT-SPIKE', trigger_code: 'AMT-SPIKE-01', trigger_time: '2025-05-16 07:15:00', trigger_reason: 'Recovered amount equals full risk amount after confirmation', crt_date: '2025-05-16', crt_usr: 'sha.reviewer02', flag: 'CONFIRMED', district: 'Bhopal' },
 ]
 
 // ─── MP Users & Workflow ───────────────────────────────────────────────────

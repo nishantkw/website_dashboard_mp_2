@@ -40,7 +40,7 @@ export default function Patients() {
   return (
     <div>
       <Modal />
-      <PageHeader title="Patients & Treatment" description="t_patient_dtls + treatment_dtls + icd_data_doctor_details — Patient records, treatment details and ICD diagnosis codes" schema="dmart_mp" />
+      <PageHeader title="Patients & Treatment" description="t_patient_dtls + treatment_dtls + icd_data_doctor_details — Patient records, treatment details and ICD diagnosis codes" />
       <KPIGrid kpis={mpPatientKPIs} onKpiClick={(kpi: KPI) => openFromKpi(kpi.label, kpi.value, { change: kpi.change ?? 0 })} />
 
       {/* Row 1: Treatment Specialty + Cost by Specialty */}

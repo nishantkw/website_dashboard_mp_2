@@ -40,15 +40,15 @@ export default function Beneficiaries() {
   return (
     <div>
       <Modal />
-      <PageHeader title="Beneficiaries" description="t_bis_beneficiary_dtls (60 cols) — Demographics, enrollment, eKYC, ABHA & card status" schema="dmart_mp" />
+      <PageHeader title="Beneficiaries" description="Demographics, enrollment, eKYC, ABHA and card status" />
       <KPIGrid kpis={mpBeneficiaryKPIs} onKpiClick={(kpi: KPI) => openFromKpi(kpi.label, kpi.value, { change: kpi.change ?? 0 })} />
 
       {/* Row 1: Gender + Urban/Rural */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <ChartCard title="Gender Distribution" subtitle="Beneficiary gender breakdown (gender column)" exportData={mpBeneficiaryGender}>
+        <ChartCard title="Gender Distribution" subtitle="Share of male and female beneficiaries" exportData={mpBeneficiaryGender}>
           <InteractivePieChart data={mpBeneficiaryGender} colors={GENDER_COLORS} innerRadius={55} chartTitle="Gender" onItemClick={openFromChart} />
         </ChartCard>
-        <ChartCard title="Urban vs Rural" subtitle="rural_urban_flag — Beneficiary area classification" exportData={mpBeneficiaryUrbanRural}>
+        <ChartCard title="Urban vs Rural" subtitle="Beneficiary area classification" exportData={mpBeneficiaryUrbanRural}>
           <InteractiveBarChart
             data={mpBeneficiaryUrbanRural}
             chartTitle="Urban/Rural"
@@ -62,11 +62,11 @@ export default function Beneficiaries() {
 
       {/* Row 2: District Enrollment + Enrollment Status */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <ChartCard title="District-wise Enrollment" subtitle="Top 8 districts — enrolled vs active (enrl_status)" exportData={mpBeneficiaryDistrictData}>
+        <ChartCard title="District-wise Enrollment" subtitle="Top 8 districts — enrolled vs active" exportData={mpBeneficiaryDistrictData}>
           <InteractiveBarChart
             data={mpBeneficiaryDistrictData}
             chartTitle="District Enrollment"
-            height={270}
+            height={300}
             showLegend
             onItemClick={openFromChart}
             bars={[
@@ -75,17 +75,17 @@ export default function Beneficiaries() {
             ]}
           />
         </ChartCard>
-        <ChartCard title="Enrollment Status" subtitle="enrl_status / active_status breakdown" exportData={mpBeneficiaryEnrollStatus}>
+        <ChartCard title="Enrollment Status" subtitle="Current enrollment breakdown" exportData={mpBeneficiaryEnrollStatus}>
           <InteractivePieChart data={mpBeneficiaryEnrollStatus} colors={STATUS_COLORS} innerRadius={55} chartTitle="Enroll Status" onItemClick={openFromChart} />
         </ChartCard>
       </div>
 
       {/* Row 3: Card Status + Monthly Enrollment Trend */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <ChartCard title="Card Status Breakdown" subtitle="card_status — from t_bis_beneficiary_dtls" exportData={mpBeneficiaryCardStatus}>
+        <ChartCard title="Card Status Breakdown" subtitle="Card printing and delivery status" exportData={mpBeneficiaryCardStatus}>
           <InteractivePieChart data={mpBeneficiaryCardStatus} colors={CARD_COLORS} chartTitle="Card Status" onItemClick={openFromChart} />
         </ChartCard>
-        <ChartCard title="Monthly Enrollment Trend" subtitle="Enrollments vs Approvals — enrol_date / approve_date" exportData={mpBeneficiaryMonthlyEnroll}>
+        <ChartCard title="Monthly Enrollment Trend" subtitle="Enrollments vs approvals by month" exportData={mpBeneficiaryMonthlyEnroll}>
           <InteractiveLineChart
             data={mpBeneficiaryMonthlyEnroll}
             chartTitle="Enrollment Trend"

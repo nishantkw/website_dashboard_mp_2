@@ -28,6 +28,7 @@ export const navigation: NavItem[] = [
       { id: 'mp-fraud', label: 'Fraud & Audit', path: '/dashboard/mp/fraud-audit' },
       { id: 'mp-users', label: 'Users & Workflow', path: '/dashboard/mp/users-workflow' },
       { id: 'mp-lms', label: 'LMS Training', path: '/dashboard/mp/lms-training' },
+      { id: 'mp-reports', label: 'Report', path: '/dashboard/mp/reports' },
     ],
   },
   {

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from 'react'
 import type { FilterValues } from '../types'
 import { getDistrictsForDivision, getDivisionForDistrict } from '../data/filterOptions'
 
@@ -12,10 +12,16 @@ interface FilterContextValue {
 }
 
 export const defaultGlobalFilters: FilterValues = {
-  schema: '',
   division: '',
   district: '',
-  status: '',
+  claim_status: '',
+  card_status: '',
+  user_status: '',
+  hospital_status: '',
+  patient_status: '',
+  investigation_status: '',
+  training_status: '',
+  enrollment_status: '',
   gender: '',
   urban_rural: '',
   hospital_type: '',
@@ -66,8 +72,20 @@ export function FilterProvider({ children }: { children: ReactNode }) {
   const activeGlobalCount =
     Object.values(globalFilters).filter(Boolean).length + (search ? 1 : 0)
 
+  const value = useMemo(
+    () => ({
+      globalFilters,
+      setGlobalFilter,
+      clearGlobalFilters,
+      activeGlobalCount,
+      search,
+      setSearch,
+    }),
+    [globalFilters, setGlobalFilter, clearGlobalFilters, activeGlobalCount, search]
+  )
+
   return (
-    <FilterContext.Provider value={{ globalFilters, setGlobalFilter, clearGlobalFilters, activeGlobalCount, search, setSearch }}>
+    <FilterContext.Provider value={value}>
       {children}
     </FilterContext.Provider>
   )

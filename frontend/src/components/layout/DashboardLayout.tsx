@@ -13,8 +13,9 @@ export default function DashboardLayout() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const isUserManagementPage =
-    location.pathname.includes('/user-management') || location.pathname.includes('/ump')
+  const isUserManagementPage = location.pathname.includes('/user-management')
+  const isImportPage = location.pathname.includes('/import-bulk-data')
+  const hideFilters = isUserManagementPage || isImportPage
 
   const handleLogout = () => {
     logout()
@@ -22,54 +23,63 @@ export default function DashboardLayout() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-[#eef6f0] overflow-hidden">
+    <div className="flex h-screen flex-col overflow-hidden bg-[#eef6f0]">
       <GovernmentHeader />
 
-      <div className="flex flex-1 min-h-0 overflow-hidden">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
         <Sidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
 
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <div className="bg-gradient-to-r from-[#d4edda] via-[#e2f3e8] to-[#d4edda] border-b border-[#a8d5b5] px-4 lg:px-6 py-2 shrink-0 shadow-sm">
-            <div className="flex items-center justify-between">
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+          {/* Green command bar — matches government header stripe */}
+          <div className="shrink-0 bg-gradient-to-r from-[#1a5c38] via-[#2d8a4e] to-[#1a5c38] px-4 shadow-md lg:px-6">
+            <div className="flex items-center justify-between py-2.5">
               <div className="flex items-center gap-3">
                 <MobileMenuButton onClick={() => setMobileOpen(true)} />
-                <span className="hidden md:inline text-xs font-semibold text-[#1a5c38] uppercase tracking-wider">
+                <div className="hidden h-5 w-px bg-white/25 sm:block" />
+                <span className="hidden text-[11px] font-bold uppercase tracking-[0.2em] text-white/95 md:inline">
                   Analytics Portal
                 </span>
-                <div className="hidden sm:block w-px h-5 bg-[#a8d5b5]" />
-                <div className="hidden sm:flex items-center gap-2 bg-white/80 border border-[#a8d5b5] rounded-md px-3 py-1.5 shadow-sm">
-                  <Search className="w-4 h-4 text-[#2d8a4e]" />
+                <div className="hidden h-5 w-px bg-white/25 sm:block" />
+                <div className="hidden items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 sm:flex">
+                  <Search className="h-3.5 w-3.5 text-white/80" />
                   <input
                     type="text"
                     placeholder="Search dashboards..."
-                    className="bg-transparent text-sm outline-none w-32 lg:w-44 text-gray-700 placeholder-[#6b9e7a]"
+                    className="w-32 bg-transparent text-sm text-white outline-none placeholder:text-white/50 lg:w-44"
                   />
                 </div>
               </div>
+
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 pl-2 sm:pl-3">
-                  <div className="w-8 h-8 bg-[#2d8a4e] rounded-full flex items-center justify-center ring-2 ring-white shadow-sm">
-                    <User className="w-3.5 h-3.5 text-white" />
+                <div className="flex items-center gap-2.5 rounded-lg border border-white/15 bg-white/10 px-2 py-1 sm:px-3">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[#1a5c38] sm:h-8 sm:w-8">
+                    <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </div>
                   <div className="hidden sm:block">
-                    <p className="text-sm font-semibold text-[#1a3a2e] leading-tight">{user?.name}</p>
-                    <p className="text-[11px] text-[#4a7c59]">{user ? ROLE_LABELS[user.role] : ''}</p>
+                    <p className="text-sm font-semibold leading-tight text-white">{user?.name}</p>
+                    <p className="text-[10px] text-emerald-100/80">{user ? ROLE_LABELS[user.role] : ''}</p>
                   </div>
                 </div>
                 <button
+                  type="button"
                   onClick={handleLogout}
                   title="Logout"
-                  className="p-2 rounded-md text-[#1a5c38] hover:bg-white/60 hover:text-red-600 transition-all"
+                  className="rounded-lg border border-white/15 bg-white/10 p-2 text-white transition-colors hover:bg-white/20"
                 >
-                  <LogOut className="w-[18px] h-[18px]" />
+                  <LogOut className="h-[18px] w-[18px]" />
                 </button>
               </div>
             </div>
-
-            {!isUserManagementPage && <GlobalFilterBar />}
           </div>
 
-          <main id="dashboard-page-content" className="flex-1 overflow-y-auto p-4 lg:p-6 bg-[#f0f7f2]">
+          {/* Filter zone — soft green bed + floating white card */}
+          {!hideFilters && (
+            <div className="shrink-0 bg-gradient-to-b from-[#dceee3] to-[#eef6f0] px-4 pb-3 pt-3 lg:px-6">
+              <GlobalFilterBar />
+            </div>
+          )}
+
+          <main id="dashboard-page-content" className="flex-1 overflow-y-auto bg-[#f0f7f2] p-4 lg:p-6">
             <Outlet />
           </main>
         </div>
