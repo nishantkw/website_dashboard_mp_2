@@ -1,0 +1,3534 @@
+{
+  "claim_paid_t": [
+    {
+      "name": "registration_id",
+      "type": "varchar"
+    },
+    {
+      "name": "case_id",
+      "type": "varchar"
+    },
+    {
+      "name": "member_id",
+      "type": "varchar"
+    },
+    {
+      "name": "family_id",
+      "type": "varchar"
+    },
+    {
+      "name": "patient_name",
+      "type": "varchar"
+    },
+    {
+      "name": "patient_dob",
+      "type": "varchar"
+    },
+    {
+      "name": "patient_state_code",
+      "type": "smallint"
+    },
+    {
+      "name": "patient_district_code",
+      "type": "smallint"
+    },
+    {
+      "name": "patient_district_name",
+      "type": "varchar"
+    },
+    {
+      "name": "patient_state_name",
+      "type": "varchar"
+    },
+    {
+      "name": "gender",
+      "type": "varchar"
+    },
+    {
+      "name": "age",
+      "type": "numeric"
+    },
+    {
+      "name": "policy_code",
+      "type": "varchar"
+    },
+    {
+      "name": "renewal_code",
+      "type": "varchar"
+    },
+    {
+      "name": "category_details",
+      "type": "varchar"
+    },
+    {
+      "name": "speciality_code",
+      "type": "varchar"
+    },
+    {
+      "name": "procedure_details",
+      "type": "varchar"
+    },
+    {
+      "name": "procedure_code",
+      "type": "varchar"
+    },
+    {
+      "name": "case_type",
+      "type": "varchar"
+    },
+    {
+      "name": "status_id_pk",
+      "type": "integer"
+    },
+    {
+      "name": "case_status",
+      "type": "varchar"
+    },
+    {
+      "name": "hospital_code",
+      "type": "varchar"
+    },
+    {
+      "name": "hospital_name",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_district_name",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_state_name",
+      "type": "varchar"
+    },
+    {
+      "name": "hospital_state_cd",
+      "type": "smallint"
+    },
+    {
+      "name": "hospital_district_cd",
+      "type": "smallint"
+    },
+    {
+      "name": "hosp_pan_number",
+      "type": "varchar"
+    },
+    {
+      "name": "hospital_type",
+      "type": "varchar"
+    },
+    {
+      "name": "admission_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "preauth_init_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "amount_preauth_initiated",
+      "type": "numeric"
+    },
+    {
+      "name": "preauth_approved_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "amount_preauth_approved",
+      "type": "numeric"
+    },
+    {
+      "name": "preauth_rejected_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "surgery_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "death_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "discharge_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "claim_init_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "amount_claim_initiated",
+      "type": "numeric"
+    },
+    {
+      "name": "amount_claim_approved",
+      "type": "numeric"
+    },
+    {
+      "name": "amount_claim_paid",
+      "type": "numeric"
+    },
+    {
+      "name": "claim_rejected_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "rf_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "tds_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "utr_no",
+      "type": "varchar"
+    },
+    {
+      "name": "payment_paid_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "transaction_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "cpd_approved_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "cpd_approved_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "cpd_user",
+      "type": "varchar"
+    },
+    {
+      "name": "aco_approved_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "aco_approved_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "aco_user",
+      "type": "varchar"
+    },
+    {
+      "name": "sha_approved_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "sha_approved_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "sha_user",
+      "type": "varchar"
+    },
+    {
+      "name": "json_object_perauth",
+      "type": "varchar"
+    },
+    {
+      "name": "json_object_claim",
+      "type": "varchar"
+    },
+    {
+      "name": "json_object_ben",
+      "type": "varchar"
+    },
+    {
+      "name": "last_insert_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "src_account_no",
+      "type": "varchar"
+    },
+    {
+      "name": "src_ifsc_code",
+      "type": "varchar"
+    },
+    {
+      "name": "paid_flag",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_account_number",
+      "type": "varchar"
+    },
+    {
+      "name": "ben_ifsc_code",
+      "type": "varchar"
+    },
+    {
+      "name": "current_workflow_role",
+      "type": "varchar"
+    },
+    {
+      "name": "current_workflow_user",
+      "type": "varchar"
+    },
+    {
+      "name": "service_request_type",
+      "type": "varchar"
+    },
+    {
+      "name": "m_flag",
+      "type": "integer"
+    },
+    {
+      "name": "careplan_desc",
+      "type": "varchar"
+    },
+    {
+      "name": "discharge_type",
+      "type": "varchar"
+    },
+    {
+      "name": "admission_type",
+      "type": "varchar"
+    },
+    {
+      "name": "claim_approved_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "preauth_tat",
+      "type": "bigint"
+    },
+    {
+      "name": "claim_tat",
+      "type": "bigint"
+    },
+    {
+      "name": "payment_tat",
+      "type": "bigint"
+    },
+    {
+      "name": "patient_mobile_number",
+      "type": "varchar"
+    }
+  ],
+  "claim_paid_t_portability": [
+    {
+      "name": "registration_id",
+      "type": "varchar"
+    },
+    {
+      "name": "case_id",
+      "type": "varchar"
+    },
+    {
+      "name": "member_id",
+      "type": "varchar"
+    },
+    {
+      "name": "family_id",
+      "type": "varchar"
+    },
+    {
+      "name": "patient_name",
+      "type": "varchar"
+    },
+    {
+      "name": "patient_dob",
+      "type": "varchar"
+    },
+    {
+      "name": "patient_state_code",
+      "type": "smallint"
+    },
+    {
+      "name": "patient_district_code",
+      "type": "smallint"
+    },
+    {
+      "name": "patient_district_name",
+      "type": "varchar"
+    },
+    {
+      "name": "patient_state_name",
+      "type": "varchar"
+    },
+    {
+      "name": "gender",
+      "type": "varchar"
+    },
+    {
+      "name": "age",
+      "type": "numeric"
+    },
+    {
+      "name": "policy_code",
+      "type": "varchar"
+    },
+    {
+      "name": "renewal_code",
+      "type": "varchar"
+    },
+    {
+      "name": "category_details",
+      "type": "varchar"
+    },
+    {
+      "name": "speciality_code",
+      "type": "varchar"
+    },
+    {
+      "name": "procedure_details",
+      "type": "varchar"
+    },
+    {
+      "name": "procedure_code",
+      "type": "varchar"
+    },
+    {
+      "name": "case_type",
+      "type": "varchar"
+    },
+    {
+      "name": "status_id_pk",
+      "type": "integer"
+    },
+    {
+      "name": "case_status",
+      "type": "varchar"
+    },
+    {
+      "name": "hospital_code",
+      "type": "varchar"
+    },
+    {
+      "name": "hospital_name",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_district_name",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_state_name",
+      "type": "varchar"
+    },
+    {
+      "name": "hospital_state_cd",
+      "type": "smallint"
+    },
+    {
+      "name": "hospital_district_cd",
+      "type": "smallint"
+    },
+    {
+      "name": "hosp_pan_number",
+      "type": "varchar"
+    },
+    {
+      "name": "hospital_type",
+      "type": "varchar"
+    },
+    {
+      "name": "admission_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "preauth_init_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "amount_preauth_initiated",
+      "type": "numeric"
+    },
+    {
+      "name": "preauth_approved_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "amount_preauth_approved",
+      "type": "numeric"
+    },
+    {
+      "name": "preauth_rejected_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "surgery_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "death_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "discharge_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "claim_init_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "amount_claim_initiated",
+      "type": "numeric"
+    },
+    {
+      "name": "amount_claim_approved",
+      "type": "numeric"
+    },
+    {
+      "name": "amount_claim_paid",
+      "type": "numeric"
+    },
+    {
+      "name": "claim_rejected_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "rf_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "tds_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "utr_no",
+      "type": "varchar"
+    },
+    {
+      "name": "payment_paid_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "transaction_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "cpd_approved_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "cpd_approved_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "cpd_user",
+      "type": "varchar"
+    },
+    {
+      "name": "aco_approved_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "aco_approved_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "aco_user",
+      "type": "varchar"
+    },
+    {
+      "name": "sha_approved_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "sha_approved_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "sha_user",
+      "type": "varchar"
+    },
+    {
+      "name": "json_object_perauth",
+      "type": "varchar"
+    },
+    {
+      "name": "json_object_claim",
+      "type": "varchar"
+    },
+    {
+      "name": "json_object_ben",
+      "type": "varchar"
+    },
+    {
+      "name": "src_account_no",
+      "type": "varchar"
+    },
+    {
+      "name": "src_ifsc_code",
+      "type": "varchar"
+    },
+    {
+      "name": "paid_flag",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_account_number",
+      "type": "varchar"
+    },
+    {
+      "name": "ben_ifsc_code",
+      "type": "varchar"
+    },
+    {
+      "name": "current_workflow_role",
+      "type": "varchar"
+    },
+    {
+      "name": "current_workflow_user",
+      "type": "varchar"
+    },
+    {
+      "name": "service_request_type",
+      "type": "varchar"
+    },
+    {
+      "name": "m_flag",
+      "type": "integer"
+    },
+    {
+      "name": "careplan_desc",
+      "type": "varchar"
+    },
+    {
+      "name": "discharge_type",
+      "type": "varchar"
+    },
+    {
+      "name": "admission_type",
+      "type": "varchar"
+    },
+    {
+      "name": "claim_approved_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "last_insert_dt",
+      "type": "timestamp"
+    }
+  ],
+  "hospital_master_with_quality_certification": [
+    {
+      "name": "hosp_state",
+      "type": "smallint"
+    },
+    {
+      "name": "hosp_dist",
+      "type": "smallint"
+    },
+    {
+      "name": "hospital_type",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_id",
+      "type": "integer"
+    },
+    {
+      "name": "facility_id",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_name",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_request_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "hosp_empaneled_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "hosp_spec_type",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_spec_desc",
+      "type": "varchar"
+    },
+    {
+      "name": "enrl_status",
+      "type": "integer"
+    },
+    {
+      "name": "active_status",
+      "type": "integer"
+    },
+    {
+      "name": "deempanel_status",
+      "type": "integer"
+    },
+    {
+      "name": "hosp_status",
+      "type": "integer"
+    },
+    {
+      "name": "hosp_status_desc",
+      "type": "varchar"
+    },
+    {
+      "name": "bed_size",
+      "type": "integer"
+    },
+    {
+      "name": "app_status",
+      "type": "integer"
+    },
+    {
+      "name": "accreditation_status",
+      "type": "varchar"
+    },
+    {
+      "name": "accred_id",
+      "type": "varchar"
+    },
+    {
+      "name": "quality_certification",
+      "type": "varchar"
+    },
+    {
+      "name": "m_flag",
+      "type": "varchar"
+    }
+  ],
+  "hospital_master_with_quality_certification_final": [
+    {
+      "name": "hosp_id",
+      "type": "integer"
+    },
+    {
+      "name": "facility_id",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_name",
+      "type": "varchar"
+    },
+    {
+      "name": "hem_speciality",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_state",
+      "type": "smallint"
+    },
+    {
+      "name": "state_name",
+      "type": "varchar"
+    },
+    {
+      "name": "hospital_type",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_dist",
+      "type": "smallint"
+    },
+    {
+      "name": "hosp_request_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "hosp_empaneled_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "hosp_spec_type",
+      "type": "varchar"
+    },
+    {
+      "name": "enrl_status",
+      "type": "integer"
+    },
+    {
+      "name": "active_status",
+      "type": "integer"
+    },
+    {
+      "name": "deempanel_status",
+      "type": "integer"
+    },
+    {
+      "name": "hosp_status",
+      "type": "integer"
+    },
+    {
+      "name": "hosp_status_desc",
+      "type": "varchar"
+    },
+    {
+      "name": "bed_size",
+      "type": "integer"
+    },
+    {
+      "name": "app_status",
+      "type": "integer"
+    },
+    {
+      "name": "accreditation_status",
+      "type": "varchar"
+    },
+    {
+      "name": "accred_id",
+      "type": "varchar"
+    },
+    {
+      "name": "quality_certification",
+      "type": "varchar"
+    },
+    {
+      "name": "m_flag",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_city",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_email_id",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_mobile_no",
+      "type": "bigint"
+    },
+    {
+      "name": "hosp_contact_no",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_address",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_pan_number",
+      "type": "varchar"
+    },
+    {
+      "name": "account_number",
+      "type": "varchar"
+    },
+    {
+      "name": "ifsc",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_longitude",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_latitude",
+      "type": "varchar"
+    },
+    {
+      "name": "speciality_code",
+      "type": "varchar"
+    },
+    {
+      "name": "speciality",
+      "type": "varchar"
+    },
+    {
+      "name": "district_name",
+      "type": "varchar"
+    },
+    {
+      "name": "hospital_subtype",
+      "type": "varchar"
+    }
+  ],
+  "icd_data_doctor_details": [
+    {
+      "name": "registration_id",
+      "type": "varchar"
+    },
+    {
+      "name": "case_id",
+      "type": "varchar"
+    },
+    {
+      "name": "id",
+      "type": "bigint"
+    },
+    {
+      "name": "code",
+      "type": "varchar"
+    },
+    {
+      "name": "display",
+      "type": "varchar"
+    },
+    {
+      "name": "type",
+      "type": "varchar"
+    },
+    {
+      "name": "typedescription",
+      "type": "varchar"
+    },
+    {
+      "name": "idpk",
+      "type": "varchar"
+    },
+    {
+      "name": "patient_state_code",
+      "type": "smallint"
+    }
+  ],
+  "lms_user_course_completion_status": [
+    {
+      "name": "userid",
+      "type": "bigint"
+    },
+    {
+      "name": "username",
+      "type": "varchar"
+    },
+    {
+      "name": "firstname",
+      "type": "varchar"
+    },
+    {
+      "name": "lastname",
+      "type": "varchar"
+    },
+    {
+      "name": "phone2",
+      "type": "varchar"
+    },
+    {
+      "name": "email",
+      "type": "varchar"
+    },
+    {
+      "name": "ab_pmjay_status",
+      "type": "varchar"
+    },
+    {
+      "name": "ab_pmjay_completed_epoch",
+      "type": "bigint"
+    },
+    {
+      "name": "ab_pmjay_completed_at_utc",
+      "type": "timestamptz"
+    },
+    {
+      "name": "abdm_status",
+      "type": "varchar"
+    },
+    {
+      "name": "abdm_completed_epoch",
+      "type": "bigint"
+    },
+    {
+      "name": "abdm_completed_at_utc",
+      "type": "timestamptz"
+    },
+    {
+      "name": "parententity",
+      "type": "varchar"
+    },
+    {
+      "name": "entitytype",
+      "type": "varchar"
+    },
+    {
+      "name": "selfentity",
+      "type": "varchar"
+    },
+    {
+      "name": "role",
+      "type": "varchar"
+    }
+  ],
+  "m_lookup": [
+    {
+      "name": "id_pk",
+      "type": "integer"
+    },
+    {
+      "name": "lookup_cd",
+      "type": "varchar"
+    },
+    {
+      "name": "lookup_value",
+      "type": "varchar"
+    },
+    {
+      "name": "active_yn",
+      "type": "smallint"
+    },
+    {
+      "name": "created_by",
+      "type": "varchar"
+    },
+    {
+      "name": "created_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "updated_by",
+      "type": "varchar"
+    },
+    {
+      "name": "updated_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "type",
+      "type": "varchar"
+    }
+  ],
+  "m_source_data": [
+    {
+      "name": "id_pk",
+      "type": "bigint"
+    },
+    {
+      "name": "src_family_id",
+      "type": "varchar"
+    },
+    {
+      "name": "state_cd",
+      "type": "varchar"
+    },
+    {
+      "name": "dist_cd",
+      "type": "varchar"
+    },
+    {
+      "name": "name",
+      "type": "varchar"
+    },
+    {
+      "name": "age",
+      "type": "smallint"
+    },
+    {
+      "name": "gender",
+      "type": "varchar"
+    },
+    {
+      "name": "relation",
+      "type": "varchar"
+    },
+    {
+      "name": "father_guardian_name",
+      "type": "varchar"
+    },
+    {
+      "name": "dob",
+      "type": "varchar"
+    },
+    {
+      "name": "rural_urban_flag",
+      "type": "varchar"
+    },
+    {
+      "name": "block_or_town",
+      "type": "varchar"
+    },
+    {
+      "name": "ward_or_village",
+      "type": "varchar"
+    },
+    {
+      "name": "sub_division",
+      "type": "varchar"
+    },
+    {
+      "name": "addr1",
+      "type": "varchar"
+    },
+    {
+      "name": "addr2",
+      "type": "varchar"
+    },
+    {
+      "name": "mobilenumber",
+      "type": "varchar"
+    },
+    {
+      "name": "source_type",
+      "type": "varchar"
+    },
+    {
+      "name": "enrl_status",
+      "type": "varchar"
+    },
+    {
+      "name": "created_by",
+      "type": "varchar"
+    },
+    {
+      "name": "created_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "bis_source",
+      "type": "varchar"
+    },
+    {
+      "name": "village_ward_lgd_code",
+      "type": "varchar"
+    },
+    {
+      "name": "mandal_taluka_lgd_code",
+      "type": "varchar"
+    },
+    {
+      "name": "card_status",
+      "type": "varchar"
+    },
+    {
+      "name": "bis_member_id",
+      "type": "varchar"
+    },
+    {
+      "name": "card_no",
+      "type": "varchar"
+    },
+    {
+      "name": "bis_family_id",
+      "type": "varchar"
+    },
+    {
+      "name": "src_member_id",
+      "type": "varchar"
+    },
+    {
+      "name": "state_scheme_family_id",
+      "type": "varchar"
+    },
+    {
+      "name": "nfsa_card_type",
+      "type": "varchar"
+    },
+    {
+      "name": "api_yn",
+      "type": "varchar"
+    },
+    {
+      "name": "updated_by",
+      "type": "varchar"
+    },
+    {
+      "name": "updated_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "nfsa_type",
+      "type": "varchar"
+    },
+    {
+      "name": "scheme",
+      "type": "varchar"
+    }
+  ],
+  "payment_dtls": [
+    {
+      "name": "case_id",
+      "type": "varchar"
+    },
+    {
+      "name": "payment_type",
+      "type": "varchar"
+    },
+    {
+      "name": "bank_name",
+      "type": "varchar"
+    },
+    {
+      "name": "payment_unique_id",
+      "type": "varchar"
+    },
+    {
+      "name": "careplan_id",
+      "type": "varchar"
+    },
+    {
+      "name": "src_account_no",
+      "type": "varchar"
+    },
+    {
+      "name": "src_ifsc_code",
+      "type": "varchar"
+    },
+    {
+      "name": "transaction_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "transaction_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "upload_file_name",
+      "type": "varchar"
+    },
+    {
+      "name": "paid_flag",
+      "type": "varchar"
+    },
+    {
+      "name": "payment_paid_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "paid_remarks",
+      "type": "varchar"
+    },
+    {
+      "name": "payment_remarks",
+      "type": "varchar"
+    },
+    {
+      "name": "state_code",
+      "type": "varchar"
+    },
+    {
+      "name": "payer_id",
+      "type": "varchar"
+    },
+    {
+      "name": "reject_code",
+      "type": "varchar"
+    },
+    {
+      "name": "reject_flag",
+      "type": "varchar"
+    },
+    {
+      "name": "reject_remarks",
+      "type": "varchar"
+    },
+    {
+      "name": "payment_reject_dt",
+      "type": "timestamp"
+    }
+  ],
+  "pro_workflow_users_t": [
+    {
+      "name": "table_name",
+      "type": "varchar"
+    },
+    {
+      "name": "id_pk",
+      "type": "integer"
+    },
+    {
+      "name": "registration_id",
+      "type": "varchar"
+    },
+    {
+      "name": "workflow_role",
+      "type": "varchar"
+    },
+    {
+      "name": "status_id",
+      "type": "numeric"
+    },
+    {
+      "name": "status_descrption",
+      "type": "varchar"
+    },
+    {
+      "name": "workflow_process_code",
+      "type": "varchar"
+    },
+    {
+      "name": "workflow_user",
+      "type": "varchar"
+    },
+    {
+      "name": "created_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "last_action_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "initiated_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "approved_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "transaction_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "final_level",
+      "type": "smallint"
+    },
+    {
+      "name": "active_flag",
+      "type": "smallint"
+    },
+    {
+      "name": "created_by",
+      "type": "varchar"
+    },
+    {
+      "name": "remarks",
+      "type": "varchar"
+    },
+    {
+      "name": "json_object",
+      "type": "varchar"
+    },
+    {
+      "name": "patient_state_code",
+      "type": "smallint"
+    },
+    {
+      "name": "patient_district_code",
+      "type": "smallint"
+    },
+    {
+      "name": "patient_state_name",
+      "type": "varchar"
+    },
+    {
+      "name": "patient_district_name",
+      "type": "varchar"
+    },
+    {
+      "name": "hospital_code",
+      "type": "varchar"
+    },
+    {
+      "name": "hospital_name",
+      "type": "varchar"
+    },
+    {
+      "name": "hospital_state_cd",
+      "type": "smallint"
+    },
+    {
+      "name": "hospital_district_cd",
+      "type": "smallint"
+    },
+    {
+      "name": "hosp_district_name",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_state_name",
+      "type": "varchar"
+    },
+    {
+      "name": "hospital_type",
+      "type": "varchar"
+    },
+    {
+      "name": "mobile_number",
+      "type": "bigint"
+    },
+    {
+      "name": "user_id",
+      "type": "varchar"
+    },
+    {
+      "name": "user_name",
+      "type": "varchar"
+    },
+    {
+      "name": "last_insert_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "m_flag",
+      "type": "integer"
+    },
+    {
+      "name": "dashboard_workflow_role",
+      "type": "varchar"
+    },
+    {
+      "name": "pendency_age",
+      "type": "varchar"
+    },
+    {
+      "name": "ppd_tat",
+      "type": "varchar"
+    },
+    {
+      "name": "overall_tat",
+      "type": "varchar"
+    },
+    {
+      "name": "service_request_type",
+      "type": "varchar"
+    }
+  ],
+  "t_bis_beneficiary_disabled": [
+    {
+      "name": "state_cd",
+      "type": "varchar"
+    },
+    {
+      "name": "card_no",
+      "type": "varchar"
+    },
+    {
+      "name": "aadhaar_no",
+      "type": "varchar"
+    },
+    {
+      "name": "card_status",
+      "type": "varchar"
+    },
+    {
+      "name": "family_id",
+      "type": "varchar"
+    },
+    {
+      "name": "member_id",
+      "type": "varchar"
+    },
+    {
+      "name": "source_type",
+      "type": "varchar"
+    },
+    {
+      "name": "name",
+      "type": "varchar"
+    },
+    {
+      "name": "created_by",
+      "type": "varchar"
+    },
+    {
+      "name": "created_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "updated_by",
+      "type": "varchar"
+    },
+    {
+      "name": "updated_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "date_of_birth",
+      "type": "varchar"
+    },
+    {
+      "name": "acted_workflow_user",
+      "type": "varchar"
+    },
+    {
+      "name": "disabled_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "reason_desc",
+      "type": "varchar"
+    },
+    {
+      "name": "reason_id",
+      "type": "varchar"
+    }
+  ],
+  "t_bis_beneficiary_dtls": [
+    {
+      "name": "id_pk",
+      "type": "bigint"
+    },
+    {
+      "name": "ben_id",
+      "type": "varchar"
+    },
+    {
+      "name": "family_id",
+      "type": "varchar"
+    },
+    {
+      "name": "member_id",
+      "type": "varchar"
+    },
+    {
+      "name": "bis_family_id",
+      "type": "varchar"
+    },
+    {
+      "name": "bis_member_id",
+      "type": "varchar"
+    },
+    {
+      "name": "ben_ref_id",
+      "type": "varchar"
+    },
+    {
+      "name": "state_cd",
+      "type": "varchar"
+    },
+    {
+      "name": "dist_cd",
+      "type": "varchar"
+    },
+    {
+      "name": "block_id",
+      "type": "varchar"
+    },
+    {
+      "name": "village_id",
+      "type": "varchar"
+    },
+    {
+      "name": "rural_urban_flag",
+      "type": "varchar"
+    },
+    {
+      "name": "house_no",
+      "type": "varchar"
+    },
+    {
+      "name": "pincode",
+      "type": "varchar"
+    },
+    {
+      "name": "address",
+      "type": "varchar"
+    },
+    {
+      "name": "dist_name",
+      "type": "varchar"
+    },
+    {
+      "name": "state_name",
+      "type": "varchar"
+    },
+    {
+      "name": "ben_mobile_no",
+      "type": "varchar"
+    },
+    {
+      "name": "ben_email_id",
+      "type": "varchar"
+    },
+    {
+      "name": "json_obj_ben_source_dtl",
+      "type": "varchar"
+    },
+    {
+      "name": "json_obj_ben_ekyc_dtl",
+      "type": "varchar"
+    },
+    {
+      "name": "active_status",
+      "type": "smallint"
+    },
+    {
+      "name": "enrl_status",
+      "type": "varchar"
+    },
+    {
+      "name": "created_by",
+      "type": "varchar"
+    },
+    {
+      "name": "created_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "updated_by",
+      "type": "varchar"
+    },
+    {
+      "name": "updated_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "abha_id",
+      "type": "varchar"
+    },
+    {
+      "name": "payer_id",
+      "type": "bigint"
+    },
+    {
+      "name": "tpa_isa_id",
+      "type": "bigint"
+    },
+    {
+      "name": "json_obj_ben_othr_dtl",
+      "type": "varchar"
+    },
+    {
+      "name": "src_flag",
+      "type": "varchar"
+    },
+    {
+      "name": "enrol_status",
+      "type": "bigint"
+    },
+    {
+      "name": "entity_id",
+      "type": "varchar"
+    },
+    {
+      "name": "card_no",
+      "type": "varchar"
+    },
+    {
+      "name": "photo",
+      "type": "varchar"
+    },
+    {
+      "name": "relation",
+      "type": "varchar"
+    },
+    {
+      "name": "auth_mode",
+      "type": "varchar"
+    },
+    {
+      "name": "primary_auth_mode",
+      "type": "varchar"
+    },
+    {
+      "name": "new_member_flag",
+      "type": "varchar"
+    },
+    {
+      "name": "gender",
+      "type": "varchar"
+    },
+    {
+      "name": "year_of_birth",
+      "type": "varchar"
+    },
+    {
+      "name": "name",
+      "type": "varchar"
+    },
+    {
+      "name": "father_name",
+      "type": "varchar"
+    },
+    {
+      "name": "age",
+      "type": "varchar"
+    },
+    {
+      "name": "primary_ben_id",
+      "type": "varchar"
+    },
+    {
+      "name": "approve_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "enrol_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "card_status",
+      "type": "varchar"
+    },
+    {
+      "name": "aadhar_status",
+      "type": "varchar"
+    },
+    {
+      "name": "reject_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "date_of_birth",
+      "type": "varchar"
+    },
+    {
+      "name": "scheme_code",
+      "type": "varchar"
+    },
+    {
+      "name": "request_type",
+      "type": "varchar"
+    },
+    {
+      "name": "auth_txn",
+      "type": "varchar"
+    },
+    {
+      "name": "primary_auth_txn",
+      "type": "varchar"
+    },
+    {
+      "name": "request_agent",
+      "type": "varchar"
+    },
+    {
+      "name": "match_score",
+      "type": "varchar"
+    },
+    {
+      "name": "source_type",
+      "type": "varchar"
+    },
+    {
+      "name": "aadhaar_disp_code",
+      "type": "varchar"
+    }
+  ],
+  "t_card_printing_status": [
+    {
+      "name": "card_no",
+      "type": "varchar"
+    },
+    {
+      "name": "entity_id",
+      "type": "varchar"
+    },
+    {
+      "name": "batch_id",
+      "type": "varchar"
+    },
+    {
+      "name": "user_id",
+      "type": "varchar"
+    },
+    {
+      "name": "state_cd",
+      "type": "varchar"
+    },
+    {
+      "name": "district_cd",
+      "type": "varchar"
+    },
+    {
+      "name": "subdistrict_town",
+      "type": "varchar"
+    },
+    {
+      "name": "village_ward",
+      "type": "varchar"
+    },
+    {
+      "name": "urban_or_rural",
+      "type": "varchar"
+    },
+    {
+      "name": "card_name",
+      "type": "varchar"
+    },
+    {
+      "name": "card_fathername",
+      "type": "varchar"
+    },
+    {
+      "name": "card_relation",
+      "type": "varchar"
+    },
+    {
+      "name": "card_yob",
+      "type": "varchar"
+    },
+    {
+      "name": "card_gender",
+      "type": "varchar"
+    },
+    {
+      "name": "card_address",
+      "type": "varchar"
+    },
+    {
+      "name": "abha_no",
+      "type": "varchar"
+    },
+    {
+      "name": "card_photo",
+      "type": "varchar"
+    },
+    {
+      "name": "card_print_status",
+      "type": "varchar"
+    },
+    {
+      "name": "enroll_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "approve_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "card_gen_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "card_print_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "card_distribute_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "card_deliver_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "ben_id",
+      "type": "varchar"
+    },
+    {
+      "name": "family_id",
+      "type": "varchar"
+    },
+    {
+      "name": "age",
+      "type": "varchar"
+    },
+    {
+      "name": "source_type",
+      "type": "varchar"
+    },
+    {
+      "name": "created_by",
+      "type": "varchar"
+    },
+    {
+      "name": "created_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "updated_by",
+      "type": "varchar"
+    },
+    {
+      "name": "updated_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "mobile_number",
+      "type": "varchar"
+    },
+    {
+      "name": "operator_id",
+      "type": "varchar"
+    },
+    {
+      "name": "operator_name",
+      "type": "varchar"
+    },
+    {
+      "name": "operator_contact",
+      "type": "varchar"
+    },
+    {
+      "name": "state_name",
+      "type": "varchar"
+    },
+    {
+      "name": "district_name",
+      "type": "varchar"
+    },
+    {
+      "name": "sub_district_name",
+      "type": "varchar"
+    },
+    {
+      "name": "village_name",
+      "type": "varchar"
+    }
+  ],
+  "t_deempanelment_details": [
+    {
+      "name": "id_pk",
+      "type": "integer"
+    },
+    {
+      "name": "hosp_id",
+      "type": "integer"
+    },
+    {
+      "name": "status",
+      "type": "integer"
+    },
+    {
+      "name": "end_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "start_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "app_status",
+      "type": "integer"
+    },
+    {
+      "name": "stop_payment",
+      "type": "varchar"
+    },
+    {
+      "name": "remarks",
+      "type": "varchar"
+    },
+    {
+      "name": "attachment",
+      "type": "varchar"
+    },
+    {
+      "name": "created_by",
+      "type": "varchar"
+    },
+    {
+      "name": "created_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "updated_by",
+      "type": "varchar"
+    },
+    {
+      "name": "updated_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "type",
+      "type": "varchar"
+    },
+    {
+      "name": "reasons",
+      "type": "varchar"
+    },
+    {
+      "name": "deempanel_scheme",
+      "type": "varchar"
+    },
+    {
+      "name": "deempanel_speclity",
+      "type": "varchar"
+    },
+    {
+      "name": "due_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "documents",
+      "type": "varchar"
+    },
+    {
+      "name": "media",
+      "type": "varchar"
+    },
+    {
+      "name": "order_id",
+      "type": "integer"
+    },
+    {
+      "name": "action_applicable_days",
+      "type": "integer"
+    },
+    {
+      "name": "preauth_enable",
+      "type": "boolean"
+    }
+  ],
+  "t_hem_hospital": [
+    {
+      "name": "id_pk",
+      "type": "integer"
+    },
+    {
+      "name": "hosp_id",
+      "type": "integer"
+    },
+    {
+      "name": "hfr_hosp_id",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_name",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_address",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_city",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_pin",
+      "type": "integer"
+    },
+    {
+      "name": "state_cd",
+      "type": "smallint"
+    },
+    {
+      "name": "dist_cd",
+      "type": "smallint"
+    },
+    {
+      "name": "hosp_mobile_no",
+      "type": "bigint"
+    },
+    {
+      "name": "hosp_email_id",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_contact_no",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_website",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_rating",
+      "type": "smallint"
+    },
+    {
+      "name": "hosp_type_cd",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_empnl_type",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_longitude",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_latitude",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_gstin",
+      "type": "varchar"
+    },
+    {
+      "name": "json_obj_hosp_dtl",
+      "type": "varchar"
+    },
+    {
+      "name": "active_status",
+      "type": "integer"
+    },
+    {
+      "name": "enrl_status",
+      "type": "integer"
+    },
+    {
+      "name": "created_by",
+      "type": "varchar"
+    },
+    {
+      "name": "created_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "updated_by",
+      "type": "varchar"
+    },
+    {
+      "name": "updated_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "nodal_officer_name",
+      "type": "varchar"
+    },
+    {
+      "name": "facility_id",
+      "type": "varchar"
+    },
+    {
+      "name": "nodal_officer_number",
+      "type": "bigint"
+    },
+    {
+      "name": "type",
+      "type": "varchar"
+    },
+    {
+      "name": "hfr_facility_id",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_spec_type",
+      "type": "varchar"
+    },
+    {
+      "name": "upgrade_status",
+      "type": "integer"
+    },
+    {
+      "name": "cluster_id",
+      "type": "integer"
+    },
+    {
+      "name": "deempanel_status",
+      "type": "integer"
+    },
+    {
+      "name": "u_role",
+      "type": "varchar"
+    },
+    {
+      "name": "group_id",
+      "type": "varchar"
+    },
+    {
+      "name": "pgdnb_status",
+      "type": "varchar"
+    },
+    {
+      "name": "nodal_officer_email",
+      "type": "varchar"
+    },
+    {
+      "name": "company_name",
+      "type": "varchar"
+    },
+    {
+      "name": "cin_number",
+      "type": "varchar"
+    },
+    {
+      "name": "establishment_year",
+      "type": "varchar"
+    },
+    {
+      "name": "entity_id",
+      "type": "integer"
+    },
+    {
+      "name": "empaneled_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "hosp_type_cd_sub1",
+      "type": "varchar"
+    },
+    {
+      "name": "bed_size",
+      "type": "integer"
+    },
+    {
+      "name": "data_source",
+      "type": "varchar"
+    },
+    {
+      "name": "certificate_expiry_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "is_pv_required",
+      "type": "integer"
+    },
+    {
+      "name": "audit_status",
+      "type": "integer"
+    },
+    {
+      "name": "hbp_hospital_id",
+      "type": "varchar"
+    },
+    {
+      "name": "old_hosp_id",
+      "type": "varchar"
+    },
+    {
+      "name": "query_allowed",
+      "type": "integer"
+    }
+  ],
+  "t_hem_sch_mapping": [
+    {
+      "name": "id_pk",
+      "type": "integer"
+    },
+    {
+      "name": "hosp_id",
+      "type": "integer"
+    },
+    {
+      "name": "scheme_code",
+      "type": "varchar"
+    },
+    {
+      "name": "scheme_name",
+      "type": "varchar"
+    },
+    {
+      "name": "active_status",
+      "type": "smallint"
+    },
+    {
+      "name": "created_by",
+      "type": "varchar"
+    },
+    {
+      "name": "created_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "updated_by",
+      "type": "varchar"
+    },
+    {
+      "name": "updated_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "app_status",
+      "type": "integer"
+    },
+    {
+      "name": "data_source",
+      "type": "varchar"
+    }
+  ],
+  "t_patient_dtl": [
+    {
+      "name": "state_code",
+      "type": "smallint"
+    },
+    {
+      "name": "district_code",
+      "type": "smallint"
+    },
+    {
+      "name": "is_authenticated",
+      "type": "smallint"
+    },
+    {
+      "name": "registration_id",
+      "type": "varchar"
+    },
+    {
+      "name": "name",
+      "type": "varchar"
+    },
+    {
+      "name": "registration_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "authentication_type",
+      "type": "varchar"
+    }
+  ],
+  "t_patient_dtls": [
+    {
+      "name": "id_pk",
+      "type": "integer"
+    },
+    {
+      "name": "registration_id",
+      "type": "bigint"
+    },
+    {
+      "name": "careplan_id",
+      "type": "integer"
+    },
+    {
+      "name": "program_id",
+      "type": "varchar"
+    },
+    {
+      "name": "state_code",
+      "type": "smallint"
+    },
+    {
+      "name": "district_code",
+      "type": "smallint"
+    },
+    {
+      "name": "name",
+      "type": "varchar"
+    },
+    {
+      "name": "dob",
+      "type": "varchar"
+    },
+    {
+      "name": "gender",
+      "type": "varchar"
+    },
+    {
+      "name": "registration_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "hospital_id",
+      "type": "integer"
+    },
+    {
+      "name": "hospital_name",
+      "type": "varchar"
+    },
+    {
+      "name": "status_id",
+      "type": "smallint"
+    },
+    {
+      "name": "referral_id",
+      "type": "varchar"
+    },
+    {
+      "name": "ref_object_datavault",
+      "type": "varchar"
+    },
+    {
+      "name": "ip_op",
+      "type": "varchar"
+    },
+    {
+      "name": "consent_data",
+      "type": "smallint"
+    },
+    {
+      "name": "member_type",
+      "type": "varchar"
+    },
+    {
+      "name": "amount",
+      "type": "numeric"
+    },
+    {
+      "name": "created_by",
+      "type": "varchar"
+    },
+    {
+      "name": "created_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "updated_by",
+      "type": "varchar"
+    },
+    {
+      "name": "updated_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "case_id",
+      "type": "varchar"
+    },
+    {
+      "name": "hist_created_by",
+      "type": "varchar"
+    },
+    {
+      "name": "hist_created_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "json_object_registration",
+      "type": "varchar"
+    },
+    {
+      "name": "json_object_preauthorisation",
+      "type": "varchar"
+    },
+    {
+      "name": "json_object_claim",
+      "type": "varchar"
+    },
+    {
+      "name": "remarks",
+      "type": "varchar"
+    },
+    {
+      "name": "is_authenticated",
+      "type": "smallint"
+    },
+    {
+      "name": "authentication_type",
+      "type": "varchar"
+    },
+    {
+      "name": "authentication_value",
+      "type": "varchar"
+    },
+    {
+      "name": "admission_type",
+      "type": "varchar"
+    },
+    {
+      "name": "admission_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "surgery_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "discharge_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "m_flag",
+      "type": "smallint"
+    },
+    {
+      "name": "reason_code",
+      "type": "varchar"
+    },
+    {
+      "name": "renewal_id",
+      "type": "integer"
+    },
+    {
+      "name": "family_id",
+      "type": "varchar"
+    },
+    {
+      "name": "discharge_type",
+      "type": "varchar"
+    },
+    {
+      "name": "discharge_sub_type",
+      "type": "varchar"
+    },
+    {
+      "name": "death_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "stage",
+      "type": "varchar"
+    },
+    {
+      "name": "datalake_scheduler_flag",
+      "type": "varchar"
+    },
+    {
+      "name": "payer_name",
+      "type": "varchar"
+    },
+    {
+      "name": "renewal_code",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_bill_number",
+      "type": "varchar"
+    },
+    {
+      "name": "ben_type",
+      "type": "varchar"
+    },
+    {
+      "name": "portability",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_careplan_id",
+      "type": "integer"
+    },
+    {
+      "name": "hosp_renewal_id",
+      "type": "integer"
+    },
+    {
+      "name": "state_transition_flag",
+      "type": "varchar"
+    },
+    {
+      "name": "table_name",
+      "type": "varchar"
+    }
+  ],
+  "t_payment_dtls": [
+    {
+      "name": "id_pk",
+      "type": "integer"
+    },
+    {
+      "name": "case_id",
+      "type": "integer"
+    },
+    {
+      "name": "payment_tran_type",
+      "type": "varchar"
+    },
+    {
+      "name": "payment_type",
+      "type": "varchar"
+    },
+    {
+      "name": "payment_unique_id",
+      "type": "varchar"
+    },
+    {
+      "name": "payment_sequence_id",
+      "type": "varchar"
+    },
+    {
+      "name": "careplan_id",
+      "type": "integer"
+    },
+    {
+      "name": "src_bank_id",
+      "type": "varchar"
+    },
+    {
+      "name": "src_account_no",
+      "type": "varchar"
+    },
+    {
+      "name": "src_ifsc_code",
+      "type": "varchar"
+    },
+    {
+      "name": "ben_bank_id",
+      "type": "varchar"
+    },
+    {
+      "name": "ben_account_no",
+      "type": "varchar"
+    },
+    {
+      "name": "ben_ifsc_code",
+      "type": "varchar"
+    },
+    {
+      "name": "ben_account_name",
+      "type": "varchar"
+    },
+    {
+      "name": "ben_mail_id",
+      "type": "varchar"
+    },
+    {
+      "name": "ben_account_address",
+      "type": "varchar"
+    },
+    {
+      "name": "ben_provider_type",
+      "type": "varchar"
+    },
+    {
+      "name": "ben_provider_id",
+      "type": "varchar"
+    },
+    {
+      "name": "transaction_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "bank_transaction_type",
+      "type": "varchar"
+    },
+    {
+      "name": "transaction_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "upload_file_name",
+      "type": "varchar"
+    },
+    {
+      "name": "upload_file_path",
+      "type": "varchar"
+    },
+    {
+      "name": "payment_sent_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "reject_code",
+      "type": "varchar"
+    },
+    {
+      "name": "reject_flag",
+      "type": "varchar"
+    },
+    {
+      "name": "reject_remarks",
+      "type": "varchar"
+    },
+    {
+      "name": "payment_reject_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "paid_flag",
+      "type": "varchar"
+    },
+    {
+      "name": "payment_paid_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "paid_remarks",
+      "type": "varchar"
+    },
+    {
+      "name": "ack_flag",
+      "type": "varchar"
+    },
+    {
+      "name": "ack_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "scheduler_flag",
+      "type": "varchar"
+    },
+    {
+      "name": "created_by",
+      "type": "varchar"
+    },
+    {
+      "name": "created_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "updated_by",
+      "type": "varchar"
+    },
+    {
+      "name": "updated_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "ben_bank_branch",
+      "type": "varchar"
+    },
+    {
+      "name": "src_bank_name",
+      "type": "varchar"
+    },
+    {
+      "name": "registration_id",
+      "type": "bigint"
+    },
+    {
+      "name": "case_no",
+      "type": "varchar"
+    },
+    {
+      "name": "re_init_flag",
+      "type": "varchar"
+    },
+    {
+      "name": "state_code",
+      "type": "varchar"
+    }
+  ],
+  "t_suspicious_api_case_data": [
+    {
+      "name": "state_lgd_code",
+      "type": "varchar"
+    },
+    {
+      "name": "reference_number",
+      "type": "varchar"
+    },
+    {
+      "name": "application_type",
+      "type": "varchar"
+    },
+    {
+      "name": "lst_trigger_event_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "remarks",
+      "type": "varchar"
+    },
+    {
+      "name": "crt_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "crt_usr",
+      "type": "varchar"
+    },
+    {
+      "name": "updt_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "updt_usr",
+      "type": "varchar"
+    },
+    {
+      "name": "suspicion_id",
+      "type": "varchar"
+    },
+    {
+      "name": "entity_id",
+      "type": "varchar"
+    },
+    {
+      "name": "entity_type",
+      "type": "varchar"
+    },
+    {
+      "name": "entity_name",
+      "type": "varchar"
+    },
+    {
+      "name": "risk_score",
+      "type": "bigint"
+    },
+    {
+      "name": "medag_or_safo",
+      "type": "varchar"
+    }
+  ],
+  "t_suspicious_api_case_dtls": [
+    {
+      "name": "id_pk",
+      "type": "bigint"
+    },
+    {
+      "name": "state_lgd_code",
+      "type": "varchar"
+    },
+    {
+      "name": "reference_number",
+      "type": "varchar"
+    },
+    {
+      "name": "application_type",
+      "type": "varchar"
+    },
+    {
+      "name": "vendor_id",
+      "type": "varchar"
+    },
+    {
+      "name": "trigger_type",
+      "type": "varchar"
+    },
+    {
+      "name": "trigger_code",
+      "type": "varchar"
+    },
+    {
+      "name": "trigger_time",
+      "type": "timestamp"
+    },
+    {
+      "name": "trigger_reason",
+      "type": "varchar"
+    },
+    {
+      "name": "crt_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "crt_usr",
+      "type": "varchar"
+    },
+    {
+      "name": "flag",
+      "type": "varchar"
+    }
+  ],
+  "t_workflow_transaction_audit": [
+    {
+      "name": "id_pk",
+      "type": "integer"
+    },
+    {
+      "name": "work_id_pk",
+      "type": "integer"
+    },
+    {
+      "name": "workflow_transaction_id",
+      "type": "bigint"
+    },
+    {
+      "name": "status_id",
+      "type": "numeric"
+    },
+    {
+      "name": "service_request_type",
+      "type": "varchar"
+    },
+    {
+      "name": "json_object",
+      "type": "varchar"
+    },
+    {
+      "name": "workflow_process_code",
+      "type": "varchar"
+    },
+    {
+      "name": "remarks",
+      "type": "varchar"
+    },
+    {
+      "name": "criteria_code",
+      "type": "varchar"
+    },
+    {
+      "name": "workflow_id",
+      "type": "varchar"
+    },
+    {
+      "name": "previous_workflow_role",
+      "type": "varchar"
+    },
+    {
+      "name": "acted_workflow_user",
+      "type": "varchar"
+    },
+    {
+      "name": "version",
+      "type": "varchar"
+    },
+    {
+      "name": "final_level",
+      "type": "smallint"
+    },
+    {
+      "name": "cluster_id",
+      "type": "bigint"
+    },
+    {
+      "name": "active_flag",
+      "type": "smallint"
+    },
+    {
+      "name": "transaction_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "verified",
+      "type": "varchar"
+    },
+    {
+      "name": "time_taken_by_user",
+      "type": "numeric"
+    },
+    {
+      "name": "time_taken_at_level",
+      "type": "numeric"
+    },
+    {
+      "name": "current_entity_id",
+      "type": "varchar"
+    },
+    {
+      "name": "current_tpa_group",
+      "type": "varchar"
+    },
+    {
+      "name": "created_by",
+      "type": "varchar"
+    },
+    {
+      "name": "created_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "updated_by",
+      "type": "varchar"
+    },
+    {
+      "name": "updated_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "hist_created_by",
+      "type": "varchar"
+    },
+    {
+      "name": "hist_created_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "check_list_json",
+      "type": "varchar"
+    },
+    {
+      "name": "is_migrated",
+      "type": "varchar"
+    },
+    {
+      "name": "reason_desc",
+      "type": "varchar"
+    },
+    {
+      "name": "reason_id",
+      "type": "varchar"
+    },
+    {
+      "name": "priority",
+      "type": "integer"
+    },
+    {
+      "name": "state_cd",
+      "type": "varchar"
+    }
+  ],
+  "t_workflow_transaction_audit_hem": [
+    {
+      "name": "id_pk",
+      "type": "integer"
+    },
+    {
+      "name": "work_id_pk",
+      "type": "integer"
+    },
+    {
+      "name": "workflow_transaction_id",
+      "type": "integer"
+    },
+    {
+      "name": "status_id",
+      "type": "numeric"
+    },
+    {
+      "name": "service_request_type",
+      "type": "varchar"
+    },
+    {
+      "name": "json_object",
+      "type": "varchar"
+    },
+    {
+      "name": "workflow_process_code",
+      "type": "varchar"
+    },
+    {
+      "name": "remarks",
+      "type": "varchar"
+    },
+    {
+      "name": "criteria_code",
+      "type": "varchar"
+    },
+    {
+      "name": "workflow_id",
+      "type": "varchar"
+    },
+    {
+      "name": "previous_workflow_role",
+      "type": "varchar"
+    },
+    {
+      "name": "acted_workflow_user",
+      "type": "varchar"
+    },
+    {
+      "name": "version",
+      "type": "varchar"
+    },
+    {
+      "name": "created_by",
+      "type": "varchar"
+    },
+    {
+      "name": "created_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "updated_by",
+      "type": "varchar"
+    },
+    {
+      "name": "updated_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "hist_created_by",
+      "type": "varchar"
+    },
+    {
+      "name": "hist_created_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "final_level",
+      "type": "smallint"
+    },
+    {
+      "name": "cluster_id",
+      "type": "integer"
+    },
+    {
+      "name": "latest_rejection",
+      "type": "smallint"
+    },
+    {
+      "name": "active_flag",
+      "type": "smallint"
+    },
+    {
+      "name": "physical_report",
+      "type": "varchar"
+    },
+    {
+      "name": "attachment",
+      "type": "varchar"
+    },
+    {
+      "name": "transaction_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "admission_type",
+      "type": "varchar"
+    },
+    {
+      "name": "scheme_code",
+      "type": "varchar"
+    }
+  ],
+  "tms_recovery": [
+    {
+      "name": "hosp_disp_code",
+      "type": "varchar"
+    },
+    {
+      "name": "case_id",
+      "type": "varchar"
+    },
+    {
+      "name": "requested_recovery_amount",
+      "type": "bigint"
+    },
+    {
+      "name": "reason",
+      "type": "varchar"
+    },
+    {
+      "name": "remarks",
+      "type": "varchar"
+    },
+    {
+      "name": "created_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "tobe_recovered_amt",
+      "type": "bigint"
+    },
+    {
+      "name": "recovered_case_id",
+      "type": "varchar"
+    },
+    {
+      "name": "recovered_amt",
+      "type": "bigint"
+    },
+    {
+      "name": "recovery_date",
+      "type": "timestamp"
+    },
+    {
+      "name": "recovery_status",
+      "type": "varchar"
+    },
+    {
+      "name": "payer_id",
+      "type": "varchar"
+    },
+    {
+      "name": "state_code",
+      "type": "bigint"
+    },
+    {
+      "name": "state_name",
+      "type": "varchar"
+    }
+  ],
+  "treatment_dtls": [
+    {
+      "name": "registration_id",
+      "type": "varchar"
+    },
+    {
+      "name": "caseid",
+      "type": "varchar"
+    },
+    {
+      "name": "item_id",
+      "type": "varchar"
+    },
+    {
+      "name": "type",
+      "type": "varchar"
+    },
+    {
+      "name": "type_desc",
+      "type": "varchar"
+    },
+    {
+      "name": "date_on_which",
+      "type": "varchar"
+    },
+    {
+      "name": "procedure_id",
+      "type": "varchar"
+    },
+    {
+      "name": "procedure_code",
+      "type": "varchar"
+    },
+    {
+      "name": "procedure_name",
+      "type": "varchar"
+    },
+    {
+      "name": "procedure_strat",
+      "type": "varchar"
+    },
+    {
+      "name": "procedure_strat_name",
+      "type": "varchar"
+    },
+    {
+      "name": "stratification_amount",
+      "type": "varchar"
+    },
+    {
+      "name": "procedure_type",
+      "type": "varchar"
+    },
+    {
+      "name": "amount",
+      "type": "varchar"
+    },
+    {
+      "name": "factor",
+      "type": "varchar"
+    },
+    {
+      "name": "approved_factor",
+      "type": "varchar"
+    },
+    {
+      "name": "no_of_days",
+      "type": "bigint"
+    },
+    {
+      "name": "quantity",
+      "type": "bigint"
+    },
+    {
+      "name": "approved_quantity",
+      "type": "bigint"
+    },
+    {
+      "name": "unit_price",
+      "type": "numeric"
+    },
+    {
+      "name": "net_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "approved_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "status",
+      "type": "varchar"
+    },
+    {
+      "name": "remarks",
+      "type": "varchar"
+    },
+    {
+      "name": "reason_code",
+      "type": "varchar"
+    },
+    {
+      "name": "procedure_category_flag",
+      "type": "varchar"
+    },
+    {
+      "name": "product_service",
+      "type": "varchar"
+    }
+  ],
+  "ump_users_v": [
+    {
+      "name": "id_pk",
+      "type": "bigint"
+    },
+    {
+      "name": "user_id",
+      "type": "varchar"
+    },
+    {
+      "name": "user_name",
+      "type": "varchar"
+    },
+    {
+      "name": "mobile_number",
+      "type": "bigint"
+    },
+    {
+      "name": "email_id",
+      "type": "varchar"
+    },
+    {
+      "name": "reference_id",
+      "type": "varchar"
+    },
+    {
+      "name": "ump_user_dtl_created_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "active_status",
+      "type": "varchar"
+    },
+    {
+      "name": "user_active_status_updated_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "user_active_status_updated_by",
+      "type": "varchar"
+    },
+    {
+      "name": "last_login_time",
+      "type": "timestamp"
+    },
+    {
+      "name": "app_id",
+      "type": "integer"
+    },
+    {
+      "name": "app_name",
+      "type": "varchar"
+    },
+    {
+      "name": "entity_id",
+      "type": "integer"
+    },
+    {
+      "name": "entity_name",
+      "type": "varchar"
+    },
+    {
+      "name": "entity_id_pk",
+      "type": "integer"
+    },
+    {
+      "name": "entity_type_name",
+      "type": "varchar"
+    },
+    {
+      "name": "m_ump_entity_dtl_entity_id",
+      "type": "integer"
+    },
+    {
+      "name": "m_ump_entity_dtl_entity_name",
+      "type": "varchar"
+    },
+    {
+      "name": "state_cd",
+      "type": "smallint"
+    },
+    {
+      "name": "state_name",
+      "type": "varchar"
+    },
+    {
+      "name": "cluster_id",
+      "type": "integer"
+    },
+    {
+      "name": "district_cd",
+      "type": "integer"
+    },
+    {
+      "name": "district_name",
+      "type": "varchar"
+    },
+    {
+      "name": "role_id",
+      "type": "integer"
+    },
+    {
+      "name": "role_name",
+      "type": "varchar"
+    },
+    {
+      "name": "status",
+      "type": "varchar"
+    },
+    {
+      "name": "role_status",
+      "type": "varchar"
+    },
+    {
+      "name": "user_role_mpg_updated_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "user_role_mpg_updated_by",
+      "type": "varchar"
+    }
+  ],
+  "user_master_ump": [
+    {
+      "name": "id_pk",
+      "type": "bigint"
+    },
+    {
+      "name": "user_id",
+      "type": "varchar"
+    },
+    {
+      "name": "user_name",
+      "type": "varchar"
+    },
+    {
+      "name": "email_id",
+      "type": "varchar"
+    },
+    {
+      "name": "mobile_number",
+      "type": "bigint"
+    },
+    {
+      "name": "user_gender",
+      "type": "varchar"
+    },
+    {
+      "name": "user_state_code",
+      "type": "smallint"
+    },
+    {
+      "name": "csc_id",
+      "type": "varchar"
+    },
+    {
+      "name": "active_status",
+      "type": "varchar"
+    },
+    {
+      "name": "user_dtl_id",
+      "type": "bigint"
+    },
+    {
+      "name": "entity_id",
+      "type": "integer"
+    },
+    {
+      "name": "entity_name",
+      "type": "varchar"
+    },
+    {
+      "name": "entity_description",
+      "type": "varchar"
+    },
+    {
+      "name": "entity_state_code",
+      "type": "smallint"
+    },
+    {
+      "name": "status",
+      "type": "varchar"
+    },
+    {
+      "name": "role_status",
+      "type": "varchar"
+    },
+    {
+      "name": "role_id",
+      "type": "integer"
+    },
+    {
+      "name": "app_id",
+      "type": "integer"
+    },
+    {
+      "name": "app_description",
+      "type": "varchar"
+    },
+    {
+      "name": "app_name",
+      "type": "varchar"
+    },
+    {
+      "name": "app_status",
+      "type": "varchar"
+    },
+    {
+      "name": "role_name",
+      "type": "varchar"
+    }
+  ],
+  "workflow_users_t": [
+    {
+      "name": "table_name",
+      "type": "varchar"
+    },
+    {
+      "name": "id_pk",
+      "type": "integer"
+    },
+    {
+      "name": "registration_id",
+      "type": "varchar"
+    },
+    {
+      "name": "workflow_role",
+      "type": "varchar"
+    },
+    {
+      "name": "status_id",
+      "type": "numeric"
+    },
+    {
+      "name": "status_descrption",
+      "type": "varchar"
+    },
+    {
+      "name": "workflow_process_code",
+      "type": "varchar"
+    },
+    {
+      "name": "workflow_user",
+      "type": "varchar"
+    },
+    {
+      "name": "created_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "last_action_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "initiated_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "approved_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "transaction_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "final_level",
+      "type": "smallint"
+    },
+    {
+      "name": "active_flag",
+      "type": "smallint"
+    },
+    {
+      "name": "created_by",
+      "type": "varchar"
+    },
+    {
+      "name": "remarks",
+      "type": "varchar"
+    },
+    {
+      "name": "json_object",
+      "type": "varchar"
+    },
+    {
+      "name": "patient_state_code",
+      "type": "smallint"
+    },
+    {
+      "name": "patient_district_code",
+      "type": "smallint"
+    },
+    {
+      "name": "patient_state_name",
+      "type": "varchar"
+    },
+    {
+      "name": "patient_district_name",
+      "type": "varchar"
+    },
+    {
+      "name": "hospital_code",
+      "type": "varchar"
+    },
+    {
+      "name": "hospital_name",
+      "type": "varchar"
+    },
+    {
+      "name": "hospital_state_cd",
+      "type": "smallint"
+    },
+    {
+      "name": "hospital_district_cd",
+      "type": "smallint"
+    },
+    {
+      "name": "hosp_district_name",
+      "type": "varchar"
+    },
+    {
+      "name": "hosp_state_name",
+      "type": "varchar"
+    },
+    {
+      "name": "hospital_type",
+      "type": "varchar"
+    },
+    {
+      "name": "mobile_number",
+      "type": "bigint"
+    },
+    {
+      "name": "user_id",
+      "type": "varchar"
+    },
+    {
+      "name": "user_name",
+      "type": "varchar"
+    },
+    {
+      "name": "last_insert_dt",
+      "type": "timestamp"
+    },
+    {
+      "name": "m_flag",
+      "type": "integer"
+    },
+    {
+      "name": "dashboard_workflow_role",
+      "type": "varchar"
+    },
+    {
+      "name": "pendency_age",
+      "type": "varchar"
+    },
+    {
+      "name": "ppd_tat",
+      "type": "varchar"
+    },
+    {
+      "name": "overall_tat",
+      "type": "varchar"
+    },
+    {
+      "name": "service_request_type",
+      "type": "varchar"
+    }
+  ]
+}

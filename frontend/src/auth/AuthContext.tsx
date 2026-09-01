@@ -1,18 +1,22 @@
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
+import { useState, useCallback, useEffect, type ReactNode } from 'react'
 import type { AuthUser, LoginCredentials } from './types'
 import { authenticateUser } from './mockUsers'
+import { loginApi } from '../api/endpoints'
+import { AuthContext } from './auth-context'
 
 const STORAGE_KEY = 'dashboard_auth_user'
 
-interface AuthContextValue {
-  user: AuthUser | null
-  isAuthenticated: boolean
-  isLoading: boolean
-  login: (credentials: LoginCredentials) => Promise<{ success: boolean; error?: string; user?: AuthUser }>
-  logout: () => void
+function isValidStoredUser(parsed: unknown): parsed is AuthUser {
+  if (!parsed || typeof parsed !== 'object') return false
+  const role = (parsed as AuthUser).role
+  return (
+    role === 'super_admin' ||
+    role === 'state_admin' ||
+    role === 'bis_user' ||
+    role === 'mp_user' ||
+    role === 'ump_user'
+  )
 }
-
-const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
@@ -23,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (stored) {
       try {
         const parsed = JSON.parse(stored)
-        if (parsed && parsed.role && (parsed.role === 'super_admin' || parsed.role === 'state_admin' || parsed.role === 'bis_user' || parsed.role === 'mp_user' || parsed.role === 'ump_user')) {
+        if (isValidStoredUser(parsed)) {
           setUser(parsed)
         } else {
           localStorage.removeItem(STORAGE_KEY)
@@ -36,14 +40,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const login = useCallback(async (credentials: LoginCredentials) => {
-    await new Promise((r) => setTimeout(r, 400))
+    const apiResult = await loginApi(credentials.username, credentials.password, credentials.role)
+    if (apiResult.ok) {
+      const authUser = apiResult.data.user
+      setUser(authUser)
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(authUser))
+      return { success: true, user: authUser }
+    }
+
     const authUser = authenticateUser(
       credentials.username,
       credentials.password,
       credentials.role
     )
     if (!authUser) {
-      return { success: false, error: 'Invalid username, password, or role' }
+      return { success: false, error: apiResult.error || 'Invalid username, password, or role' }
     }
     setUser(authUser)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(authUser))
@@ -64,8 +75,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 }
 
-export function useAuth() {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
-  return ctx
-}
+export { useAuth } from './auth-context'

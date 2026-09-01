@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react'
-import { X, Search, RotateCcw, Table as TableIcon, Filter, CheckCircle2, AlertCircle, XCircle } from 'lucide-react'
-import { getConnectedDataset, type ConnectedDataset } from '../../data/connectedDemoData'
+import { useState, useMemo, useEffect } from 'react'
+import { X, Search, RotateCcw, Table as TableIcon, Filter, CheckCircle2, AlertCircle, XCircle, Loader2 } from 'lucide-react'
+import type { ConnectedDataset } from '../../data/connectedDemoData'
 import { useGlobalFilters } from '../../context/FilterContext'
 import { DIVISION_OPTIONS, getDistrictsForDivision, getDivisionForDistrict } from '../../data/filterOptions'
 import ExportDropdown from './ExportDropdown'
@@ -8,11 +8,73 @@ import ColumnSelector from './ColumnSelector'
 import TablePagination from './TablePagination'
 import DateRangeFilter, { rowMatchesDateRange } from './DateRangeFilter'
 import { useTableControls } from '../../hooks/useTableControls'
+import type { TableColumn } from '../../types'
+import { preferPatientGeoOrder } from '../../utils/schemaColumns'
+import { formatCodedField, isCodedColumn } from '../../utils/beneficiaryCodes'
 
 export interface DrillDownDetail {
   title: string
   subtitle?: string
   data?: Record<string, string | number | undefined>
+  records?: Record<string, string | number>[]
+  columns?: TableColumn[]
+  datasetTitle?: string
+  source?: 'api' | 'demo'
+  loading?: boolean
+  /** Pre-select modal filters from chart/KPI click. */
+  appliedFilters?: {
+    division?: string
+    district?: string
+    patient_state?: string
+    status?: string
+    search?: string
+    dateFrom?: string
+    dateTo?: string
+  }
+}
+
+const DIVISION_FIELDS = ['division', '_division']
+const PATIENT_STATE_FIELDS = ['patient_state_name', '_patient_state']
+const PATIENT_DISTRICT_FIELDS = ['patient_district_name', '_patient_district']
+
+const DISTRICT_FIELDS = [
+  'patient_district_name',
+  '_patient_district',
+  '_district',
+  'district',
+  'district_name',
+  'dist_name',
+  'hosp_district_name',
+  'sub_district_name',
+]
+
+const STATUS_FIELDS = [
+  'status',
+  'case_status',
+  'enrl_status',
+  'card_print_status',
+  'print_status',
+  'ekyc',
+  'active_status',
+  'ab_pmjay_status',
+  'abdm_status',
+]
+
+function columnLabel(key: string): string {
+  if (key === 'division' || key === '_division') return 'Division'
+  if (key === 'patient_district_name') return 'District'
+  if (key === 'empaneled_date' || key === 'hosp_empaneled_date') return 'Empaneled On'
+  if (key === 'deempanel_date' || key === 'deempaneled_date') return 'De-empanelment Date'
+  if (key === 'deempanel_status') return 'De-empanelment Status'
+  return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+function rowField(row: Record<string, string | number>, fields: string[]): string {
+  for (const key of fields) {
+    const val = row[key]
+    if (val != null && String(val).trim() !== '') return String(val)
+  }
+  return ''
 }
 
 interface DetailModalProps {
@@ -29,17 +91,99 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
 
+  useEffect(() => {
+    if (!detail || detail.loading) return
+
+    const applied = detail.appliedFilters
+    setSearchTerm(applied?.search ?? '')
+    setStatusFilter(applied?.status ?? 'ALL')
+    setDivisionFilter(applied?.patient_state || applied?.division || 'ALL')
+    setDistrictFilter(applied?.district ?? 'ALL')
+    setDateFrom(applied?.dateFrom ?? '')
+    setDateTo(applied?.dateTo ?? '')
+  }, [detail?.title, detail?.subtitle, detail?.records, detail?.loading, detail?.appliedFilters])
+
   const dataset: ConnectedDataset | null = useMemo(() => {
-    if (!detail) return null
-    return getConnectedDataset(detail.title, detail.subtitle)
+    if (!detail || detail.loading) return null
+    if (detail.records && detail.columns) {
+      return {
+        title: detail.datasetTitle ?? detail.subtitle ?? 'Filtered Records',
+        subtitle: detail.subtitle
+          ? `${detail.title} · ${detail.subtitle}`
+          : detail.title,
+        columns: detail.columns.map((c) => ({ key: c.key, label: c.label })),
+        records: detail.records,
+      }
+    }
+    // Single-row payload from live click — never fall back to hardcoded demo datasets
+    if (detail.data && Object.keys(detail.data).length > 0) {
+      const row = detail.data as Record<string, string | number>
+      const keys = Object.keys(row)
+      return {
+        title: detail.datasetTitle ?? detail.title,
+        subtitle: detail.subtitle ?? 'Record detail',
+        columns: preferPatientGeoOrder(keys).map((key) => ({
+          key,
+          label: columnLabel(key),
+        })),
+        records: [row],
+      }
+    }
+    return {
+      title: detail.title,
+      subtitle: detail.subtitle ?? 'No backend records for this selection',
+      columns: [],
+      records: [],
+    }
   }, [detail])
 
+  const usesPatientGeo = useMemo(() => {
+    if (!dataset) return false
+    return (
+      dataset.columns.some((c) => c.key === 'patient_state_name' || c.key === 'patient_district_name') ||
+      dataset.records.some((r) => r.patient_state_name != null || r.patient_district_name != null)
+    )
+  }, [dataset])
+
+  const patientStateOptions = useMemo(() => {
+    if (!dataset) return []
+    const names = new Set<string>()
+    for (const rec of dataset.records) {
+      const mapped =
+        rowField(rec, DIVISION_FIELDS) || getDivisionForDistrict(rowField(rec, PATIENT_DISTRICT_FIELDS) || rowField(rec, DISTRICT_FIELDS))
+      if (mapped) names.add(mapped)
+    }
+    if (names.size) return [...names].sort((a, b) => a.localeCompare(b))
+    return []
+  }, [dataset])
+
   const dynamicDistricts = useMemo(() => {
+    if (usesPatientGeo && dataset) {
+      const names = new Set<string>()
+      for (const rec of dataset.records) {
+        if (divisionFilter !== 'ALL') {
+          const mapped =
+            rowField(rec, DIVISION_FIELDS) ||
+            getDivisionForDistrict(rowField(rec, PATIENT_DISTRICT_FIELDS) || rowField(rec, DISTRICT_FIELDS))
+          if ((mapped || '').toLowerCase() !== divisionFilter.toLowerCase()) continue
+        }
+        const name = rowField(rec, PATIENT_DISTRICT_FIELDS) || rowField(rec, DISTRICT_FIELDS)
+        if (name) names.add(name)
+      }
+      return [
+        { value: '', label: 'All Districts' },
+        ...[...names].sort((a, b) => a.localeCompare(b)).map((d) => ({ value: d, label: d })),
+      ]
+    }
     return getDistrictsForDivision(divisionFilter === 'ALL' ? '' : divisionFilter)
-  }, [divisionFilter])
+  }, [dataset, usesPatientGeo, divisionFilter])
 
   const handleDivisionChange = (divVal: string) => {
     setDivisionFilter(divVal)
+    if (usesPatientGeo) {
+      setDistrictFilter('ALL')
+      return
+    }
     if (divVal !== 'ALL' && districtFilter !== 'ALL') {
       const allowed = getDistrictsForDivision(divVal).map((d) => d.value)
       if (!allowed.includes(districtFilter)) {
@@ -50,6 +194,7 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
 
   const handleDistrictChange = (distVal: string) => {
     setDistrictFilter(distVal)
+    if (usesPatientGeo) return
     if (distVal !== 'ALL' && divisionFilter === 'ALL') {
       const parentDiv = getDivisionForDistrict(distVal)
       if (parentDiv) {
@@ -65,24 +210,34 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
         String(val).toLowerCase().includes(searchTerm.toLowerCase().trim())
       )
 
-      const recStatus = String(rec.status || rec.ekyc || rec.print_status || '').toLowerCase()
+      const recStatus = rowField(rec, STATUS_FIELDS).toLowerCase()
       const matchStatus =
         statusFilter === 'ALL' || recStatus.includes(statusFilter.toLowerCase())
 
-      const recDistrict = String(rec.district || '')
-      const recDivision = String(rec.division || getDivisionForDistrict(recDistrict) || '')
+      const recDistrict = usesPatientGeo
+        ? rowField(rec, PATIENT_DISTRICT_FIELDS) || rowField(rec, DISTRICT_FIELDS)
+        : rowField(rec, DISTRICT_FIELDS)
+      const recDivision =
+        rowField(rec, DIVISION_FIELDS) ||
+        getDivisionForDistrict(recDistrict) ||
+        (usesPatientGeo ? rowField(rec, PATIENT_STATE_FIELDS) : '')
 
       const matchDivision =
-        divisionFilter === 'ALL' || recDivision.toLowerCase() === divisionFilter.toLowerCase()
+        divisionFilter === 'ALL' ||
+        !recDivision ||
+        recDivision.toLowerCase() === divisionFilter.toLowerCase()
 
       const matchDistrict =
-        districtFilter === 'ALL' || recDistrict.toLowerCase() === districtFilter.toLowerCase()
+        districtFilter === 'ALL' ||
+        !recDistrict ||
+        recDistrict.toLowerCase() === districtFilter.toLowerCase() ||
+        recDistrict.toLowerCase().includes(districtFilter.toLowerCase())
 
       const matchDate = rowMatchesDateRange(rec, dateFrom, dateTo)
 
       return matchSearch && matchStatus && matchDivision && matchDistrict && matchDate
     })
-  }, [dataset, searchTerm, statusFilter, divisionFilter, districtFilter, dateFrom, dateTo])
+  }, [dataset, searchTerm, statusFilter, divisionFilter, districtFilter, dateFrom, dateTo, usesPatientGeo])
 
   const {
     visibleColumns,
@@ -100,7 +255,23 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
 
   const pageRecords = paginate(filteredRecords)
 
-  if (!detail || !dataset) return null
+  if (!detail) return null
+
+  if (detail.loading) {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
+        <div className="relative flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white px-10 py-8 shadow-2xl">
+          <Loader2 className="h-8 w-8 animate-spin text-[#2d8a4e]" />
+          <p className="text-sm font-medium text-slate-600">Loading records from backend…</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!dataset) return null
+
+  const isLive = detail.source === 'api'
 
   const handleClearFilters = () => {
     setSearchTerm('')
@@ -134,11 +305,11 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-bold text-slate-900 leading-snug">{dataset.title}</h3>
                 <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#2d8a4e]/10 text-[#2d8a4e] border border-[#2d8a4e]/20">
-                  {filteredRecords.length} Connected Records
+                  {filteredRecords.length} {isLive ? 'Live Records' : 'Connected Records'}
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {detail.title} — {dataset.subtitle}
+              <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                {dataset.subtitle}
               </p>
             </div>
           </div>
@@ -200,7 +371,7 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
               className="text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 outline-none focus:border-[#2d8a4e]"
             >
               <option value="ALL">All Divisions</option>
-              {DIVISION_OPTIONS.filter((d) => d.value).map((d) => (
+              {(usesPatientGeo ? patientStateOptions.map((name) => ({ value: name, label: name })) : DIVISION_OPTIONS.filter((d) => d.value)).map((d) => (
                 <option key={d.value} value={d.value}>
                   {d.label}
                 </option>
@@ -262,7 +433,9 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
                     <tr key={startIndex + idx} className="transition-colors hover:bg-slate-50/80">
                       {visibleColumns.map((col) => {
                       const val = row[col.key]
-                      const textVal = String(val ?? '—')
+                      const textVal = isCodedColumn(col.key)
+                        ? formatCodedField(col.key, val) || '—'
+                        : String(val ?? '—')
 
                       // Badge formatting for status-like fields
                       if (col.key === 'status' || col.key === 'ekyc' || col.key === 'print_status') {
@@ -345,7 +518,8 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
             <span className="font-bold text-slate-800">
               {filteredRecords.length === 0 ? 0 : startIndex + 1}–{endIndex}
             </span>{' '}
-            of <span className="font-bold text-slate-800">{filteredRecords.length}</span> connected SQL records
+            of <span className="font-bold text-slate-800">{filteredRecords.length}</span>{' '}
+            {isLive ? 'backend records' : 'connected SQL records'}
             {showPagination && <span className="text-slate-400"> · 200 per page</span>}
           </p>
 

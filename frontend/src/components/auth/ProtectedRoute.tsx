@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { useAuth } from '../../auth/AuthContext'
+import { useAuth } from '../../auth/auth-context'
 import { canAccessRoute } from '../../auth/permissions'
 import { getDefaultRouteForRole } from '../../auth/mockUsers'
 

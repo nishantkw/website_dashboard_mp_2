@@ -2,9 +2,15 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App'
+import { AuthProvider } from './auth/AuthContext'
+import { FilterProvider } from './context/FilterContext'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <AuthProvider>
+      <FilterProvider>
+        <App />
+      </FilterProvider>
+    </AuthProvider>
   </StrictMode>,
 )

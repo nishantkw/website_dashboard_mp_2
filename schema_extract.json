@@ -1,0 +1,1104 @@
+{
+  "user_master_ump": [
+    {
+      "name": "id_pk",
+      "type": "integer"
+    },
+    {
+      "name": "user_id",
+      "type": "bigint"
+    },
+    {
+      "name": "user_name",
+      "type": "numeric"
+    },
+    {
+      "name": "email_id",
+      "type": "text"
+    },
+    {
+      "name": "mobile_number",
+      "type": "text"
+    },
+    {
+      "name": "user_gender",
+      "type": "text"
+    },
+    {
+      "name": "user_state_code",
+      "type": "text"
+    },
+    {
+      "name": "csc_id",
+      "type": "text"
+    },
+    {
+      "name": "active_status",
+      "type": "text"
+    },
+    {
+      "name": "user_dtl_id",
+      "type": "text"
+    },
+    {
+      "name": "entity_id",
+      "type": "text"
+    },
+    {
+      "name": "entity_name",
+      "type": "text"
+    },
+    {
+      "name": "entity_description",
+      "type": "text"
+    },
+    {
+      "name": "entity_state_code",
+      "type": "text"
+    },
+    {
+      "name": "status",
+      "type": "text"
+    },
+    {
+      "name": "role_status",
+      "type": "text"
+    },
+    {
+      "name": "role_id",
+      "type": "text"
+    },
+    {
+      "name": "app_id",
+      "type": "text"
+    },
+    {
+      "name": "app_description",
+      "type": "text"
+    },
+    {
+      "name": "app_name",
+      "type": "text"
+    },
+    {
+      "name": "app_status",
+      "type": "text"
+    },
+    {
+      "name": "role_name",
+      "type": "text"
+    }
+  ],
+  "t_bis_beneficiary_dtls": [
+    {
+      "name": "id_pk",
+      "type": "bigint"
+    },
+    {
+      "name": "ben_id",
+      "type": "text"
+    },
+    {
+      "name": "family_id",
+      "type": "text"
+    },
+    {
+      "name": "member_id",
+      "type": "text"
+    },
+    {
+      "name": "bis_family_id",
+      "type": "text"
+    },
+    {
+      "name": "bis_member_id",
+      "type": "text"
+    },
+    {
+      "name": "ben_ref_id",
+      "type": "text"
+    },
+    {
+      "name": "state_cd",
+      "type": "text"
+    },
+    {
+      "name": "dist_cd",
+      "type": "text"
+    },
+    {
+      "name": "block_id",
+      "type": "text"
+    },
+    {
+      "name": "village_id",
+      "type": "text"
+    },
+    {
+      "name": "rural_urban_flag",
+      "type": "text"
+    },
+    {
+      "name": "house_no",
+      "type": "text"
+    },
+    {
+      "name": "pincode",
+      "type": "text"
+    },
+    {
+      "name": "address",
+      "type": "text"
+    },
+    {
+      "name": "dist_name",
+      "type": "text"
+    },
+    {
+      "name": "state_name",
+      "type": "text"
+    },
+    {
+      "name": "ben_mobile_no",
+      "type": "text"
+    },
+    {
+      "name": "ben_email_id",
+      "type": "text"
+    },
+    {
+      "name": "json_obj_ben_source_dtl",
+      "type": "text"
+    },
+    {
+      "name": "json_obj_ben_ekyc_dtl",
+      "type": "text"
+    },
+    {
+      "name": "obj_aadhar_vault",
+      "type": "text"
+    },
+    {
+      "name": "active_status",
+      "type": "smallint"
+    },
+    {
+      "name": "enrl_status",
+      "type": "text"
+    },
+    {
+      "name": "created_by",
+      "type": "text"
+    },
+    {
+      "name": "created_dt",
+      "type": "timestamptz"
+    },
+    {
+      "name": "updated_by",
+      "type": "text"
+    },
+    {
+      "name": "updated_dt",
+      "type": "timestamptz"
+    },
+    {
+      "name": "abha_id",
+      "type": "text"
+    },
+    {
+      "name": "payer_id",
+      "type": "bigint"
+    },
+    {
+      "name": "tpa_isa_id",
+      "type": "bigint"
+    },
+    {
+      "name": "json_obj_ben_othr_dtl",
+      "type": "text"
+    },
+    {
+      "name": "src_flag",
+      "type": "text"
+    },
+    {
+      "name": "aadhaar_no",
+      "type": "text"
+    },
+    {
+      "name": "enrol_status",
+      "type": "bigint"
+    },
+    {
+      "name": "entity_id",
+      "type": "text"
+    },
+    {
+      "name": "card_no",
+      "type": "text"
+    },
+    {
+      "name": "photo",
+      "type": "text"
+    },
+    {
+      "name": "relation",
+      "type": "text"
+    },
+    {
+      "name": "auth_mode",
+      "type": "text"
+    },
+    {
+      "name": "primary_auth_mode",
+      "type": "text"
+    },
+    {
+      "name": "new_member_flag",
+      "type": "text"
+    },
+    {
+      "name": "gender",
+      "type": "text"
+    },
+    {
+      "name": "year_of_birth",
+      "type": "text"
+    },
+    {
+      "name": "name",
+      "type": "text"
+    },
+    {
+      "name": "father_name",
+      "type": "text"
+    },
+    {
+      "name": "age",
+      "type": "text"
+    },
+    {
+      "name": "primary_ben_id",
+      "type": "text"
+    },
+    {
+      "name": "approve_date",
+      "type": "timestamptz"
+    },
+    {
+      "name": "enrol_date",
+      "type": "timestamptz"
+    },
+    {
+      "name": "card_status",
+      "type": "text"
+    },
+    {
+      "name": "aadhar_status",
+      "type": "text"
+    },
+    {
+      "name": "reject_date",
+      "type": "timestamptz"
+    },
+    {
+      "name": "date_of_birth",
+      "type": "text"
+    },
+    {
+      "name": "scheme_code",
+      "type": "text"
+    },
+    {
+      "name": "request_type",
+      "type": "text"
+    },
+    {
+      "name": "auth_txn",
+      "type": "text"
+    },
+    {
+      "name": "primary_auth_txn",
+      "type": "text"
+    },
+    {
+      "name": "request_agent",
+      "type": "text"
+    },
+    {
+      "name": "match_score",
+      "type": "text"
+    },
+    {
+      "name": "source_type",
+      "type": "text"
+    },
+    {
+      "name": "aadhaar_disp_code",
+      "type": "text"
+    },
+    {
+      "name": "yob_secc",
+      "type": "text"
+    }
+  ],
+  "t_workflow_transaction_audit": [
+    {
+      "name": "work_id_pk",
+      "type": "integer"
+    },
+    {
+      "name": "workflow_transaction_id",
+      "type": "bigint"
+    },
+    {
+      "name": "status_id",
+      "type": "numeric"
+    },
+    {
+      "name": "service_request_type",
+      "type": "text"
+    },
+    {
+      "name": "json_object",
+      "type": "text"
+    },
+    {
+      "name": "workflow_process_code",
+      "type": "text"
+    },
+    {
+      "name": "remarks",
+      "type": "text"
+    },
+    {
+      "name": "criteria_code",
+      "type": "text"
+    },
+    {
+      "name": "workflow_id",
+      "type": "text"
+    },
+    {
+      "name": "previous_workflow_role",
+      "type": "text"
+    },
+    {
+      "name": "acted_workflow_user",
+      "type": "text"
+    },
+    {
+      "name": "version",
+      "type": "text"
+    },
+    {
+      "name": "final_level",
+      "type": "smallint"
+    },
+    {
+      "name": "cluster_id",
+      "type": "bigint"
+    },
+    {
+      "name": "active_flag",
+      "type": "smallint"
+    },
+    {
+      "name": "transaction_dt",
+      "type": "timestamptz"
+    },
+    {
+      "name": "verified",
+      "type": "text"
+    },
+    {
+      "name": "time_taken_by_user",
+      "type": "numeric"
+    },
+    {
+      "name": "time_taken_at_level",
+      "type": "numeric"
+    },
+    {
+      "name": "current_entity_id",
+      "type": "text"
+    },
+    {
+      "name": "current_tpa_group",
+      "type": "text"
+    },
+    {
+      "name": "created_by",
+      "type": "text"
+    },
+    {
+      "name": "created_dt",
+      "type": "timestamptz"
+    },
+    {
+      "name": "updated_by",
+      "type": "text"
+    },
+    {
+      "name": "updated_dt",
+      "type": "timestamptz"
+    },
+    {
+      "name": "hist_created_by",
+      "type": "text"
+    },
+    {
+      "name": "hist_created_dt",
+      "type": "timestamptz"
+    },
+    {
+      "name": "check_list_json",
+      "type": "text"
+    },
+    {
+      "name": "is_migrated",
+      "type": "text"
+    },
+    {
+      "name": "reason_desc",
+      "type": "text"
+    },
+    {
+      "name": "reason_id",
+      "type": "text"
+    },
+    {
+      "name": "priority",
+      "type": "integer"
+    }
+  ],
+  "claim_paid_excel_t": [
+    {
+      "name": "registration_id",
+      "type": "integer"
+    },
+    {
+      "name": "case_id",
+      "type": "text"
+    },
+    {
+      "name": "member_id",
+      "type": "text"
+    },
+    {
+      "name": "family_id",
+      "type": "text"
+    },
+    {
+      "name": "patient_name",
+      "type": "text"
+    },
+    {
+      "name": "patient_dob",
+      "type": "text"
+    },
+    {
+      "name": "patient_state_code",
+      "type": "smallint"
+    },
+    {
+      "name": "patient_district_code",
+      "type": "smallint"
+    },
+    {
+      "name": "patient_district_name",
+      "type": "text"
+    },
+    {
+      "name": "patient_state_name",
+      "type": "text"
+    },
+    {
+      "name": "gender",
+      "type": "text"
+    },
+    {
+      "name": "age",
+      "type": "numeric"
+    },
+    {
+      "name": "policy_code",
+      "type": "text"
+    },
+    {
+      "name": "renewal_code",
+      "type": "text"
+    },
+    {
+      "name": "category_details",
+      "type": "text"
+    },
+    {
+      "name": "speciality_code",
+      "type": "text"
+    },
+    {
+      "name": "procedure_details",
+      "type": "text"
+    },
+    {
+      "name": "procedure_code",
+      "type": "text"
+    },
+    {
+      "name": "case_type",
+      "type": "text"
+    },
+    {
+      "name": "status_id_pk",
+      "type": "integer"
+    },
+    {
+      "name": "case_status",
+      "type": "text"
+    },
+    {
+      "name": "hospital_code",
+      "type": "text"
+    },
+    {
+      "name": "hospital_name",
+      "type": "text"
+    },
+    {
+      "name": "hosp_district_name",
+      "type": "text"
+    },
+    {
+      "name": "hosp_state_name",
+      "type": "text"
+    },
+    {
+      "name": "hospital_state_cd",
+      "type": "smallint"
+    },
+    {
+      "name": "hospital_district_cd",
+      "type": "smallint"
+    },
+    {
+      "name": "hosp_pan_number",
+      "type": "text"
+    },
+    {
+      "name": "hospital_type",
+      "type": "text"
+    },
+    {
+      "name": "admission_dt",
+      "type": "timestamptz"
+    },
+    {
+      "name": "preauth_init_date",
+      "type": "timestamptz"
+    },
+    {
+      "name": "amount_preauth_initiated",
+      "type": "numeric"
+    },
+    {
+      "name": "preauth_approved_date",
+      "type": "timestamptz"
+    },
+    {
+      "name": "amount_preauth_approved",
+      "type": "numeric"
+    },
+    {
+      "name": "preauth_rejected_date",
+      "type": "timestamptz"
+    },
+    {
+      "name": "surgery_dt",
+      "type": "timestamptz"
+    },
+    {
+      "name": "death_dt",
+      "type": "timestamptz"
+    },
+    {
+      "name": "discharge_dt",
+      "type": "timestamptz"
+    },
+    {
+      "name": "claim_init_date",
+      "type": "timestamptz"
+    },
+    {
+      "name": "amount_claim_initiated",
+      "type": "numeric"
+    },
+    {
+      "name": "amount_claim_approved",
+      "type": "numeric"
+    },
+    {
+      "name": "amount_claim_paid",
+      "type": "numeric"
+    },
+    {
+      "name": "claim_rejected_date",
+      "type": "timestamptz"
+    },
+    {
+      "name": "rf_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "tds_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "utr_no",
+      "type": "text"
+    },
+    {
+      "name": "payment_paid_dt",
+      "type": "timestamptz"
+    },
+    {
+      "name": "transaction_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "cpd_approved_date",
+      "type": "timestamptz"
+    },
+    {
+      "name": "cpd_approved_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "cpd_user",
+      "type": "text"
+    },
+    {
+      "name": "aco_approved_date",
+      "type": "timestamptz"
+    },
+    {
+      "name": "aco_approved_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "aco_user",
+      "type": "text"
+    },
+    {
+      "name": "sha_approved_date",
+      "type": "timestamptz"
+    },
+    {
+      "name": "sha_approved_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "sha_user",
+      "type": "text"
+    },
+    {
+      "name": "json_object_perauth",
+      "type": "text"
+    },
+    {
+      "name": "json_object_claim",
+      "type": "text"
+    },
+    {
+      "name": "json_object_ben",
+      "type": "text"
+    },
+    {
+      "name": "last_insert_dt",
+      "type": "timestamptz"
+    },
+    {
+      "name": "src_account_no",
+      "type": "text"
+    },
+    {
+      "name": "src_ifsc_code",
+      "type": "text"
+    },
+    {
+      "name": "paid_flag",
+      "type": "text"
+    },
+    {
+      "name": "hosp_account_number",
+      "type": "text"
+    },
+    {
+      "name": "ben_ifsc_code",
+      "type": "text"
+    },
+    {
+      "name": "current_workflow_role",
+      "type": "text"
+    },
+    {
+      "name": "current_workflow_user",
+      "type": "text"
+    },
+    {
+      "name": "service_request_type",
+      "type": "text"
+    },
+    {
+      "name": "m_flag",
+      "type": "integer"
+    },
+    {
+      "name": "careplan_desc",
+      "type": "text"
+    },
+    {
+      "name": "discharge_type",
+      "type": "text"
+    },
+    {
+      "name": "admission_type",
+      "type": "text"
+    },
+    {
+      "name": "claim_approved_date",
+      "type": "timestamptz"
+    },
+    {
+      "name": "preauth_tat",
+      "type": "bigint"
+    },
+    {
+      "name": "claim_tat",
+      "type": "bigint"
+    },
+    {
+      "name": "payment_tat",
+      "type": "bigint"
+    },
+    {
+      "name": "patient_mobile_number",
+      "type": "text"
+    }
+  ],
+  "workflow_users_t": [
+    {
+      "name": "table_name",
+      "type": "text"
+    },
+    {
+      "name": "id_pk",
+      "type": "integer"
+    },
+    {
+      "name": "registration_id",
+      "type": "text"
+    },
+    {
+      "name": "workflow_role",
+      "type": "text"
+    },
+    {
+      "name": "status_id",
+      "type": "numeric"
+    },
+    {
+      "name": "status_descrption",
+      "type": "text"
+    },
+    {
+      "name": "workflow_process_code",
+      "type": "text"
+    },
+    {
+      "name": "workflow_user",
+      "type": "text"
+    },
+    {
+      "name": "created_dt",
+      "type": "timestamptz"
+    },
+    {
+      "name": "last_action_dt",
+      "type": "timestamptz"
+    },
+    {
+      "name": "initiated_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "approved_amount",
+      "type": "numeric"
+    },
+    {
+      "name": "transaction_dt",
+      "type": "timestamptz"
+    },
+    {
+      "name": "final_level",
+      "type": "smallint"
+    },
+    {
+      "name": "active_flag",
+      "type": "smallint"
+    },
+    {
+      "name": "created_by",
+      "type": "text"
+    },
+    {
+      "name": "remarks",
+      "type": "text"
+    },
+    {
+      "name": "json_object",
+      "type": "text"
+    },
+    {
+      "name": "patient_state_code",
+      "type": "smallint"
+    },
+    {
+      "name": "patient_district_code",
+      "type": "smallint"
+    },
+    {
+      "name": "patient_state_name",
+      "type": "text"
+    },
+    {
+      "name": "patient_district_name",
+      "type": "text"
+    },
+    {
+      "name": "hospital_code",
+      "type": "text"
+    },
+    {
+      "name": "hospital_name",
+      "type": "text"
+    },
+    {
+      "name": "hospital_state_cd",
+      "type": "smallint"
+    },
+    {
+      "name": "hospital_district_cd",
+      "type": "smallint"
+    },
+    {
+      "name": "hosp_district_name",
+      "type": "text"
+    },
+    {
+      "name": "hosp_state_name",
+      "type": "text"
+    },
+    {
+      "name": "hospital_type",
+      "type": "text"
+    },
+    {
+      "name": "mobile_number",
+      "type": "bigint"
+    },
+    {
+      "name": "user_id",
+      "type": "text"
+    },
+    {
+      "name": "user_name",
+      "type": "text"
+    },
+    {
+      "name": "last_insert_dt",
+      "type": "timestamptz"
+    },
+    {
+      "name": "m_flag",
+      "type": "integer"
+    },
+    {
+      "name": "dashboard_workflow_role",
+      "type": "text"
+    },
+    {
+      "name": "pendency_age",
+      "type": "text"
+    },
+    {
+      "name": "ppd_tat",
+      "type": "text"
+    },
+    {
+      "name": "overall_tat",
+      "type": "text"
+    }
+  ],
+  "ump_user_dtl": [
+    {
+      "name": "id_pk",
+      "type": "bigint"
+    },
+    {
+      "name": "active_yn",
+      "type": "smallint"
+    },
+    {
+      "name": "obj_aadhar_vault",
+      "type": "text"
+    },
+    {
+      "name": "created_by",
+      "type": "text"
+    },
+    {
+      "name": "created_dt",
+      "type": "timestamptz"
+    },
+    {
+      "name": "email_id",
+      "type": "text"
+    },
+    {
+      "name": "last_login_time",
+      "type": "timestamptz"
+    },
+    {
+      "name": "lock_yn",
+      "type": "smallint"
+    },
+    {
+      "name": "mobile_number",
+      "type": "bigint"
+    },
+    {
+      "name": "updated_by",
+      "type": "text"
+    },
+    {
+      "name": "updated_dt",
+      "type": "timestamptz"
+    },
+    {
+      "name": "user_age",
+      "type": "smallint"
+    },
+    {
+      "name": "user_gender",
+      "type": "text"
+    },
+    {
+      "name": "user_id",
+      "type": "text"
+    },
+    {
+      "name": "user_name",
+      "type": "text"
+    },
+    {
+      "name": "user_state_code",
+      "type": "smallint"
+    },
+    {
+      "name": "user_dob",
+      "type": "text"
+    },
+    {
+      "name": "reference_id",
+      "type": "text"
+    },
+    {
+      "name": "default_authmode",
+      "type": "integer"
+    },
+    {
+      "name": "failed_attempts",
+      "type": "integer"
+    },
+    {
+      "name": "present_address",
+      "type": "text"
+    },
+    {
+      "name": "aadhaar_address",
+      "type": "text"
+    },
+    {
+      "name": "language",
+      "type": "text"
+    },
+    {
+      "name": "user_enrollment",
+      "type": "text"
+    },
+    {
+      "name": "user_designation",
+      "type": "text"
+    },
+    {
+      "name": "otp_failed_updation",
+      "type": "timestamptz"
+    },
+    {
+      "name": "otp_failed_count",
+      "type": "integer"
+    },
+    {
+      "name": "aadhaar_display_code",
+      "type": "text"
+    },
+    {
+      "name": "ekyc_flag",
+      "type": "text"
+    },
+    {
+      "name": "csc_id",
+      "type": "text"
+    }
+  ],
+  "ump_role_dtl": [
+    {
+      "name": "role_id",
+      "type": "integer"
+    },
+    {
+      "name": "created_by",
+      "type": "text"
+    },
+    {
+      "name": "created_dt",
+      "type": "timestamptz"
+    },
+    {
+      "name": "role_description",
+      "type": "text"
+    },
+    {
+      "name": "role_name",
+      "type": "text"
+    },
+    {
+      "name": "updated_by",
+      "type": "text"
+    },
+    {
+      "name": "updated_dt",
+      "type": "timestamptz"
+    },
+    {
+      "name": "workflow_applicable",
+      "type": "smallint"
+    },
+    {
+      "name": "status",
+      "type": "text"
+    }
+  ]
+}

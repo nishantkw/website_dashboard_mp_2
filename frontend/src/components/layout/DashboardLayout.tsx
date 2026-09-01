@@ -4,7 +4,7 @@ import GovernmentHeader from './GovernmentHeader'
 import Sidebar, { MobileMenuButton } from './Sidebar'
 import GlobalFilterBar from './GlobalFilterBar'
 import { Search, User, LogOut } from 'lucide-react'
-import { useAuth } from '../../auth/AuthContext'
+import { useAuth } from '../../auth/auth-context'
 import { ROLE_LABELS } from '../../auth/types'
 
 export default function DashboardLayout() {
@@ -15,7 +15,33 @@ export default function DashboardLayout() {
 
   const isUserManagementPage = location.pathname.includes('/user-management')
   const isImportPage = location.pathname.includes('/import-bulk-data')
-  const hideFilters = isUserManagementPage || isImportPage
+  const isFraudAuditPage = location.pathname.includes('/mp/fraud-audit')
+  const isClaimsPage = location.pathname.includes('/mp/claims-payments')
+  const isFraudReportPage = /\/mp\/reports\/(fraud-audit|fraud|safu-)/.test(location.pathname)
+  const isClaimsReportPage = location.pathname.includes('/mp/reports/claims')
+  const isBeneficiariesPage = location.pathname.includes('/mp/beneficiaries')
+  const isBeneficiariesReportPage = location.pathname.includes('/mp/reports/beneficiaries')
+  const isCardPrintingPage = location.pathname.includes('/bis/card-printing')
+  const isReportsCatalogPage = /\/mp\/reports\/?$/.test(location.pathname.replace(/\/+$/, '') || '/')
+  const isHospitalsPage = location.pathname.includes('/mp/hospitals')
+  const isPatientsPage = location.pathname.includes('/mp/patients')
+  const isLmsPage = location.pathname.includes('/mp/lms-training')
+  const isWorkflowPage = location.pathname.includes('/mp/users-workflow')
+  const hideFilters =
+    isUserManagementPage ||
+    isImportPage ||
+    isFraudAuditPage ||
+    isFraudReportPage ||
+    isClaimsPage ||
+    isClaimsReportPage ||
+    isBeneficiariesPage ||
+    isBeneficiariesReportPage ||
+    isCardPrintingPage ||
+    isReportsCatalogPage ||
+    isHospitalsPage ||
+    isPatientsPage ||
+    isLmsPage ||
+    isWorkflowPage
 
   const handleLogout = () => {
     logout()
@@ -55,9 +81,9 @@ export default function DashboardLayout() {
                   <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[#1a5c38] sm:h-8 sm:w-8">
                     <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </div>
-                  <div className="hidden sm:block">
-                    <p className="text-sm font-semibold leading-tight text-white">{user?.name}</p>
-                    <p className="text-[10px] text-emerald-100/80">{user ? ROLE_LABELS[user.role] : ''}</p>
+                  <div className="hidden min-w-0 flex-col gap-0.5 sm:flex">
+                    <p className="text-sm font-semibold leading-snug text-white">{user?.name}</p>
+                    <p className="text-[10px] leading-relaxed text-emerald-100/80">{user ? ROLE_LABELS[user.role] : ''}</p>
                   </div>
                 </div>
                 <button

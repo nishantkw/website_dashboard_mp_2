@@ -7,6 +7,7 @@ interface TablePaginationProps {
   startIndex: number
   endIndex: number
   onPageChange: (page: number) => void
+  pageSize?: number
 }
 
 export default function TablePagination({
@@ -16,6 +17,7 @@ export default function TablePagination({
   startIndex,
   endIndex,
   onPageChange,
+  pageSize = 200,
 }: TablePaginationProps) {
   return (
     <div className="flex flex-col gap-2 border-t border-gray-100 bg-gray-50/80 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
@@ -25,7 +27,7 @@ export default function TablePagination({
           {startIndex + 1}–{endIndex}
         </span>{' '}
         of <span className="font-semibold text-slate-800">{totalRows}</span> rows
-        <span className="ml-1 text-slate-400">(200 per page)</span>
+        <span className="ml-1 text-slate-400">({pageSize} per page)</span>
       </p>
 
       <div className="flex items-center gap-1.5">

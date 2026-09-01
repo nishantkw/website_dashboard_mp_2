@@ -51,8 +51,8 @@ export function usePageFilters(fields: FilterField[]) {
 
           if (field.key === 'state' && rowKey === 'state') {
             if (!rowVal.includes(filterVal.toLowerCase())) return false
-          } else if (field.key === 'fraud_type' && rowKey === 'type') {
-            if (rowVal !== filterVal.toLowerCase()) return false
+          } else if (field.key === 'fraud_type' && (rowKey === 'fraud_type' || rowKey === 'type')) {
+            if (!rowVal.includes(filterVal.toLowerCase())) return false
           } else if (field.key === 'course' && rowKey === 'course') {
             if (rowVal !== filterVal.toLowerCase()) return false
           } else if (rowKey && row[rowKey] !== undefined) {

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import ExportDropdown from './ExportDropdown'
+import StackedHeading from './StackedHeading'
 
 interface ChartCardProps {
   title: string
@@ -15,12 +16,16 @@ export default function ChartCard({ title, subtitle, children, className = '', e
   ]
 
   return (
-    <div className={`bg-white rounded-xl border border-gray-200 shadow-sm p-5 ${className}`}>
-      <div className="flex items-start justify-between gap-2 mb-4">
-        <div>
-          <h3 className="text-base font-semibold text-gray-900">{title}</h3>
-          {subtitle && <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>}
-        </div>
+    <div className={`flex h-full flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-sm ${className}`}>
+      <div className="mb-5 flex shrink-0 items-start justify-between gap-3">
+        <StackedHeading
+          size="section"
+          title={title}
+          subtitle={subtitle}
+          titleClassName="text-base text-gray-900"
+          subtitleClassName="text-sm text-gray-500"
+          className="min-w-0 flex-1"
+        />
 
         <ExportDropdown
           title={title}
@@ -31,7 +36,7 @@ export default function ChartCard({ title, subtitle, children, className = '', e
           variant="outline"
         />
       </div>
-      {children}
+      <div className="flex min-h-0 flex-1 flex-col justify-center">{children}</div>
     </div>
   )
 }

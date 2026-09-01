@@ -130,7 +130,7 @@ const INITIAL_ROLES: RoleRecord[] = [
     id: 'r5',
     name: 'mp_user',
     label: 'Madhya Pradesh Analyst',
-    description: 'MP claims, beneficiaries, hospital & fraud analytics',
+    description: 'MP claims, beneficiaries, hospital & SAFU MIS analytics',
     userCount: 1,
     status: 'Active',
   },
@@ -151,7 +151,7 @@ const MODULES_LIST = [
   { id: 'mp_claims', name: 'MP Claims & Payments' },
   { id: 'mp_beneficiaries', name: 'MP Beneficiaries' },
   { id: 'mp_hospitals', name: 'MP Hospitals' },
-  { id: 'mp_fraud', name: 'MP Fraud & Audit' },
+  { id: 'mp_fraud', name: 'Fraud and Audit' },
   { id: 'mp_reports', name: 'MP Reports' },
   { id: 'ump', name: 'UMP Legacy User Master' },
 ]

@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, LogIn, ChevronRight } from 'lucide-react'
-import { useAuth } from '../auth/AuthContext'
+import { useAuth } from '../auth/auth-context'
 import { getDefaultRouteForRole, mockUsers } from '../auth/mockUsers'
 import type { UserRole } from '../auth/types'
 import { ROLE_OPTIONS, ROLE_LABELS } from '../auth/types'
