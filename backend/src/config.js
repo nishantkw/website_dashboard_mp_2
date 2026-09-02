@@ -26,3 +26,18 @@ export const config = {
   supabaseUrl: process.env.SUPABASE_URL || '',
   supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
 }
+
+export function isAllowedCorsOrigin(origin) {
+  if (!origin) return true
+  const listed = String(config.corsOrigin)
+    .split(',')
+    .map((s) => s.trim().replace(/\/$/, ''))
+    .filter(Boolean)
+  if (listed.includes(origin)) return true
+  try {
+    const host = new URL(origin).hostname
+    return host.endsWith('.vercel.app')
+  } catch {
+    return false
+  }
+}
