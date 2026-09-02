@@ -26,7 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const login = useCallback(async (credentials: LoginCredentials) => {
-    const apiResult = await loginApi(credentials.username, credentials.password)
+    const apiResult = await loginApi(credentials.username, credentials.password, credentials.role)
     if (!apiResult.ok) {
       return { success: false, error: apiResult.error || 'Invalid username or password' }
     }

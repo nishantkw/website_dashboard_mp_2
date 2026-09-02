@@ -15,7 +15,7 @@ import {
   clearSessionCookie,
 } from '../utils/jwt.js'
 
-const router = Router()
+const ALLOWED_ROLES = new Set(['super_admin', 'state_admin', 'bis_user', 'mp_user', 'ump_user'])
 
 function publicUser(row) {
   return {
@@ -31,9 +31,13 @@ router.post('/login', loginRateLimit, async (req, res) => {
   try {
     const username = String(req.body?.username || '').trim()
     const password = String(req.body?.password || '')
+    const role = String(req.body?.role || '').trim()
 
-    if (!username || !password || username.length > 64 || password.length > 128) {
-      return res.status(400).json({ error: 'Username and password are required' })
+    if (!username || !password || !role || username.length > 64 || password.length > 128) {
+      return res.status(400).json({ error: 'Username, password, and role are required' })
+    }
+    if (!ALLOWED_ROLES.has(role)) {
+      return res.status(400).json({ error: 'Invalid role' })
     }
 
     if (isUsernameLocked(username)) {
@@ -51,11 +55,12 @@ router.post('/login', loginRateLimit, async (req, res) => {
     const row = rows[0]
     const hash = row?.password_hash || DUMMY_PASSWORD_HASH
     const passwordOk = await bcrypt.compare(password, hash)
-    const allowed = Boolean(row?.active) && passwordOk
+    const roleOk = row?.role === role
+    const allowed = Boolean(row?.active) && passwordOk && roleOk
 
     if (!allowed) {
       recordLoginFailure(username)
-      return res.status(401).json({ error: 'Invalid username or password' })
+      return res.status(401).json({ error: 'Invalid username, password, or role' })
     }
 
     recordLoginSuccess(username)

@@ -1,11 +1,11 @@
 import { apiFetch } from './client'
-import type { AuthUser } from '../auth/types'
+import type { AuthUser, UserRole } from '../auth/types'
 import type { KPI, ChartDataPoint } from '../types'
 
-export async function loginApi(username: string, password: string) {
+export async function loginApi(username: string, password: string, role: UserRole) {
   return apiFetch<{ user: AuthUser; db?: string }>('/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ username, password, role }),
   })
 }
 
