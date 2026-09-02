@@ -4,13 +4,14 @@ import { Eye, EyeOff, LogIn, ChevronRight } from 'lucide-react'
 import { useAuth } from '../auth/auth-context'
 import { demoAccounts } from '../auth/mockUsers'
 import { getDefaultRouteForRole } from '../auth/permissions'
-import { ROLE_LABELS } from '../auth/types'
+import { ROLE_LABELS, ROLE_OPTIONS, type UserRole } from '../auth/types'
 
 export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [role, setRole] = useState<UserRole>('state_admin')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -22,7 +23,7 @@ export default function Login() {
     setError('')
     setLoading(true)
 
-    const result = await login({ username, password })
+    const result = await login({ username, password, role })
     setLoading(false)
 
     if (result.success && result.user) {
@@ -32,9 +33,10 @@ export default function Login() {
     }
   }
 
-  const fillDemo = (user: string, pass: string) => {
+  const fillDemo = (user: string, pass: string, userRole: UserRole) => {
     setUsername(user)
     setPassword(pass)
+    setRole(userRole)
     setError('')
     setShowDemo(false)
   }
@@ -190,6 +192,24 @@ export default function Login() {
                     </button>
                   </div>
                 </div>
+
+                <div>
+                  <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                    Select Role
+                  </label>
+                  <select
+                    value={role}
+                    onChange={(e) => setRole(e.target.value as UserRole)}
+                    className="w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#2d8a4e] focus:bg-white focus:ring-4 focus:ring-[#2d8a4e]/12"
+                    required
+                  >
+                    {ROLE_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <button
@@ -227,7 +247,7 @@ export default function Login() {
                     <button
                       key={u.id}
                       type="button"
-                      onClick={() => fillDemo(u.username, u.password)}
+                      onClick={() => fillDemo(u.username, u.password, u.role)}
                       className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-[#e8f5ec]"
                     >
                       <div>

@@ -11,6 +11,7 @@ export interface AuthUser {
 export interface LoginCredentials {
   username: string
   password: string
+  role: UserRole
 }
 
 export const ROLE_LABELS: Record<UserRole, string> = {
