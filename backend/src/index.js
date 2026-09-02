@@ -2,7 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import cookieParser from 'cookie-parser'
-import { config } from './config.js'
+import { config, isAllowedCorsOrigin } from './config.js'
 import { healthCheck, closePools } from './db/pool.js'
 import { seedDashboardUsersIfEmpty } from './db/seedUsers.js'
 import { requireAuth, requireRole, ROLES } from './middleware/auth.js'
@@ -31,7 +31,15 @@ app.use(
     hsts: config.nodeEnv === 'production',
   })
 )
-app.use(cors({ origin: config.corsOrigin, credentials: true }))
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (isAllowedCorsOrigin(origin)) return callback(null, true)
+      return callback(null, false)
+    },
+    credentials: true,
+  })
+)
 app.use(cookieParser())
 app.use(express.json({ limit: '40mb' }))
 app.use(express.urlencoded({ extended: true, limit: '40mb' }))

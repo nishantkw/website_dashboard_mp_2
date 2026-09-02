@@ -3,10 +3,14 @@ import type { AuthUser, UserRole } from '../auth/types'
 import type { KPI, ChartDataPoint } from '../types'
 
 export async function loginApi(username: string, password: string, role: UserRole) {
-  return apiFetch<{ user: AuthUser; db?: string }>('/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ username, password, role }),
-  })
+  return apiFetch<{ user: AuthUser; db?: string }>(
+    '/auth/login',
+    {
+      method: 'POST',
+      body: JSON.stringify({ username, password, role }),
+    },
+    60000
+  )
 }
 
 export async function logoutApi() {
