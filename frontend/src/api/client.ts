@@ -1,4 +1,15 @@
-const API_BASE = import.meta.env.VITE_API_URL || '/api'
+const RENDER_API = 'https://website-dashboard-mp-2.onrender.com/api'
+
+function resolveApiBase() {
+  if (import.meta.env.VITE_API_URL) return String(import.meta.env.VITE_API_URL).replace(/\/$/, '')
+  if (typeof window !== 'undefined' && window.location.hostname.endsWith('.vercel.app')) {
+    return RENDER_API
+  }
+  if (import.meta.env.PROD) return RENDER_API
+  return '/api'
+}
+
+const API_BASE = resolveApiBase()
 
 export type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string; status?: number }
 
