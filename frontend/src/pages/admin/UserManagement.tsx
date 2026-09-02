@@ -130,7 +130,7 @@ const INITIAL_ROLES: RoleRecord[] = [
     id: 'r5',
     name: 'mp_user',
     label: 'Madhya Pradesh Analyst',
-    description: 'MP claims, beneficiaries, hospital & fraud analytics',
+    description: 'MP claims, beneficiaries, hospital & SAFU MIS analytics',
     userCount: 1,
     status: 'Active',
   },
@@ -151,7 +151,7 @@ const MODULES_LIST = [
   { id: 'mp_claims', name: 'MP Claims & Payments' },
   { id: 'mp_beneficiaries', name: 'MP Beneficiaries' },
   { id: 'mp_hospitals', name: 'MP Hospitals' },
-  { id: 'mp_fraud', name: 'MP Fraud & Audit' },
+  { id: 'mp_fraud', name: 'Fraud and Audit' },
   { id: 'mp_reports', name: 'MP Reports' },
   { id: 'ump', name: 'UMP Legacy User Master' },
 ]
@@ -466,7 +466,7 @@ export default function UserManagement() {
 
       {/* Tabs Navigation */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-        <div className="overflow-x-auto scrollbar-hide">
+        <div className="scrollbar-visible overflow-x-auto">
           <nav className="-mb-px flex whitespace-nowrap px-2 sm:px-6 min-w-max">
             <button
               onClick={() => setActiveTab('users')}
@@ -570,16 +570,16 @@ export default function UserManagement() {
 
           {/* Users Table */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
+            <div className="scrollbar-visible overflow-x-auto">
+              <table className="w-max min-w-full text-left text-sm">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-xs">
                   <tr>
-                    <th className="px-6 py-3.5">Username</th>
-                    <th className="px-6 py-3.5">Full Name</th>
-                    <th className="px-6 py-3.5">Role</th>
-                    <th className="px-6 py-3.5">Department / Organization</th>
-                    <th className="px-6 py-3.5">Status</th>
-                    <th className="px-6 py-3.5 text-right">Actions</th>
+                    <th className="whitespace-nowrap px-6 py-3.5">Username</th>
+                    <th className="whitespace-nowrap px-6 py-3.5">Full Name</th>
+                    <th className="whitespace-nowrap px-6 py-3.5">Role</th>
+                    <th className="whitespace-nowrap px-6 py-3.5">Department / Organization</th>
+                    <th className="whitespace-nowrap px-6 py-3.5">Status</th>
+                    <th className="whitespace-nowrap px-6 py-3.5 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 text-slate-700">
@@ -654,15 +654,15 @@ export default function UserManagement() {
           <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
             <h3 className="font-semibold text-slate-800">Defined System Roles ({roles.length})</h3>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+          <div className="scrollbar-visible overflow-x-auto">
+            <table className="w-max min-w-full text-left text-sm">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-xs">
                 <tr>
-                  <th className="px-6 py-3.5">Role Name (Key)</th>
-                  <th className="px-6 py-3.5">Role Label</th>
-                  <th className="px-6 py-3.5">Description</th>
-                  <th className="px-6 py-3.5">Assigned Users</th>
-                  <th className="px-6 py-3.5">Status</th>
+                  <th className="whitespace-nowrap px-6 py-3.5">Role Name (Key)</th>
+                  <th className="whitespace-nowrap px-6 py-3.5">Role Label</th>
+                  <th className="whitespace-nowrap px-6 py-3.5">Description</th>
+                  <th className="whitespace-nowrap px-6 py-3.5">Assigned Users</th>
+                  <th className="whitespace-nowrap px-6 py-3.5">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 text-slate-700">
@@ -700,11 +700,11 @@ export default function UserManagement() {
             </p>
           </div>
 
-          <div className="overflow-x-auto border border-slate-200 rounded-lg">
-            <table className="w-full text-left text-sm">
+          <div className="scrollbar-visible overflow-x-auto border border-slate-200 rounded-lg">
+            <table className="w-max min-w-full text-left text-sm">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 font-semibold text-xs uppercase">
                 <tr>
-                  <th className="px-6 py-3.5 border-r border-slate-200 min-w-[200px]">Module / Feature</th>
+                  <th className="whitespace-nowrap px-6 py-3.5 border-r border-slate-200 min-w-[200px]">Module / Feature</th>
                   {roles.map((r) => (
                     <th key={r.id} className="px-4 py-3.5 text-center min-w-[120px]">
                       {r.label}
@@ -751,17 +751,17 @@ export default function UserManagement() {
             </div>
           </div>
 
-          <div className="overflow-x-auto border border-slate-200 rounded-lg">
-            <table className="w-full text-left text-sm">
+          <div className="scrollbar-visible overflow-x-auto border border-slate-200 rounded-lg">
+            <table className="w-max min-w-full text-left text-sm">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-xs">
                 <tr>
-                  <th className="px-6 py-3.5">Timestamp</th>
-                  <th className="px-6 py-3.5">User</th>
-                  <th className="px-6 py-3.5">Role</th>
-                  <th className="px-6 py-3.5">Action</th>
-                  <th className="px-6 py-3.5">Module</th>
-                  <th className="px-6 py-3.5">IP Address</th>
-                  <th className="px-6 py-3.5">Status</th>
+                  <th className="whitespace-nowrap px-6 py-3.5">Timestamp</th>
+                  <th className="whitespace-nowrap px-6 py-3.5">User</th>
+                  <th className="whitespace-nowrap px-6 py-3.5">Role</th>
+                  <th className="whitespace-nowrap px-6 py-3.5">Action</th>
+                  <th className="whitespace-nowrap px-6 py-3.5">Module</th>
+                  <th className="whitespace-nowrap px-6 py-3.5">IP Address</th>
+                  <th className="whitespace-nowrap px-6 py-3.5">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 text-slate-700">

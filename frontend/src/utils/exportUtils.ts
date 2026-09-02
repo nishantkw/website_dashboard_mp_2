@@ -3,91 +3,88 @@ export interface ColumnDef {
   label: string
 }
 
-// 1. Export Data to CSV
-export function exportToCSV(
-  filename: string,
-  data: Record<string, any>[],
+export interface ExportSheet {
+  name: string
+  rows: Record<string, any>[]
   columns?: ColumnDef[]
-) {
-  if (!data || data.length === 0) return
+}
 
-  const cols =
-    columns ||
-    Object.keys(data[0]).map((k) => ({ key: k, label: k.replace(/_/g, ' ').toUpperCase() }))
+function resolveColumns(data: Record<string, any>[], columns?: ColumnDef[]): ColumnDef[] {
+  if (columns?.length) return columns
+  if (!data.length) return []
+  return Object.keys(data[0]).map((k) => ({
+    key: k,
+    label: k === 'name' ? 'Category' : k === 'value' ? 'Count' : k.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+  }))
+}
 
-  const headers = cols.map((c) => `"${c.label.replace(/"/g, '""')}"`).join(',')
-  const rows = data.map((row) =>
-    cols
-      .map((c) => {
-        const val = row[c.key] ?? ''
-        return `"${String(val).replace(/"/g, '""')}"`
-      })
-      .join(',')
-  )
-
-  const csvContent = '\uFEFF' + [headers, ...rows].join('\r\n')
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob)
-
   const link = document.createElement('a')
   link.setAttribute('href', url)
-  link.setAttribute('download', filename.endsWith('.csv') ? filename : `${filename}.csv`)
+  link.setAttribute('download', filename)
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
   URL.revokeObjectURL(url)
 }
 
-// 2. Export Data to Excel (.xls XML Format)
-export function exportToExcel(
+// 1. Export Data to CSV
+export function exportToCSV(
   filename: string,
   data: Record<string, any>[],
   columns?: ColumnDef[]
 ) {
-  if (!data || data.length === 0) return
+  exportSheetsToCSV(filename, [{ name: 'Data', rows: data, columns }])
+}
 
-  const cols =
-    columns ||
-    Object.keys(data[0]).map((k) => ({ key: k, label: k.replace(/_/g, ' ').toUpperCase() }))
+/** One CSV with every dashboard card/graph as a labeled section. */
+export function exportSheetsToCSV(filename: string, sheets: ExportSheet[]) {
+  const blocks = sheets.filter((s) => s.rows?.length)
+  if (!blocks.length) return
 
-  const headerXml = cols.map((c) => `<Cell><Data ss:Type="String">${c.label}</Data></Cell>`).join('')
-  const rowsXml = data
-    .map((row) => {
-      const cells = cols
-        .map((c) => {
-          const val = row[c.key] ?? ''
-          const isNum = typeof val === 'number' && !Number.isNaN(val)
-          return `<Cell><Data ss:Type="${isNum ? 'Number' : 'String'}">${String(val)}</Data></Cell>`
-        })
-        .join('')
-      return `<Row>${cells}</Row>`
-    })
-    .join('')
+  const parts: string[] = []
+  for (const sheet of blocks) {
+    const cols = resolveColumns(sheet.rows, sheet.columns)
+    if (!cols.length) continue
+    parts.push(`"${String(sheet.name).replace(/"/g, '""')}"`)
+    parts.push(cols.map((c) => `"${c.label.replace(/"/g, '""')}"`).join(','))
+    for (const row of sheet.rows) {
+      parts.push(
+        cols
+          .map((c) => `"${String(row[c.key] ?? '').replace(/"/g, '""')}"`)
+          .join(',')
+      )
+    }
+    parts.push('')
+  }
 
-  const excelXml = `<?xml version="1.0"?>
-<?mso-application progid="Excel.Sheet"?>
-<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
-  xmlns:o="urn:schemas-microsoft-com:office:office"
-  xmlns:x="urn:schemas-microsoft-com:office:excel"
-  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
-  <Worksheet ss:Name="Sheet1">
-    <Table>
-      <Row>${headerXml}</Row>
-      ${rowsXml}
-    </Table>
-  </Worksheet>
-</Workbook>`
+  const csvContent = '\uFEFF' + parts.join('\r\n')
+  downloadBlob(new Blob([csvContent], { type: 'text/csv;charset=utf-8;' }), filename.endsWith('.csv') ? filename : `${filename}.csv`)
+}
 
-  const blob = new Blob([excelXml], { type: 'application/vnd.ms-excel' })
-  const url = URL.createObjectURL(blob)
+export async function exportToExcel(
+  filename: string,
+  data: Record<string, any>[],
+  columns?: ColumnDef[]
+) {
+  const { writeExcelFile } = await import('./exportExcelXlsx')
+  await writeExcelFile(filename, [{ name: 'Sheet1', rows: data, columns }])
+}
 
-  const link = document.createElement('a')
-  link.setAttribute('href', url)
-  link.setAttribute('download', filename.endsWith('.xls') ? filename : `${filename}.xls`)
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+export async function exportSheetsToExcel(filename: string, sheets: ExportSheet[]) {
+  const { writeExcelFile } = await import('./exportExcelXlsx')
+  await writeExcelFile(filename, sheets)
+}
+
+export async function exportSheetsToExcelWithVisuals(
+  filename: string,
+  _title: string,
+  sheets: ExportSheet[],
+  visuals: { title: string; dataUrl: string }[]
+) {
+  const { writeExcelFile } = await import('./exportExcelXlsx')
+  await writeExcelFile(filename, sheets, visuals)
 }
 
 // 3. Export Data & Reports to PDF (Print-to-PDF / PDF Window Export)

@@ -20,6 +20,12 @@ body {
   margin: 0;
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+:where(h1, h2, h3, h4, h5, h6, p) {
+  line-height: 1.5;
+  margin: 0;
 }
 
 #root {
@@ -32,6 +38,28 @@ body {
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Visible scrollbars for horizontal/vertical overflow areas */
+.scrollbar-visible {
+  scrollbar-width: thin;
+  scrollbar-color: #86b89a #e8f3ec;
+}
+.scrollbar-visible::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+.scrollbar-visible::-webkit-scrollbar-track {
+  background: #e8f3ec;
+  border-radius: 999px;
+}
+.scrollbar-visible::-webkit-scrollbar-thumb {
+  background: #86b89a;
+  border-radius: 999px;
+  border: 2px solid #e8f3ec;
+}
+.scrollbar-visible::-webkit-scrollbar-thumb:hover {
+  background: #2d8a4e;
 }
 
 .recharts-bar-rectangle,

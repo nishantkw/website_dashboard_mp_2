@@ -35,17 +35,17 @@ export function useGlobalFilterData() {
           ['department', 'department'],
           ['course', 'course'],
           ['hospital_type', 'type'],
-          ['nabh', 'nabH'],
-          ['fraud_type', 'type'],
+          ['nabh', 'nabh'],
+          ['fraud_type', 'fraud_type'],
         ]
 
         for (const [filterKey, defaultRowKey] of checks) {
           const val = globalFilters[filterKey]
           if (!val) continue
           const rowKey = rowKeyMap[filterKey] ?? defaultRowKey
-          if (!hasOwn(row, rowKey)) continue
-          const rowVal = String(row[rowKey] ?? '').toLowerCase()
-          if (!rowVal.includes(val.toLowerCase())) return false
+          const rowKeys = rowKey === 'district' ? ['district', 'district_name', 'hosp_district_name', 'patient_district_name'] : [rowKey]
+          if (!rowKeys.some((k) => hasOwn(row, k))) continue
+          if (!rowKeys.some((k) => String(row[k] ?? '').toLowerCase().includes(val.toLowerCase()))) return false
         }
 
         if (globalFilters.claim_status) {
@@ -74,8 +74,8 @@ export function useGlobalFilterData() {
         }
 
         if (globalFilters.investigation_status) {
-          const isFraud = hasOwn(row, 'amount_risk') || hasOwn(row, 'investigator')
-          if (isFraud && !matchesValue(row, ['status'], globalFilters.investigation_status)) return false
+          const isFraud = hasOwn(row, 'amount_risk') || hasOwn(row, 'investigator') || hasOwn(row, 'investigation_status')
+          if (isFraud && !matchesValue(row, ['investigation_status', 'status'], globalFilters.investigation_status)) return false
         }
 
         if (globalFilters.training_status) {
@@ -90,7 +90,7 @@ export function useGlobalFilterData() {
 
         if (globalFilters.date_from || globalFilters.date_to) {
           const dateKey = Object.keys(row).find((k) =>
-            ['enroll_date', 'admission', 'created', 'last_login', 'completed_on', 'start_date', 'trigger_time', 'crt_date'].includes(k)
+            ['enroll_date', 'admission', 'created', 'last_login', 'completed_on', 'lst_trigger_event_date', 'trigger_time', 'crt_date', 'updt_date'].includes(k)
           )
           if (dateKey) {
             const rowDate = String(row[dateKey]).slice(0, 10)

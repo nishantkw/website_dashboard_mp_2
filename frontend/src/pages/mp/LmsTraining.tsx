@@ -1,109 +1,113 @@
-import ChartCard from '../../components/ui/ChartCard'
+import { useMemo } from 'react'
 import DataTable from '../../components/ui/DataTable'
 import { PageHeader, KPIGrid } from '../../components/ui/PageHeader'
-import { InteractiveBarChart, InteractivePieChart, InteractiveLineChart } from '../../components/charts/InteractiveCharts'
+import ModuleFilterBar from '../../components/layout/ModuleFilterBar'
 import { useDrillDown } from '../../hooks/useDrillDown'
-import { useGlobalFilterData } from '../../hooks/useGlobalFilterData'
-import type { KPI } from '../../types'
-import {
-  mpLmsKPIs, mpLmsCourseData, mpLmsCompletionTrend, mpLmsRoleStatusData,
-  mpLmsEntityTypeData, mpLmsStateWiseData, mpLmsTableData,
-} from '../../data/mockData'
+import { useModuleFilters } from '../../hooks/useModuleFilters'
+import { getModuleFilters } from '../../data/moduleFilterConfig'
+import { useApiResource } from '../../hooks/useApiResource'
+import { fetchLms } from '../../api/endpoints'
+import DataSourceBadge from '../../components/ui/DataSourceBadge'
+import BackendOfflineNotice from '../../components/ui/BackendOfflineNotice'
+import { schemaTableColumns } from '../../utils/schemaColumns'
+import type { KPI, TableColumn } from '../../types'
 
-const ENTITY_COLORS = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b']
-
-const columns = [
+const preferredColumns: TableColumn[] = [
   { key: 'userid', label: 'User ID' },
-  { key: 'name', label: 'Name' },
+  { key: 'username', label: 'Username' },
+  { key: 'firstname', label: 'First Name' },
+  { key: 'lastname', label: 'Last Name' },
   { key: 'role', label: 'Role' },
-  { key: 'entity', label: 'Entity' },
   { key: 'parententity', label: 'Parent Entity' },
   { key: 'entitytype', label: 'Entity Type' },
+  { key: 'selfentity', label: 'Entity' },
   { key: 'ab_pmjay_status', label: 'AB-PMJAY Status' },
   { key: 'abdm_status', label: 'ABDM Status' },
-  { key: 'ab_pmjay_completed', label: 'PMJAY Completed' },
-  { key: 'abdm_completed', label: 'ABDM Completed' },
+  { key: 'ab_pmjay_completed_at_utc', label: 'PMJAY Completed' },
+  { key: 'abdm_completed_at_utc', label: 'ABDM Completed' },
 ]
 
+const EMPTY = {
+  kpis: [] as KPI[],
+  charts: {} as Record<string, never>,
+  table: [] as Record<string, string | number>[],
+  columns: [] as string[],
+}
+
 export default function LmsTraining() {
-  const { openFromChart, openFromKpi, openDetail, Modal } = useDrillDown()
-  const { filterData } = useGlobalFilterData()
-  const filtered = filterData(mpLmsTableData)
+  const filterFields = useMemo(() => getModuleFilters('mp_lms'), [])
+  const moduleFilters = useModuleFilters('mp_lms', filterFields)
+
+  const { data, source, db, loading, error } = useApiResource(
+    () => fetchLms(moduleFilters.queryString),
+    EMPTY,
+    [moduleFilters.queryString]
+  )
+  const live = source === 'api'
+  const kpis = data.kpis ?? []
+  const tableRows = (data.table ?? []) as Record<string, string | number>[]
+  const filtered = live ? tableRows : moduleFilters.filterRows(tableRows)
+  const columns = useMemo(
+    () =>
+      schemaTableColumns({
+        source,
+        schemaKeys: data.columns,
+        rows: tableRows,
+        preferredFirst: preferredColumns.map((c) => c.key),
+        demoColumns: preferredColumns,
+      }),
+    [source, data.columns, tableRows]
+  )
+
+  const { openFromKpi, openDetail, Modal } = useDrillDown({
+    live,
+    tableRows: filtered,
+    columns,
+    datasetTitle: 'LMS Training Records',
+  })
 
   return (
     <div>
       <Modal />
-      <PageHeader title="LMS Training" />
-      <KPIGrid kpis={mpLmsKPIs} onKpiClick={(kpi: KPI) => openFromKpi(kpi.label, kpi.value, { change: kpi.change ?? 0 })} />
+      <PageHeader
+        title="LMS Training"
+        description={
+          live
+            ? `${data.schema ?? 'dmart_mp.lms_user_course_completion_status'} — schema fields`
+            : 'Connect the backend to load LMS records'
+        }
+        badge={<DataSourceBadge source={source} db={db} />}
+      />
+      <BackendOfflineNotice error={error} loading={loading} />
 
-      <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <ChartCard title="Course Enrollment vs Completion" exportData={mpLmsCourseData}>
-          <InteractiveBarChart
-            data={mpLmsCourseData}
-            chartTitle="Courses"
-            height={260}
-            showLegend
-            onItemClick={openFromChart}
-            bars={[
-              { dataKey: 'pmjay_enrolled', fill: '#3b82f6', name: 'PMJAY Enrolled' },
-              { dataKey: 'pmjay_completed', fill: '#10b981', name: 'PMJAY Completed' },
-              { dataKey: 'abdm_enrolled', fill: '#8b5cf6', name: 'ABDM Enrolled' },
-              { dataKey: 'abdm_completed', fill: '#06b6d4', name: 'ABDM Completed' },
-            ]}
-          />
-        </ChartCard>
-        <ChartCard title="Monthly Completion Trend" exportData={mpLmsCompletionTrend}>
-          <InteractiveLineChart
-            data={mpLmsCompletionTrend}
-            chartTitle="Completion Trend"
-            height={260}
-            showLegend
-            onItemClick={openFromChart}
-            lines={[
-              { dataKey: 'pmjay', stroke: '#3b82f6', name: 'AB-PMJAY' },
-              { dataKey: 'abdm', stroke: '#8b5cf6', name: 'ABDM' },
-            ]}
-          />
-        </ChartCard>
-      </div>
+      <ModuleFilterBar
+        title={moduleFilters.meta.title}
+        subtitle={moduleFilters.meta.subtitle}
+        searchPlaceholder={moduleFilters.meta.searchPlaceholder}
+        fields={moduleFilters.resolvedFields}
+        values={moduleFilters.filters}
+        onChange={moduleFilters.setFilter}
+        search={moduleFilters.search}
+        onSearchChange={moduleFilters.setSearch}
+        onClear={moduleFilters.clearFilters}
+        activeCount={moduleFilters.activeCount}
+      />
 
-      <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <ChartCard title="Role-wise Completion Status" exportData={mpLmsRoleStatusData}>
-          <InteractiveBarChart
-            data={mpLmsRoleStatusData}
-            chartTitle="Role Status"
-            height={260}
-            showLegend
-            onItemClick={openFromChart}
-            bars={[
-              { dataKey: 'completed', fill: '#10b981', name: 'Completed' },
-              { dataKey: 'in_progress', fill: '#f59e0b', name: 'In Progress' },
-              { dataKey: 'not_started', fill: '#ef4444', name: 'Not Started' },
-            ]}
-          />
-        </ChartCard>
-        <ChartCard title="Entity Type Distribution" exportData={mpLmsEntityTypeData}>
-          <InteractivePieChart data={mpLmsEntityTypeData} colors={ENTITY_COLORS} innerRadius={55} chartTitle="Entity Types" onItemClick={openFromChart} />
-        </ChartCard>
-      </div>
-
-      <div className="mb-4">
-        <ChartCard title="District-wise Training Completion Rate (%)" exportData={mpLmsStateWiseData}>
-          <InteractiveBarChart
-            data={mpLmsStateWiseData}
-            chartTitle="District Completion"
-            height={240}
-            onItemClick={openFromChart}
-            bars={[{ dataKey: 'completion_rate', fill: '#10b981', name: 'Completion %' }]}
-          />
-        </ChartCard>
-      </div>
+      {kpis.length > 0 && (
+        <KPIGrid kpis={kpis} onKpiClick={(kpi: KPI) => openFromKpi(kpi.label, kpi.value, { change: kpi.change ?? 0 })} />
+      )}
 
       <DataTable
         columns={columns}
         data={filtered}
-        title={`Training Records (${filtered.length})`}
-        onRowClick={(row) => openDetail({ title: String(row.name), subtitle: 'LMS Training Record', data: row })}
+        title={`Training Records (${filtered.length}${columns.length ? ` · ${columns.length} schema cols` : ''})`}
+        onRowClick={(row) =>
+          openDetail({
+            title: String(row.userid || row.username || 'LMS User'),
+            subtitle: 'Schema record',
+            data: row,
+          })
+        }
       />
     </div>
   )

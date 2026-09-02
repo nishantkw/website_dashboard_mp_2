@@ -1,58 +1,42 @@
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
+import { useState, useCallback, useEffect, type ReactNode } from 'react'
 import type { AuthUser, LoginCredentials } from './types'
-import { authenticateUser } from './mockUsers'
-
-const STORAGE_KEY = 'dashboard_auth_user'
-
-interface AuthContextValue {
-  user: AuthUser | null
-  isAuthenticated: boolean
-  isLoading: boolean
-  login: (credentials: LoginCredentials) => Promise<{ success: boolean; error?: string; user?: AuthUser }>
-  logout: () => void
-}
-
-const AuthContext = createContext<AuthContextValue | null>(null)
+import { fetchCurrentUser, loginApi, logoutApi } from '../api/endpoints'
+import { onAuthExpired } from '../api/client'
+import { AuthContext } from './auth-context'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored)
-        if (parsed && parsed.role && (parsed.role === 'super_admin' || parsed.role === 'state_admin' || parsed.role === 'bis_user' || parsed.role === 'mp_user' || parsed.role === 'ump_user')) {
-          setUser(parsed)
-        } else {
-          localStorage.removeItem(STORAGE_KEY)
-        }
-      } catch {
-        localStorage.removeItem(STORAGE_KEY)
-      }
+    localStorage.removeItem('dashboard_auth_user')
+    const stop = onAuthExpired(() => setUser(null))
+    let cancelled = false
+
+    ;(async () => {
+      const result = await fetchCurrentUser()
+      if (!cancelled && result.ok) setUser(result.data.user)
+      if (!cancelled) setIsLoading(false)
+    })()
+
+    return () => {
+      cancelled = true
+      stop()
     }
-    setIsLoading(false)
   }, [])
 
   const login = useCallback(async (credentials: LoginCredentials) => {
-    await new Promise((r) => setTimeout(r, 400))
-    const authUser = authenticateUser(
-      credentials.username,
-      credentials.password,
-      credentials.role
-    )
-    if (!authUser) {
-      return { success: false, error: 'Invalid username, password, or role' }
+    const apiResult = await loginApi(credentials.username, credentials.password)
+    if (!apiResult.ok) {
+      return { success: false, error: apiResult.error || 'Invalid username or password' }
     }
-    setUser(authUser)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(authUser))
-    return { success: true, user: authUser }
+    setUser(apiResult.data.user)
+    return { success: true, user: apiResult.data.user }
   }, [])
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    await logoutApi()
     setUser(null)
-    localStorage.removeItem(STORAGE_KEY)
   }, [])
 
   return (
@@ -62,10 +46,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   )
-}
-
-export function useAuth() {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
-  return ctx
 }

@@ -19,13 +19,13 @@ export default function GovernmentHeader() {
 
               <div className="hidden sm:block min-w-0">
                 <h1 className="text-[13px] sm:text-base lg:text-lg font-bold text-[#1a3a6b] leading-snug tracking-tight">
-                  Ayushman Bharat — Pradhan Mantri Jan Arogya Yojana
+                  Ayushman Bharat | Pradhan Mantri Jan Arogya Yojana
                   <span className="text-[#2d8a4e]"> (PM-JAY)</span>
                 </h1>
-                <p className="text-sm sm:text-base font-semibold text-[#b45309] mt-0.5 leading-none">
+                <p className="mt-1 text-sm font-semibold leading-snug text-[#b45309] sm:text-base">
                   &ldquo;Niramayam&rdquo;
                 </p>
-                <p className="text-[10px] sm:text-xs text-gray-500 mt-1 uppercase tracking-wide font-medium">
+                <p className="mt-1 text-[10px] font-medium uppercase tracking-wide text-gray-500 sm:text-xs">
                   State Health Agency, Madhya Pradesh
                 </p>
               </div>
@@ -59,8 +59,8 @@ export default function GovernmentHeader() {
             <h1 className="text-xs font-bold text-[#1a3a6b] leading-snug">
               Ayushman Bharat — PM-JAY
             </h1>
-            <p className="text-xs font-semibold text-[#b45309] mt-0.5">&ldquo;Niramayam&rdquo;</p>
-            <p className="text-[10px] text-gray-500 mt-0.5 uppercase tracking-wide">
+            <p className="mt-1 text-xs font-semibold leading-snug text-[#b45309]">&ldquo;Niramayam&rdquo;</p>
+            <p className="mt-1 text-[10px] uppercase tracking-wide leading-relaxed text-gray-500">
               State Health Agency, MP
             </p>
           </div>

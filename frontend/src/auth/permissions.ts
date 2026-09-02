@@ -26,3 +26,20 @@ export function canAccessNavItem(role: UserRole, navId: string): boolean {
   return navAccess[role]?.includes(navId) ?? false
 }
 
+export function getDefaultRouteForRole(role: UserRole): string {
+  switch (role) {
+    case 'super_admin':
+      return '/dashboard/admin/user-management'
+    case 'state_admin':
+      return '/dashboard'
+    case 'bis_user':
+      return '/dashboard/bis/card-printing'
+    case 'mp_user':
+      return '/dashboard/mp/claims-payments'
+    case 'ump_user':
+      return '/dashboard/ump/users'
+    default:
+      return '/dashboard'
+  }
+}
+

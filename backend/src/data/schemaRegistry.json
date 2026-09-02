@@ -1,0 +1,4992 @@
+{
+  "tables": [
+    {
+      "id": "dmart_mp.t_bis_beneficiary_disabled",
+      "logicalName": "t_bis_beneficiary_disabled",
+      "schema": "dmart_mp",
+      "table": "t_bis_beneficiary_disabled",
+      "label": "T Bis Beneficiary Disabled",
+      "source": "database_documentation.docx",
+      "module": "beneficiaries",
+      "moduleLabel": "Beneficiaries",
+      "primaryKey": "state_cd",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "state_cd",
+          "type": "text"
+        },
+        {
+          "name": "card_no",
+          "type": "text"
+        },
+        {
+          "name": "aadhaar_no",
+          "type": "text"
+        },
+        {
+          "name": "card_status",
+          "type": "text"
+        },
+        {
+          "name": "family_id",
+          "type": "text"
+        },
+        {
+          "name": "member_id",
+          "type": "text"
+        },
+        {
+          "name": "source_type",
+          "type": "text"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_by",
+          "type": "text"
+        },
+        {
+          "name": "updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "date_of_birth",
+          "type": "text"
+        },
+        {
+          "name": "acted_workflow_user",
+          "type": "text"
+        },
+        {
+          "name": "disabled_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "reason_desc",
+          "type": "text"
+        },
+        {
+          "name": "reason_id",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.t_bis_beneficiary_dtls",
+      "logicalName": "t_bis_beneficiary_dtls",
+      "schema": "dmart_mp",
+      "table": "t_bis_beneficiary_dtls",
+      "label": "T Bis Beneficiary Dtls",
+      "source": "database_documentation.docx",
+      "module": "beneficiaries",
+      "moduleLabel": "Beneficiaries",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "bigint"
+        },
+        {
+          "name": "ben_id",
+          "type": "text"
+        },
+        {
+          "name": "family_id",
+          "type": "text"
+        },
+        {
+          "name": "member_id",
+          "type": "text"
+        },
+        {
+          "name": "bis_family_id",
+          "type": "text"
+        },
+        {
+          "name": "bis_member_id",
+          "type": "text"
+        },
+        {
+          "name": "ben_ref_id",
+          "type": "text"
+        },
+        {
+          "name": "state_cd",
+          "type": "text"
+        },
+        {
+          "name": "dist_cd",
+          "type": "text"
+        },
+        {
+          "name": "block_id",
+          "type": "text"
+        },
+        {
+          "name": "village_id",
+          "type": "text"
+        },
+        {
+          "name": "rural_urban_flag",
+          "type": "text"
+        },
+        {
+          "name": "house_no",
+          "type": "text"
+        },
+        {
+          "name": "pincode",
+          "type": "text"
+        },
+        {
+          "name": "address",
+          "type": "text"
+        },
+        {
+          "name": "dist_name",
+          "type": "text"
+        },
+        {
+          "name": "state_name",
+          "type": "text"
+        },
+        {
+          "name": "ben_mobile_no",
+          "type": "text"
+        },
+        {
+          "name": "ben_email_id",
+          "type": "text"
+        },
+        {
+          "name": "json_obj_ben_source_dtl",
+          "type": "text"
+        },
+        {
+          "name": "json_obj_ben_ekyc_dtl",
+          "type": "text"
+        },
+        {
+          "name": "active_status",
+          "type": "smallint"
+        },
+        {
+          "name": "enrl_status",
+          "type": "text"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_by",
+          "type": "text"
+        },
+        {
+          "name": "updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "abha_id",
+          "type": "text"
+        },
+        {
+          "name": "payer_id",
+          "type": "bigint"
+        },
+        {
+          "name": "tpa_isa_id",
+          "type": "bigint"
+        },
+        {
+          "name": "json_obj_ben_othr_dtl",
+          "type": "text"
+        },
+        {
+          "name": "src_flag",
+          "type": "text"
+        },
+        {
+          "name": "enrol_status",
+          "type": "bigint"
+        },
+        {
+          "name": "entity_id",
+          "type": "text"
+        },
+        {
+          "name": "card_no",
+          "type": "text"
+        },
+        {
+          "name": "photo",
+          "type": "text"
+        },
+        {
+          "name": "relation",
+          "type": "text"
+        },
+        {
+          "name": "auth_mode",
+          "type": "text"
+        },
+        {
+          "name": "primary_auth_mode",
+          "type": "text"
+        },
+        {
+          "name": "new_member_flag",
+          "type": "text"
+        },
+        {
+          "name": "gender",
+          "type": "text"
+        },
+        {
+          "name": "year_of_birth",
+          "type": "text"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "father_name",
+          "type": "text"
+        },
+        {
+          "name": "age",
+          "type": "text"
+        },
+        {
+          "name": "primary_ben_id",
+          "type": "text"
+        },
+        {
+          "name": "approve_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "enrol_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "card_status",
+          "type": "text"
+        },
+        {
+          "name": "aadhar_status",
+          "type": "text"
+        },
+        {
+          "name": "reject_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "date_of_birth",
+          "type": "text"
+        },
+        {
+          "name": "scheme_code",
+          "type": "text"
+        },
+        {
+          "name": "request_type",
+          "type": "text"
+        },
+        {
+          "name": "auth_txn",
+          "type": "text"
+        },
+        {
+          "name": "primary_auth_txn",
+          "type": "text"
+        },
+        {
+          "name": "request_agent",
+          "type": "text"
+        },
+        {
+          "name": "match_score",
+          "type": "text"
+        },
+        {
+          "name": "source_type",
+          "type": "text"
+        },
+        {
+          "name": "aadhaar_disp_code",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.t_card_printing_status",
+      "logicalName": "t_card_printing_status",
+      "schema": "dmart_mp",
+      "table": "t_card_printing_status",
+      "label": "T Card Printing Status",
+      "source": "database_documentation.docx",
+      "module": "beneficiaries",
+      "moduleLabel": "Beneficiaries",
+      "primaryKey": "ben_id",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "card_no",
+          "type": "text"
+        },
+        {
+          "name": "entity_id",
+          "type": "text"
+        },
+        {
+          "name": "batch_id",
+          "type": "text"
+        },
+        {
+          "name": "user_id",
+          "type": "text"
+        },
+        {
+          "name": "state_cd",
+          "type": "text"
+        },
+        {
+          "name": "district_cd",
+          "type": "text"
+        },
+        {
+          "name": "subdistrict_town",
+          "type": "text"
+        },
+        {
+          "name": "village_ward",
+          "type": "text"
+        },
+        {
+          "name": "urban_or_rural",
+          "type": "text"
+        },
+        {
+          "name": "card_name",
+          "type": "text"
+        },
+        {
+          "name": "card_fathername",
+          "type": "text"
+        },
+        {
+          "name": "card_relation",
+          "type": "text"
+        },
+        {
+          "name": "card_yob",
+          "type": "text"
+        },
+        {
+          "name": "card_gender",
+          "type": "text"
+        },
+        {
+          "name": "card_address",
+          "type": "text"
+        },
+        {
+          "name": "abha_no",
+          "type": "text"
+        },
+        {
+          "name": "card_photo",
+          "type": "text"
+        },
+        {
+          "name": "card_print_status",
+          "type": "text"
+        },
+        {
+          "name": "enroll_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "approve_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "card_gen_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "card_print_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "card_distribute_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "card_deliver_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "ben_id",
+          "type": "text"
+        },
+        {
+          "name": "family_id",
+          "type": "text"
+        },
+        {
+          "name": "age",
+          "type": "text"
+        },
+        {
+          "name": "source_type",
+          "type": "text"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_by",
+          "type": "text"
+        },
+        {
+          "name": "updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "mobile_number",
+          "type": "text"
+        },
+        {
+          "name": "operator_id",
+          "type": "text"
+        },
+        {
+          "name": "operator_name",
+          "type": "text"
+        },
+        {
+          "name": "operator_contact",
+          "type": "text"
+        },
+        {
+          "name": "state_name",
+          "type": "text"
+        },
+        {
+          "name": "district_name",
+          "type": "text"
+        },
+        {
+          "name": "sub_district_name",
+          "type": "text"
+        },
+        {
+          "name": "village_name",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "bis_raw.t_bis_beneficiary_dtls",
+      "logicalName": "bis_raw.t_bis_beneficiary_dtls",
+      "schema": "bis_raw",
+      "table": "t_bis_beneficiary_dtls",
+      "label": "BIS Beneficiary Details (bis_raw)",
+      "source": "Data dictionary — Redshift BIS",
+      "module": "bis",
+      "moduleLabel": "BIS Card Printing",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "bigint"
+        },
+        {
+          "name": "ben_id",
+          "type": "text"
+        },
+        {
+          "name": "family_id",
+          "type": "text"
+        },
+        {
+          "name": "member_id",
+          "type": "text"
+        },
+        {
+          "name": "bis_family_id",
+          "type": "text"
+        },
+        {
+          "name": "bis_member_id",
+          "type": "text"
+        },
+        {
+          "name": "ben_ref_id",
+          "type": "text"
+        },
+        {
+          "name": "state_cd",
+          "type": "text"
+        },
+        {
+          "name": "dist_cd",
+          "type": "text"
+        },
+        {
+          "name": "block_id",
+          "type": "text"
+        },
+        {
+          "name": "village_id",
+          "type": "text"
+        },
+        {
+          "name": "rural_urban_flag",
+          "type": "text"
+        },
+        {
+          "name": "house_no",
+          "type": "text"
+        },
+        {
+          "name": "pincode",
+          "type": "text"
+        },
+        {
+          "name": "address",
+          "type": "text"
+        },
+        {
+          "name": "dist_name",
+          "type": "text"
+        },
+        {
+          "name": "state_name",
+          "type": "text"
+        },
+        {
+          "name": "ben_mobile_no",
+          "type": "text"
+        },
+        {
+          "name": "ben_email_id",
+          "type": "text"
+        },
+        {
+          "name": "json_obj_ben_source_dtl",
+          "type": "text"
+        },
+        {
+          "name": "json_obj_ben_ekyc_dtl",
+          "type": "text"
+        },
+        {
+          "name": "obj_aadhar_vault",
+          "type": "text"
+        },
+        {
+          "name": "active_status",
+          "type": "smallint"
+        },
+        {
+          "name": "enrl_status",
+          "type": "text"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_by",
+          "type": "text"
+        },
+        {
+          "name": "updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "abha_id",
+          "type": "text"
+        },
+        {
+          "name": "payer_id",
+          "type": "bigint"
+        },
+        {
+          "name": "tpa_isa_id",
+          "type": "bigint"
+        },
+        {
+          "name": "json_obj_ben_othr_dtl",
+          "type": "text"
+        },
+        {
+          "name": "src_flag",
+          "type": "text"
+        },
+        {
+          "name": "aadhaar_no",
+          "type": "text"
+        },
+        {
+          "name": "enrol_status",
+          "type": "bigint"
+        },
+        {
+          "name": "entity_id",
+          "type": "text"
+        },
+        {
+          "name": "card_no",
+          "type": "text"
+        },
+        {
+          "name": "photo",
+          "type": "text"
+        },
+        {
+          "name": "relation",
+          "type": "text"
+        },
+        {
+          "name": "auth_mode",
+          "type": "text"
+        },
+        {
+          "name": "primary_auth_mode",
+          "type": "text"
+        },
+        {
+          "name": "new_member_flag",
+          "type": "text"
+        },
+        {
+          "name": "gender",
+          "type": "text"
+        },
+        {
+          "name": "year_of_birth",
+          "type": "text"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "father_name",
+          "type": "text"
+        },
+        {
+          "name": "age",
+          "type": "text"
+        },
+        {
+          "name": "primary_ben_id",
+          "type": "text"
+        },
+        {
+          "name": "approve_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "enrol_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "card_status",
+          "type": "text"
+        },
+        {
+          "name": "aadhar_status",
+          "type": "text"
+        },
+        {
+          "name": "reject_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "date_of_birth",
+          "type": "text"
+        },
+        {
+          "name": "scheme_code",
+          "type": "text"
+        },
+        {
+          "name": "request_type",
+          "type": "text"
+        },
+        {
+          "name": "auth_txn",
+          "type": "text"
+        },
+        {
+          "name": "primary_auth_txn",
+          "type": "text"
+        },
+        {
+          "name": "request_agent",
+          "type": "text"
+        },
+        {
+          "name": "match_score",
+          "type": "text"
+        },
+        {
+          "name": "source_type",
+          "type": "text"
+        },
+        {
+          "name": "aadhaar_disp_code",
+          "type": "text"
+        },
+        {
+          "name": "yob_secc",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.claim_paid_excel_t",
+      "logicalName": "claim_paid_t",
+      "schema": "dmart_mp",
+      "table": "claim_paid_excel_t",
+      "label": "Claim Paid T",
+      "source": "database_documentation.docx",
+      "module": "claims",
+      "moduleLabel": "Claims & Payments",
+      "primaryKey": "registration_id",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "registration_id",
+          "type": "text"
+        },
+        {
+          "name": "case_id",
+          "type": "text"
+        },
+        {
+          "name": "member_id",
+          "type": "text"
+        },
+        {
+          "name": "family_id",
+          "type": "text"
+        },
+        {
+          "name": "patient_name",
+          "type": "text"
+        },
+        {
+          "name": "patient_dob",
+          "type": "text"
+        },
+        {
+          "name": "patient_state_code",
+          "type": "smallint"
+        },
+        {
+          "name": "patient_district_code",
+          "type": "smallint"
+        },
+        {
+          "name": "patient_district_name",
+          "type": "text"
+        },
+        {
+          "name": "patient_state_name",
+          "type": "text"
+        },
+        {
+          "name": "gender",
+          "type": "text"
+        },
+        {
+          "name": "age",
+          "type": "numeric"
+        },
+        {
+          "name": "policy_code",
+          "type": "text"
+        },
+        {
+          "name": "renewal_code",
+          "type": "text"
+        },
+        {
+          "name": "category_details",
+          "type": "text"
+        },
+        {
+          "name": "speciality_code",
+          "type": "text"
+        },
+        {
+          "name": "procedure_details",
+          "type": "text"
+        },
+        {
+          "name": "procedure_code",
+          "type": "text"
+        },
+        {
+          "name": "case_type",
+          "type": "text"
+        },
+        {
+          "name": "status_id_pk",
+          "type": "integer"
+        },
+        {
+          "name": "case_status",
+          "type": "text"
+        },
+        {
+          "name": "hospital_code",
+          "type": "text"
+        },
+        {
+          "name": "hospital_name",
+          "type": "text"
+        },
+        {
+          "name": "hosp_district_name",
+          "type": "text"
+        },
+        {
+          "name": "hosp_state_name",
+          "type": "text"
+        },
+        {
+          "name": "hospital_state_cd",
+          "type": "smallint"
+        },
+        {
+          "name": "hospital_district_cd",
+          "type": "smallint"
+        },
+        {
+          "name": "hosp_pan_number",
+          "type": "text"
+        },
+        {
+          "name": "hospital_type",
+          "type": "text"
+        },
+        {
+          "name": "admission_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "preauth_init_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "amount_preauth_initiated",
+          "type": "numeric"
+        },
+        {
+          "name": "preauth_approved_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "amount_preauth_approved",
+          "type": "numeric"
+        },
+        {
+          "name": "preauth_rejected_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "surgery_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "death_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "discharge_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "claim_init_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "amount_claim_initiated",
+          "type": "numeric"
+        },
+        {
+          "name": "amount_claim_approved",
+          "type": "numeric"
+        },
+        {
+          "name": "amount_claim_paid",
+          "type": "numeric"
+        },
+        {
+          "name": "claim_rejected_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "rf_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "tds_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "utr_no",
+          "type": "text"
+        },
+        {
+          "name": "payment_paid_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "transaction_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "cpd_approved_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "cpd_approved_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "cpd_user",
+          "type": "text"
+        },
+        {
+          "name": "aco_approved_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "aco_approved_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "aco_user",
+          "type": "text"
+        },
+        {
+          "name": "sha_approved_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "sha_approved_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "sha_user",
+          "type": "text"
+        },
+        {
+          "name": "json_object_perauth",
+          "type": "text"
+        },
+        {
+          "name": "json_object_claim",
+          "type": "text"
+        },
+        {
+          "name": "json_object_ben",
+          "type": "text"
+        },
+        {
+          "name": "last_insert_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "src_account_no",
+          "type": "text"
+        },
+        {
+          "name": "src_ifsc_code",
+          "type": "text"
+        },
+        {
+          "name": "paid_flag",
+          "type": "text"
+        },
+        {
+          "name": "hosp_account_number",
+          "type": "text"
+        },
+        {
+          "name": "ben_ifsc_code",
+          "type": "text"
+        },
+        {
+          "name": "current_workflow_role",
+          "type": "text"
+        },
+        {
+          "name": "current_workflow_user",
+          "type": "text"
+        },
+        {
+          "name": "service_request_type",
+          "type": "text"
+        },
+        {
+          "name": "m_flag",
+          "type": "integer"
+        },
+        {
+          "name": "careplan_desc",
+          "type": "text"
+        },
+        {
+          "name": "discharge_type",
+          "type": "text"
+        },
+        {
+          "name": "admission_type",
+          "type": "text"
+        },
+        {
+          "name": "claim_approved_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "preauth_tat",
+          "type": "bigint"
+        },
+        {
+          "name": "claim_tat",
+          "type": "bigint"
+        },
+        {
+          "name": "payment_tat",
+          "type": "bigint"
+        },
+        {
+          "name": "patient_mobile_number",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.claim_paid_excel_t",
+      "logicalName": "claim_paid_excel_t",
+      "schema": "dmart_mp",
+      "table": "claim_paid_excel_t",
+      "label": "Claims & Payments (claim_paid_excel_t)",
+      "source": "Data dictionary — Redshift TMS",
+      "module": "claims",
+      "moduleLabel": "Claims & Payments",
+      "primaryKey": "registration_id",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "registration_id",
+          "type": "text"
+        },
+        {
+          "name": "case_id",
+          "type": "text"
+        },
+        {
+          "name": "member_id",
+          "type": "text"
+        },
+        {
+          "name": "family_id",
+          "type": "text"
+        },
+        {
+          "name": "patient_name",
+          "type": "text"
+        },
+        {
+          "name": "patient_dob",
+          "type": "text"
+        },
+        {
+          "name": "patient_state_code",
+          "type": "smallint"
+        },
+        {
+          "name": "patient_district_code",
+          "type": "smallint"
+        },
+        {
+          "name": "patient_district_name",
+          "type": "text"
+        },
+        {
+          "name": "patient_state_name",
+          "type": "text"
+        },
+        {
+          "name": "gender",
+          "type": "text"
+        },
+        {
+          "name": "age",
+          "type": "numeric"
+        },
+        {
+          "name": "policy_code",
+          "type": "text"
+        },
+        {
+          "name": "renewal_code",
+          "type": "text"
+        },
+        {
+          "name": "category_details",
+          "type": "text"
+        },
+        {
+          "name": "speciality_code",
+          "type": "text"
+        },
+        {
+          "name": "procedure_details",
+          "type": "text"
+        },
+        {
+          "name": "procedure_code",
+          "type": "text"
+        },
+        {
+          "name": "case_type",
+          "type": "text"
+        },
+        {
+          "name": "status_id_pk",
+          "type": "integer"
+        },
+        {
+          "name": "case_status",
+          "type": "text"
+        },
+        {
+          "name": "hospital_code",
+          "type": "text"
+        },
+        {
+          "name": "hospital_name",
+          "type": "text"
+        },
+        {
+          "name": "hosp_district_name",
+          "type": "text"
+        },
+        {
+          "name": "hosp_state_name",
+          "type": "text"
+        },
+        {
+          "name": "hospital_state_cd",
+          "type": "smallint"
+        },
+        {
+          "name": "hospital_district_cd",
+          "type": "smallint"
+        },
+        {
+          "name": "hosp_pan_number",
+          "type": "text"
+        },
+        {
+          "name": "hospital_type",
+          "type": "text"
+        },
+        {
+          "name": "admission_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "preauth_init_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "amount_preauth_initiated",
+          "type": "numeric"
+        },
+        {
+          "name": "preauth_approved_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "amount_preauth_approved",
+          "type": "numeric"
+        },
+        {
+          "name": "preauth_rejected_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "surgery_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "death_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "discharge_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "claim_init_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "amount_claim_initiated",
+          "type": "numeric"
+        },
+        {
+          "name": "amount_claim_approved",
+          "type": "numeric"
+        },
+        {
+          "name": "amount_claim_paid",
+          "type": "numeric"
+        },
+        {
+          "name": "claim_rejected_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "rf_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "tds_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "utr_no",
+          "type": "text"
+        },
+        {
+          "name": "payment_paid_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "transaction_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "cpd_approved_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "cpd_approved_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "cpd_user",
+          "type": "text"
+        },
+        {
+          "name": "aco_approved_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "aco_approved_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "aco_user",
+          "type": "text"
+        },
+        {
+          "name": "sha_approved_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "sha_approved_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "sha_user",
+          "type": "text"
+        },
+        {
+          "name": "json_object_perauth",
+          "type": "text"
+        },
+        {
+          "name": "json_object_claim",
+          "type": "text"
+        },
+        {
+          "name": "json_object_ben",
+          "type": "text"
+        },
+        {
+          "name": "last_insert_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "src_account_no",
+          "type": "text"
+        },
+        {
+          "name": "src_ifsc_code",
+          "type": "text"
+        },
+        {
+          "name": "paid_flag",
+          "type": "text"
+        },
+        {
+          "name": "hosp_account_number",
+          "type": "text"
+        },
+        {
+          "name": "ben_ifsc_code",
+          "type": "text"
+        },
+        {
+          "name": "current_workflow_role",
+          "type": "text"
+        },
+        {
+          "name": "current_workflow_user",
+          "type": "text"
+        },
+        {
+          "name": "service_request_type",
+          "type": "text"
+        },
+        {
+          "name": "m_flag",
+          "type": "integer"
+        },
+        {
+          "name": "careplan_desc",
+          "type": "text"
+        },
+        {
+          "name": "discharge_type",
+          "type": "text"
+        },
+        {
+          "name": "admission_type",
+          "type": "text"
+        },
+        {
+          "name": "claim_approved_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "preauth_tat",
+          "type": "bigint"
+        },
+        {
+          "name": "claim_tat",
+          "type": "bigint"
+        },
+        {
+          "name": "payment_tat",
+          "type": "bigint"
+        },
+        {
+          "name": "patient_mobile_number",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.claim_paid_t_portability",
+      "logicalName": "claim_paid_t_portability",
+      "schema": "dmart_mp",
+      "table": "claim_paid_t_portability",
+      "label": "Claim Paid T Portability",
+      "source": "database_documentation.docx",
+      "module": "claims",
+      "moduleLabel": "Claims & Payments",
+      "primaryKey": "registration_id",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "registration_id",
+          "type": "text"
+        },
+        {
+          "name": "case_id",
+          "type": "text"
+        },
+        {
+          "name": "member_id",
+          "type": "text"
+        },
+        {
+          "name": "family_id",
+          "type": "text"
+        },
+        {
+          "name": "patient_name",
+          "type": "text"
+        },
+        {
+          "name": "patient_dob",
+          "type": "text"
+        },
+        {
+          "name": "patient_state_code",
+          "type": "smallint"
+        },
+        {
+          "name": "patient_district_code",
+          "type": "smallint"
+        },
+        {
+          "name": "patient_district_name",
+          "type": "text"
+        },
+        {
+          "name": "patient_state_name",
+          "type": "text"
+        },
+        {
+          "name": "gender",
+          "type": "text"
+        },
+        {
+          "name": "age",
+          "type": "numeric"
+        },
+        {
+          "name": "policy_code",
+          "type": "text"
+        },
+        {
+          "name": "renewal_code",
+          "type": "text"
+        },
+        {
+          "name": "category_details",
+          "type": "text"
+        },
+        {
+          "name": "speciality_code",
+          "type": "text"
+        },
+        {
+          "name": "procedure_details",
+          "type": "text"
+        },
+        {
+          "name": "procedure_code",
+          "type": "text"
+        },
+        {
+          "name": "case_type",
+          "type": "text"
+        },
+        {
+          "name": "status_id_pk",
+          "type": "integer"
+        },
+        {
+          "name": "case_status",
+          "type": "text"
+        },
+        {
+          "name": "hospital_code",
+          "type": "text"
+        },
+        {
+          "name": "hospital_name",
+          "type": "text"
+        },
+        {
+          "name": "hosp_district_name",
+          "type": "text"
+        },
+        {
+          "name": "hosp_state_name",
+          "type": "text"
+        },
+        {
+          "name": "hospital_state_cd",
+          "type": "smallint"
+        },
+        {
+          "name": "hospital_district_cd",
+          "type": "smallint"
+        },
+        {
+          "name": "hosp_pan_number",
+          "type": "text"
+        },
+        {
+          "name": "hospital_type",
+          "type": "text"
+        },
+        {
+          "name": "admission_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "preauth_init_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "amount_preauth_initiated",
+          "type": "numeric"
+        },
+        {
+          "name": "preauth_approved_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "amount_preauth_approved",
+          "type": "numeric"
+        },
+        {
+          "name": "preauth_rejected_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "surgery_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "death_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "discharge_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "claim_init_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "amount_claim_initiated",
+          "type": "numeric"
+        },
+        {
+          "name": "amount_claim_approved",
+          "type": "numeric"
+        },
+        {
+          "name": "amount_claim_paid",
+          "type": "numeric"
+        },
+        {
+          "name": "claim_rejected_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "rf_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "tds_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "utr_no",
+          "type": "text"
+        },
+        {
+          "name": "payment_paid_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "transaction_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "cpd_approved_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "cpd_approved_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "cpd_user",
+          "type": "text"
+        },
+        {
+          "name": "aco_approved_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "aco_approved_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "aco_user",
+          "type": "text"
+        },
+        {
+          "name": "sha_approved_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "sha_approved_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "sha_user",
+          "type": "text"
+        },
+        {
+          "name": "json_object_perauth",
+          "type": "text"
+        },
+        {
+          "name": "json_object_claim",
+          "type": "text"
+        },
+        {
+          "name": "json_object_ben",
+          "type": "text"
+        },
+        {
+          "name": "src_account_no",
+          "type": "text"
+        },
+        {
+          "name": "src_ifsc_code",
+          "type": "text"
+        },
+        {
+          "name": "paid_flag",
+          "type": "text"
+        },
+        {
+          "name": "hosp_account_number",
+          "type": "text"
+        },
+        {
+          "name": "ben_ifsc_code",
+          "type": "text"
+        },
+        {
+          "name": "current_workflow_role",
+          "type": "text"
+        },
+        {
+          "name": "current_workflow_user",
+          "type": "text"
+        },
+        {
+          "name": "service_request_type",
+          "type": "text"
+        },
+        {
+          "name": "m_flag",
+          "type": "integer"
+        },
+        {
+          "name": "careplan_desc",
+          "type": "text"
+        },
+        {
+          "name": "discharge_type",
+          "type": "text"
+        },
+        {
+          "name": "admission_type",
+          "type": "text"
+        },
+        {
+          "name": "claim_approved_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "last_insert_dt",
+          "type": "timestamptz"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.payment_dtls",
+      "logicalName": "payment_dtls",
+      "schema": "dmart_mp",
+      "table": "payment_dtls",
+      "label": "Payment Dtls",
+      "source": "database_documentation.docx",
+      "module": "claims",
+      "moduleLabel": "Claims & Payments",
+      "primaryKey": "case_id",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "case_id",
+          "type": "text"
+        },
+        {
+          "name": "payment_type",
+          "type": "text"
+        },
+        {
+          "name": "bank_name",
+          "type": "text"
+        },
+        {
+          "name": "payment_unique_id",
+          "type": "text"
+        },
+        {
+          "name": "careplan_id",
+          "type": "text"
+        },
+        {
+          "name": "src_account_no",
+          "type": "text"
+        },
+        {
+          "name": "src_ifsc_code",
+          "type": "text"
+        },
+        {
+          "name": "transaction_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "transaction_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "upload_file_name",
+          "type": "text"
+        },
+        {
+          "name": "paid_flag",
+          "type": "text"
+        },
+        {
+          "name": "payment_paid_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "paid_remarks",
+          "type": "text"
+        },
+        {
+          "name": "payment_remarks",
+          "type": "text"
+        },
+        {
+          "name": "state_code",
+          "type": "text"
+        },
+        {
+          "name": "payer_id",
+          "type": "text"
+        },
+        {
+          "name": "reject_code",
+          "type": "text"
+        },
+        {
+          "name": "reject_flag",
+          "type": "text"
+        },
+        {
+          "name": "reject_remarks",
+          "type": "text"
+        },
+        {
+          "name": "payment_reject_dt",
+          "type": "timestamptz"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.t_payment_dtls",
+      "logicalName": "t_payment_dtls",
+      "schema": "dmart_mp",
+      "table": "t_payment_dtls",
+      "label": "T Payment Dtls",
+      "source": "database_documentation.docx",
+      "module": "claims",
+      "moduleLabel": "Claims & Payments",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "integer"
+        },
+        {
+          "name": "case_id",
+          "type": "text"
+        },
+        {
+          "name": "payment_tran_type",
+          "type": "text"
+        },
+        {
+          "name": "payment_type",
+          "type": "text"
+        },
+        {
+          "name": "payment_unique_id",
+          "type": "text"
+        },
+        {
+          "name": "payment_sequence_id",
+          "type": "text"
+        },
+        {
+          "name": "careplan_id",
+          "type": "integer"
+        },
+        {
+          "name": "src_bank_id",
+          "type": "text"
+        },
+        {
+          "name": "src_account_no",
+          "type": "text"
+        },
+        {
+          "name": "src_ifsc_code",
+          "type": "text"
+        },
+        {
+          "name": "ben_bank_id",
+          "type": "text"
+        },
+        {
+          "name": "ben_account_no",
+          "type": "text"
+        },
+        {
+          "name": "ben_ifsc_code",
+          "type": "text"
+        },
+        {
+          "name": "ben_account_name",
+          "type": "text"
+        },
+        {
+          "name": "ben_mail_id",
+          "type": "text"
+        },
+        {
+          "name": "ben_account_address",
+          "type": "text"
+        },
+        {
+          "name": "ben_provider_type",
+          "type": "text"
+        },
+        {
+          "name": "ben_provider_id",
+          "type": "text"
+        },
+        {
+          "name": "transaction_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "bank_transaction_type",
+          "type": "text"
+        },
+        {
+          "name": "transaction_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "upload_file_name",
+          "type": "text"
+        },
+        {
+          "name": "upload_file_path",
+          "type": "text"
+        },
+        {
+          "name": "payment_sent_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "reject_code",
+          "type": "text"
+        },
+        {
+          "name": "reject_flag",
+          "type": "text"
+        },
+        {
+          "name": "reject_remarks",
+          "type": "text"
+        },
+        {
+          "name": "payment_reject_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "paid_flag",
+          "type": "text"
+        },
+        {
+          "name": "payment_paid_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "paid_remarks",
+          "type": "text"
+        },
+        {
+          "name": "ack_flag",
+          "type": "text"
+        },
+        {
+          "name": "ack_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "scheduler_flag",
+          "type": "text"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_by",
+          "type": "text"
+        },
+        {
+          "name": "updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "ben_bank_branch",
+          "type": "text"
+        },
+        {
+          "name": "src_bank_name",
+          "type": "text"
+        },
+        {
+          "name": "registration_id",
+          "type": "text"
+        },
+        {
+          "name": "case_no",
+          "type": "text"
+        },
+        {
+          "name": "re_init_flag",
+          "type": "text"
+        },
+        {
+          "name": "state_code",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.tms_recovery",
+      "logicalName": "tms_recovery",
+      "schema": "dmart_mp",
+      "table": "tms_recovery",
+      "label": "Tms Recovery",
+      "source": "database_documentation.docx",
+      "module": "claims",
+      "moduleLabel": "Claims & Payments",
+      "primaryKey": "case_id",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "hosp_disp_code",
+          "type": "text"
+        },
+        {
+          "name": "case_id",
+          "type": "text"
+        },
+        {
+          "name": "requested_recovery_amount",
+          "type": "bigint"
+        },
+        {
+          "name": "reason",
+          "type": "text"
+        },
+        {
+          "name": "remarks",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "tobe_recovered_amt",
+          "type": "bigint"
+        },
+        {
+          "name": "recovered_case_id",
+          "type": "text"
+        },
+        {
+          "name": "recovered_amt",
+          "type": "bigint"
+        },
+        {
+          "name": "recovery_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "recovery_status",
+          "type": "text"
+        },
+        {
+          "name": "payer_id",
+          "type": "text"
+        },
+        {
+          "name": "state_code",
+          "type": "bigint"
+        },
+        {
+          "name": "state_name",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.t_suspicious_api_case_data",
+      "logicalName": "t_suspicious_api_case_data",
+      "schema": "dmart_mp",
+      "table": "t_suspicious_api_case_data",
+      "label": "T Suspicious Api Case Data",
+      "source": "database_documentation.docx",
+      "module": "fraud",
+      "moduleLabel": "Fraud and Audit",
+      "primaryKey": "suspicion_id",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "state_lgd_code",
+          "type": "text"
+        },
+        {
+          "name": "reference_number",
+          "type": "text"
+        },
+        {
+          "name": "application_type",
+          "type": "text"
+        },
+        {
+          "name": "lst_trigger_event_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "remarks",
+          "type": "text"
+        },
+        {
+          "name": "crt_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "crt_usr",
+          "type": "text"
+        },
+        {
+          "name": "updt_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updt_usr",
+          "type": "text"
+        },
+        {
+          "name": "suspicion_id",
+          "type": "text"
+        },
+        {
+          "name": "entity_id",
+          "type": "text"
+        },
+        {
+          "name": "entity_type",
+          "type": "text"
+        },
+        {
+          "name": "entity_name",
+          "type": "text"
+        },
+        {
+          "name": "risk_score",
+          "type": "bigint"
+        },
+        {
+          "name": "medag_or_safo",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.t_suspicious_api_case_dtls",
+      "logicalName": "t_suspicious_api_case_dtls",
+      "schema": "dmart_mp",
+      "table": "t_suspicious_api_case_dtls",
+      "label": "T Suspicious Api Case Dtls",
+      "source": "database_documentation.docx",
+      "module": "fraud",
+      "moduleLabel": "Fraud and Audit",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "bigint"
+        },
+        {
+          "name": "state_lgd_code",
+          "type": "text"
+        },
+        {
+          "name": "reference_number",
+          "type": "text"
+        },
+        {
+          "name": "application_type",
+          "type": "text"
+        },
+        {
+          "name": "vendor_id",
+          "type": "text"
+        },
+        {
+          "name": "trigger_type",
+          "type": "text"
+        },
+        {
+          "name": "trigger_code",
+          "type": "text"
+        },
+        {
+          "name": "trigger_time",
+          "type": "timestamptz"
+        },
+        {
+          "name": "trigger_reason",
+          "type": "text"
+        },
+        {
+          "name": "crt_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "crt_usr",
+          "type": "text"
+        },
+        {
+          "name": "flag",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.hospital_master",
+      "logicalName": "hospital_master",
+      "schema": "dmart_mp",
+      "table": "hospital_master",
+      "label": "Hospital Master",
+      "source": "SQL schema / Hospital module",
+      "module": "hospitals",
+      "moduleLabel": "Hospitals & Empanelment",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "text"
+        },
+        {
+          "name": "hospital_code",
+          "type": "text"
+        },
+        {
+          "name": "district_name",
+          "type": "text"
+        },
+        {
+          "name": "active_status",
+          "type": "text"
+        },
+        {
+          "name": "nabh_certified",
+          "type": "text"
+        },
+        {
+          "name": "hospital_type",
+          "type": "text"
+        },
+        {
+          "name": "enrl_status",
+          "type": "text"
+        },
+        {
+          "name": "bed_capacity",
+          "type": "text"
+        },
+        {
+          "name": "hospital_name",
+          "type": "text"
+        },
+        {
+          "name": "accreditation_status",
+          "type": "text"
+        },
+        {
+          "name": "empaneled_date",
+          "type": "text"
+        },
+        {
+          "name": "facility_id",
+          "type": "text"
+        },
+        {
+          "name": "hosp_spec_type",
+          "type": "text"
+        },
+        {
+          "name": "pgdnb_status",
+          "type": "text"
+        },
+        {
+          "name": "division_name",
+          "type": "text"
+        },
+        {
+          "name": "deempanel_status",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.hospital_master_with_quality_certification",
+      "logicalName": "hospital_master_with_quality_certification",
+      "schema": "dmart_mp",
+      "table": "hospital_master_with_quality_certification",
+      "label": "Hospital Master With Quality Certification",
+      "source": "database_documentation.docx",
+      "module": "hospitals",
+      "moduleLabel": "Hospitals & Empanelment",
+      "primaryKey": "hosp_state",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "hosp_state",
+          "type": "smallint"
+        },
+        {
+          "name": "hosp_dist",
+          "type": "smallint"
+        },
+        {
+          "name": "hospital_type",
+          "type": "text"
+        },
+        {
+          "name": "hosp_id",
+          "type": "integer"
+        },
+        {
+          "name": "facility_id",
+          "type": "text"
+        },
+        {
+          "name": "hosp_name",
+          "type": "text"
+        },
+        {
+          "name": "hosp_request_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "hosp_empaneled_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "hosp_spec_type",
+          "type": "text"
+        },
+        {
+          "name": "hosp_spec_desc",
+          "type": "text"
+        },
+        {
+          "name": "enrl_status",
+          "type": "integer"
+        },
+        {
+          "name": "active_status",
+          "type": "integer"
+        },
+        {
+          "name": "deempanel_status",
+          "type": "integer"
+        },
+        {
+          "name": "hosp_status",
+          "type": "integer"
+        },
+        {
+          "name": "hosp_status_desc",
+          "type": "text"
+        },
+        {
+          "name": "bed_size",
+          "type": "integer"
+        },
+        {
+          "name": "app_status",
+          "type": "integer"
+        },
+        {
+          "name": "accreditation_status",
+          "type": "text"
+        },
+        {
+          "name": "accred_id",
+          "type": "text"
+        },
+        {
+          "name": "quality_certification",
+          "type": "text"
+        },
+        {
+          "name": "m_flag",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.hospital_master_with_quality_certification_final",
+      "logicalName": "hospital_master_with_quality_certification_final",
+      "schema": "dmart_mp",
+      "table": "hospital_master_with_quality_certification_final",
+      "label": "Hospital Master With Quality Certification Final",
+      "source": "database_documentation.docx",
+      "module": "hospitals",
+      "moduleLabel": "Hospitals & Empanelment",
+      "primaryKey": "hosp_id",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "hosp_id",
+          "type": "integer"
+        },
+        {
+          "name": "facility_id",
+          "type": "text"
+        },
+        {
+          "name": "hosp_name",
+          "type": "text"
+        },
+        {
+          "name": "hem_speciality",
+          "type": "text"
+        },
+        {
+          "name": "hosp_state",
+          "type": "smallint"
+        },
+        {
+          "name": "state_name",
+          "type": "text"
+        },
+        {
+          "name": "hospital_type",
+          "type": "text"
+        },
+        {
+          "name": "hosp_dist",
+          "type": "smallint"
+        },
+        {
+          "name": "hosp_request_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "hosp_empaneled_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "hosp_spec_type",
+          "type": "text"
+        },
+        {
+          "name": "enrl_status",
+          "type": "integer"
+        },
+        {
+          "name": "active_status",
+          "type": "integer"
+        },
+        {
+          "name": "deempanel_status",
+          "type": "integer"
+        },
+        {
+          "name": "hosp_status",
+          "type": "integer"
+        },
+        {
+          "name": "hosp_status_desc",
+          "type": "text"
+        },
+        {
+          "name": "bed_size",
+          "type": "integer"
+        },
+        {
+          "name": "app_status",
+          "type": "integer"
+        },
+        {
+          "name": "accreditation_status",
+          "type": "text"
+        },
+        {
+          "name": "accred_id",
+          "type": "text"
+        },
+        {
+          "name": "quality_certification",
+          "type": "text"
+        },
+        {
+          "name": "m_flag",
+          "type": "text"
+        },
+        {
+          "name": "hosp_city",
+          "type": "text"
+        },
+        {
+          "name": "hosp_email_id",
+          "type": "text"
+        },
+        {
+          "name": "hosp_mobile_no",
+          "type": "bigint"
+        },
+        {
+          "name": "hosp_contact_no",
+          "type": "text"
+        },
+        {
+          "name": "hosp_address",
+          "type": "text"
+        },
+        {
+          "name": "hosp_pan_number",
+          "type": "text"
+        },
+        {
+          "name": "account_number",
+          "type": "text"
+        },
+        {
+          "name": "ifsc",
+          "type": "text"
+        },
+        {
+          "name": "hosp_longitude",
+          "type": "text"
+        },
+        {
+          "name": "hosp_latitude",
+          "type": "text"
+        },
+        {
+          "name": "speciality_code",
+          "type": "text"
+        },
+        {
+          "name": "speciality",
+          "type": "text"
+        },
+        {
+          "name": "district_name",
+          "type": "text"
+        },
+        {
+          "name": "hospital_subtype",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.t_deempanelment_details",
+      "logicalName": "t_deempanelment_details",
+      "schema": "dmart_mp",
+      "table": "t_deempanelment_details",
+      "label": "T Deempanelment Details",
+      "source": "database_documentation.docx",
+      "module": "hospitals",
+      "moduleLabel": "Hospitals & Empanelment",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "integer"
+        },
+        {
+          "name": "hosp_id",
+          "type": "integer"
+        },
+        {
+          "name": "status",
+          "type": "integer"
+        },
+        {
+          "name": "end_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "start_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "app_status",
+          "type": "integer"
+        },
+        {
+          "name": "stop_payment",
+          "type": "text"
+        },
+        {
+          "name": "remarks",
+          "type": "text"
+        },
+        {
+          "name": "attachment",
+          "type": "text"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_by",
+          "type": "text"
+        },
+        {
+          "name": "updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "type",
+          "type": "text"
+        },
+        {
+          "name": "reasons",
+          "type": "text"
+        },
+        {
+          "name": "deempanel_scheme",
+          "type": "text"
+        },
+        {
+          "name": "deempanel_speclity",
+          "type": "text"
+        },
+        {
+          "name": "due_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "documents",
+          "type": "text"
+        },
+        {
+          "name": "media",
+          "type": "text"
+        },
+        {
+          "name": "order_id",
+          "type": "integer"
+        },
+        {
+          "name": "action_applicable_days",
+          "type": "integer"
+        },
+        {
+          "name": "preauth_enable",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.t_hem_hospital",
+      "logicalName": "t_hem_hospital",
+      "schema": "dmart_mp",
+      "table": "t_hem_hospital",
+      "label": "T Hem Hospital",
+      "source": "database_documentation.docx",
+      "module": "hospitals",
+      "moduleLabel": "Hospitals & Empanelment",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "integer"
+        },
+        {
+          "name": "hosp_id",
+          "type": "integer"
+        },
+        {
+          "name": "hfr_hosp_id",
+          "type": "text"
+        },
+        {
+          "name": "hosp_name",
+          "type": "text"
+        },
+        {
+          "name": "hosp_address",
+          "type": "text"
+        },
+        {
+          "name": "hosp_city",
+          "type": "text"
+        },
+        {
+          "name": "hosp_pin",
+          "type": "integer"
+        },
+        {
+          "name": "state_cd",
+          "type": "smallint"
+        },
+        {
+          "name": "dist_cd",
+          "type": "smallint"
+        },
+        {
+          "name": "hosp_mobile_no",
+          "type": "bigint"
+        },
+        {
+          "name": "hosp_email_id",
+          "type": "text"
+        },
+        {
+          "name": "hosp_contact_no",
+          "type": "text"
+        },
+        {
+          "name": "hosp_website",
+          "type": "text"
+        },
+        {
+          "name": "hosp_rating",
+          "type": "smallint"
+        },
+        {
+          "name": "hosp_type_cd",
+          "type": "text"
+        },
+        {
+          "name": "hosp_empnl_type",
+          "type": "text"
+        },
+        {
+          "name": "hosp_longitude",
+          "type": "text"
+        },
+        {
+          "name": "hosp_latitude",
+          "type": "text"
+        },
+        {
+          "name": "hosp_gstin",
+          "type": "text"
+        },
+        {
+          "name": "json_obj_hosp_dtl",
+          "type": "text"
+        },
+        {
+          "name": "active_status",
+          "type": "integer"
+        },
+        {
+          "name": "enrl_status",
+          "type": "integer"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_by",
+          "type": "text"
+        },
+        {
+          "name": "updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "nodal_officer_name",
+          "type": "text"
+        },
+        {
+          "name": "facility_id",
+          "type": "text"
+        },
+        {
+          "name": "nodal_officer_number",
+          "type": "bigint"
+        },
+        {
+          "name": "type",
+          "type": "text"
+        },
+        {
+          "name": "hfr_facility_id",
+          "type": "text"
+        },
+        {
+          "name": "hosp_spec_type",
+          "type": "text"
+        },
+        {
+          "name": "upgrade_status",
+          "type": "integer"
+        },
+        {
+          "name": "cluster_id",
+          "type": "integer"
+        },
+        {
+          "name": "deempanel_status",
+          "type": "integer"
+        },
+        {
+          "name": "u_role",
+          "type": "text"
+        },
+        {
+          "name": "group_id",
+          "type": "text"
+        },
+        {
+          "name": "pgdnb_status",
+          "type": "text"
+        },
+        {
+          "name": "nodal_officer_email",
+          "type": "text"
+        },
+        {
+          "name": "company_name",
+          "type": "text"
+        },
+        {
+          "name": "cin_number",
+          "type": "text"
+        },
+        {
+          "name": "establishment_year",
+          "type": "text"
+        },
+        {
+          "name": "entity_id",
+          "type": "integer"
+        },
+        {
+          "name": "empaneled_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "hosp_type_cd_sub1",
+          "type": "text"
+        },
+        {
+          "name": "bed_size",
+          "type": "integer"
+        },
+        {
+          "name": "data_source",
+          "type": "text"
+        },
+        {
+          "name": "certificate_expiry_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "is_pv_required",
+          "type": "integer"
+        },
+        {
+          "name": "audit_status",
+          "type": "integer"
+        },
+        {
+          "name": "hbp_hospital_id",
+          "type": "text"
+        },
+        {
+          "name": "old_hosp_id",
+          "type": "text"
+        },
+        {
+          "name": "query_allowed",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.lms_user_course_completion_status",
+      "logicalName": "lms_user_course_completion_status",
+      "schema": "dmart_mp",
+      "table": "lms_user_course_completion_status",
+      "label": "Lms User Course Completion Status",
+      "source": "database_documentation.docx",
+      "module": "lms",
+      "moduleLabel": "LMS Training",
+      "primaryKey": "userid",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "userid",
+          "type": "bigint"
+        },
+        {
+          "name": "username",
+          "type": "text"
+        },
+        {
+          "name": "firstname",
+          "type": "text"
+        },
+        {
+          "name": "lastname",
+          "type": "text"
+        },
+        {
+          "name": "phone2",
+          "type": "text"
+        },
+        {
+          "name": "email",
+          "type": "text"
+        },
+        {
+          "name": "ab_pmjay_status",
+          "type": "text"
+        },
+        {
+          "name": "ab_pmjay_completed_epoch",
+          "type": "bigint"
+        },
+        {
+          "name": "ab_pmjay_completed_at_utc",
+          "type": "timestamptz"
+        },
+        {
+          "name": "abdm_status",
+          "type": "text"
+        },
+        {
+          "name": "abdm_completed_epoch",
+          "type": "bigint"
+        },
+        {
+          "name": "abdm_completed_at_utc",
+          "type": "timestamptz"
+        },
+        {
+          "name": "parententity",
+          "type": "text"
+        },
+        {
+          "name": "entitytype",
+          "type": "text"
+        },
+        {
+          "name": "selfentity",
+          "type": "text"
+        },
+        {
+          "name": "role",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.icd_data_doctor_details",
+      "logicalName": "icd_data_doctor_details",
+      "schema": "dmart_mp",
+      "table": "icd_data_doctor_details",
+      "label": "Icd Data Doctor Details",
+      "source": "database_documentation.docx",
+      "module": "patients",
+      "moduleLabel": "Patients & Treatment",
+      "primaryKey": "registration_id",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "registration_id",
+          "type": "text"
+        },
+        {
+          "name": "case_id",
+          "type": "text"
+        },
+        {
+          "name": "id",
+          "type": "bigint"
+        },
+        {
+          "name": "code",
+          "type": "text"
+        },
+        {
+          "name": "display",
+          "type": "text"
+        },
+        {
+          "name": "type",
+          "type": "text"
+        },
+        {
+          "name": "typedescription",
+          "type": "text"
+        },
+        {
+          "name": "idpk",
+          "type": "text"
+        },
+        {
+          "name": "patient_state_code",
+          "type": "smallint"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.t_patient_dtl",
+      "logicalName": "t_patient_dtl",
+      "schema": "dmart_mp",
+      "table": "t_patient_dtl",
+      "label": "T Patient Dtl",
+      "source": "database_documentation.docx",
+      "module": "patients",
+      "moduleLabel": "Patients & Treatment",
+      "primaryKey": "registration_id",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "state_code",
+          "type": "smallint"
+        },
+        {
+          "name": "district_code",
+          "type": "smallint"
+        },
+        {
+          "name": "is_authenticated",
+          "type": "smallint"
+        },
+        {
+          "name": "registration_id",
+          "type": "text"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "registration_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "authentication_type",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.t_patient_dtls",
+      "logicalName": "t_patient_dtls",
+      "schema": "dmart_mp",
+      "table": "t_patient_dtls",
+      "label": "T Patient Dtls",
+      "source": "database_documentation.docx",
+      "module": "patients",
+      "moduleLabel": "Patients & Treatment",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "integer"
+        },
+        {
+          "name": "registration_id",
+          "type": "text"
+        },
+        {
+          "name": "careplan_id",
+          "type": "integer"
+        },
+        {
+          "name": "program_id",
+          "type": "text"
+        },
+        {
+          "name": "state_code",
+          "type": "smallint"
+        },
+        {
+          "name": "district_code",
+          "type": "smallint"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "dob",
+          "type": "text"
+        },
+        {
+          "name": "gender",
+          "type": "text"
+        },
+        {
+          "name": "registration_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "hospital_id",
+          "type": "integer"
+        },
+        {
+          "name": "hospital_name",
+          "type": "text"
+        },
+        {
+          "name": "status_id",
+          "type": "smallint"
+        },
+        {
+          "name": "referral_id",
+          "type": "text"
+        },
+        {
+          "name": "ref_object_datavault",
+          "type": "text"
+        },
+        {
+          "name": "ip_op",
+          "type": "text"
+        },
+        {
+          "name": "consent_data",
+          "type": "smallint"
+        },
+        {
+          "name": "member_type",
+          "type": "text"
+        },
+        {
+          "name": "amount",
+          "type": "numeric"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_by",
+          "type": "text"
+        },
+        {
+          "name": "updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "case_id",
+          "type": "text"
+        },
+        {
+          "name": "hist_created_by",
+          "type": "text"
+        },
+        {
+          "name": "hist_created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "json_object_registration",
+          "type": "text"
+        },
+        {
+          "name": "json_object_preauthorisation",
+          "type": "text"
+        },
+        {
+          "name": "json_object_claim",
+          "type": "text"
+        },
+        {
+          "name": "remarks",
+          "type": "text"
+        },
+        {
+          "name": "is_authenticated",
+          "type": "smallint"
+        },
+        {
+          "name": "authentication_type",
+          "type": "text"
+        },
+        {
+          "name": "authentication_value",
+          "type": "text"
+        },
+        {
+          "name": "admission_type",
+          "type": "text"
+        },
+        {
+          "name": "admission_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "surgery_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "discharge_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "m_flag",
+          "type": "smallint"
+        },
+        {
+          "name": "reason_code",
+          "type": "text"
+        },
+        {
+          "name": "renewal_id",
+          "type": "integer"
+        },
+        {
+          "name": "family_id",
+          "type": "text"
+        },
+        {
+          "name": "discharge_type",
+          "type": "text"
+        },
+        {
+          "name": "discharge_sub_type",
+          "type": "text"
+        },
+        {
+          "name": "death_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "stage",
+          "type": "text"
+        },
+        {
+          "name": "datalake_scheduler_flag",
+          "type": "text"
+        },
+        {
+          "name": "payer_name",
+          "type": "text"
+        },
+        {
+          "name": "renewal_code",
+          "type": "text"
+        },
+        {
+          "name": "hosp_bill_number",
+          "type": "text"
+        },
+        {
+          "name": "ben_type",
+          "type": "text"
+        },
+        {
+          "name": "portability",
+          "type": "text"
+        },
+        {
+          "name": "hosp_careplan_id",
+          "type": "integer"
+        },
+        {
+          "name": "hosp_renewal_id",
+          "type": "integer"
+        },
+        {
+          "name": "state_transition_flag",
+          "type": "text"
+        },
+        {
+          "name": "table_name",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.t_morth_patient_details",
+      "logicalName": "t_morth_patient_details",
+      "schema": "dmart_mp",
+      "table": "t_morth_patient_details",
+      "label": "MORTH Patient Details",
+      "source": "Result 18.csv",
+      "module": "patients",
+      "moduleLabel": "Patients & Treatment",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "bigint"
+        },
+        {
+          "name": "addmission_type",
+          "type": "text"
+        },
+        {
+          "name": "govt_id_type",
+          "type": "text"
+        },
+        {
+          "name": "govt_id",
+          "type": "text"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "age",
+          "type": "integer"
+        },
+        {
+          "name": "gender",
+          "type": "text"
+        },
+        {
+          "name": "father_spouce_name",
+          "type": "text"
+        },
+        {
+          "name": "identity_mark",
+          "type": "text"
+        },
+        {
+          "name": "pincode",
+          "type": "text"
+        },
+        {
+          "name": "state",
+          "type": "text"
+        },
+        {
+          "name": "district",
+          "type": "text"
+        },
+        {
+          "name": "town",
+          "type": "text"
+        },
+        {
+          "name": "address_1",
+          "type": "text"
+        },
+        {
+          "name": "address_2",
+          "type": "text"
+        },
+        {
+          "name": "mobile_number",
+          "type": "text"
+        },
+        {
+          "name": "location_of_accident",
+          "type": "text"
+        },
+        {
+          "name": "date_of_accident",
+          "type": "text"
+        },
+        {
+          "name": "time_of_accident",
+          "type": "text"
+        },
+        {
+          "name": "collision_type",
+          "type": "text"
+        },
+        {
+          "name": "collision_nature",
+          "type": "text"
+        },
+        {
+          "name": "details_of_injury",
+          "type": "text"
+        },
+        {
+          "name": "ambulance_vehicle_number",
+          "type": "text"
+        },
+        {
+          "name": "accident_severity",
+          "type": "text"
+        },
+        {
+          "name": "no_of_vehicle",
+          "type": "integer"
+        },
+        {
+          "name": "care_plan",
+          "type": "text"
+        },
+        {
+          "name": "patient_brought_by",
+          "type": "text"
+        },
+        {
+          "name": "brought_by_fullname",
+          "type": "text"
+        },
+        {
+          "name": "brought_by_relation",
+          "type": "text"
+        },
+        {
+          "name": "brought_by_mobile",
+          "type": "text"
+        },
+        {
+          "name": "json_capture_photo",
+          "type": "text"
+        },
+        {
+          "name": "patient_registration_id",
+          "type": "text"
+        },
+        {
+          "name": "patient_con_uncon",
+          "type": "text"
+        },
+        {
+          "name": "edar_victim_id",
+          "type": "text"
+        },
+        {
+          "name": "hospital_id",
+          "type": "bigint"
+        },
+        {
+          "name": "hospital_name",
+          "type": "text"
+        },
+        {
+          "name": "hospital_address",
+          "type": "text"
+        },
+        {
+          "name": "is_pushed_to_edhar",
+          "type": "text"
+        },
+        {
+          "name": "edar_update_time",
+          "type": "timestamptz"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_by",
+          "type": "text"
+        },
+        {
+          "name": "updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "is_victim_id_exist",
+          "type": "text"
+        },
+        {
+          "name": "cause_of_accident",
+          "type": "text"
+        },
+        {
+          "name": "victim_id_updated_dt_by_edar",
+          "type": "timestamptz"
+        },
+        {
+          "name": "victim_id_remark_by_edar",
+          "type": "text"
+        },
+        {
+          "name": "victim_id_approval_flag_by_edar",
+          "type": "text"
+        },
+        {
+          "name": "hospital_state_code",
+          "type": "text"
+        },
+        {
+          "name": "hospital_district_code",
+          "type": "text"
+        },
+        {
+          "name": "pid",
+          "type": "text"
+        },
+        {
+          "name": "district_of_accident",
+          "type": "text"
+        },
+        {
+          "name": "district_name_of_accident",
+          "type": "text"
+        },
+        {
+          "name": "state_of_accident",
+          "type": "text"
+        },
+        {
+          "name": "state_name_of_accident",
+          "type": "text"
+        },
+        {
+          "name": "responded_district_of_accident",
+          "type": "text"
+        },
+        {
+          "name": "responded_state_of_accident",
+          "type": "text"
+        },
+        {
+          "name": "life_threatening",
+          "type": "text"
+        },
+        {
+          "name": "accident_brought_to_hospital",
+          "type": "text"
+        },
+        {
+          "name": "landmark",
+          "type": "text"
+        },
+        {
+          "name": "brought_by_ambulance",
+          "type": "text"
+        },
+        {
+          "name": "attachment_content",
+          "type": "text"
+        },
+        {
+          "name": "request_json",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.treatment_dtls",
+      "logicalName": "treatment_dtls",
+      "schema": "dmart_mp",
+      "table": "treatment_dtls",
+      "label": "Treatment Dtls",
+      "source": "database_documentation.docx",
+      "module": "patients",
+      "moduleLabel": "Patients & Treatment",
+      "primaryKey": "registration_id",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "registration_id",
+          "type": "text"
+        },
+        {
+          "name": "caseid",
+          "type": "text"
+        },
+        {
+          "name": "item_id",
+          "type": "text"
+        },
+        {
+          "name": "type",
+          "type": "text"
+        },
+        {
+          "name": "type_desc",
+          "type": "text"
+        },
+        {
+          "name": "date_on_which",
+          "type": "text"
+        },
+        {
+          "name": "procedure_id",
+          "type": "text"
+        },
+        {
+          "name": "procedure_code",
+          "type": "text"
+        },
+        {
+          "name": "procedure_name",
+          "type": "text"
+        },
+        {
+          "name": "procedure_strat",
+          "type": "text"
+        },
+        {
+          "name": "procedure_strat_name",
+          "type": "text"
+        },
+        {
+          "name": "stratification_amount",
+          "type": "text"
+        },
+        {
+          "name": "procedure_type",
+          "type": "text"
+        },
+        {
+          "name": "amount",
+          "type": "text"
+        },
+        {
+          "name": "factor",
+          "type": "text"
+        },
+        {
+          "name": "approved_factor",
+          "type": "text"
+        },
+        {
+          "name": "no_of_days",
+          "type": "bigint"
+        },
+        {
+          "name": "quantity",
+          "type": "bigint"
+        },
+        {
+          "name": "approved_quantity",
+          "type": "bigint"
+        },
+        {
+          "name": "unit_price",
+          "type": "numeric"
+        },
+        {
+          "name": "net_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "approved_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "status",
+          "type": "text"
+        },
+        {
+          "name": "remarks",
+          "type": "text"
+        },
+        {
+          "name": "reason_code",
+          "type": "text"
+        },
+        {
+          "name": "procedure_category_flag",
+          "type": "text"
+        },
+        {
+          "name": "product_service",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.m_lookup",
+      "logicalName": "m_lookup",
+      "schema": "dmart_mp",
+      "table": "m_lookup",
+      "label": "M Lookup",
+      "source": "database_documentation.docx",
+      "module": "reference",
+      "moduleLabel": "Reference / Lookup",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "integer"
+        },
+        {
+          "name": "lookup_cd",
+          "type": "text"
+        },
+        {
+          "name": "lookup_value",
+          "type": "text"
+        },
+        {
+          "name": "active_yn",
+          "type": "smallint"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_by",
+          "type": "text"
+        },
+        {
+          "name": "updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "type",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.m_source_data",
+      "logicalName": "m_source_data",
+      "schema": "dmart_mp",
+      "table": "m_source_data",
+      "label": "M Source Data",
+      "source": "database_documentation.docx",
+      "module": "reference",
+      "moduleLabel": "Reference / Lookup",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "bigint"
+        },
+        {
+          "name": "src_family_id",
+          "type": "text"
+        },
+        {
+          "name": "state_cd",
+          "type": "text"
+        },
+        {
+          "name": "dist_cd",
+          "type": "text"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "age",
+          "type": "smallint"
+        },
+        {
+          "name": "gender",
+          "type": "text"
+        },
+        {
+          "name": "relation",
+          "type": "text"
+        },
+        {
+          "name": "father_guardian_name",
+          "type": "text"
+        },
+        {
+          "name": "dob",
+          "type": "text"
+        },
+        {
+          "name": "rural_urban_flag",
+          "type": "text"
+        },
+        {
+          "name": "block_or_town",
+          "type": "text"
+        },
+        {
+          "name": "ward_or_village",
+          "type": "text"
+        },
+        {
+          "name": "sub_division",
+          "type": "text"
+        },
+        {
+          "name": "addr1",
+          "type": "text"
+        },
+        {
+          "name": "addr2",
+          "type": "text"
+        },
+        {
+          "name": "mobilenumber",
+          "type": "text"
+        },
+        {
+          "name": "source_type",
+          "type": "text"
+        },
+        {
+          "name": "enrl_status",
+          "type": "text"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "bis_source",
+          "type": "text"
+        },
+        {
+          "name": "village_ward_lgd_code",
+          "type": "text"
+        },
+        {
+          "name": "mandal_taluka_lgd_code",
+          "type": "text"
+        },
+        {
+          "name": "card_status",
+          "type": "text"
+        },
+        {
+          "name": "bis_member_id",
+          "type": "text"
+        },
+        {
+          "name": "card_no",
+          "type": "text"
+        },
+        {
+          "name": "bis_family_id",
+          "type": "text"
+        },
+        {
+          "name": "src_member_id",
+          "type": "text"
+        },
+        {
+          "name": "state_scheme_family_id",
+          "type": "text"
+        },
+        {
+          "name": "nfsa_card_type",
+          "type": "text"
+        },
+        {
+          "name": "api_yn",
+          "type": "text"
+        },
+        {
+          "name": "updated_by",
+          "type": "text"
+        },
+        {
+          "name": "updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "nfsa_type",
+          "type": "text"
+        },
+        {
+          "name": "scheme",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.t_hem_sch_mapping",
+      "logicalName": "t_hem_sch_mapping",
+      "schema": "dmart_mp",
+      "table": "t_hem_sch_mapping",
+      "label": "T Hem Sch Mapping",
+      "source": "database_documentation.docx",
+      "module": "reference",
+      "moduleLabel": "Reference / Lookup",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "integer"
+        },
+        {
+          "name": "hosp_id",
+          "type": "integer"
+        },
+        {
+          "name": "scheme_code",
+          "type": "text"
+        },
+        {
+          "name": "scheme_name",
+          "type": "text"
+        },
+        {
+          "name": "active_status",
+          "type": "smallint"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_by",
+          "type": "text"
+        },
+        {
+          "name": "updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "app_status",
+          "type": "integer"
+        },
+        {
+          "name": "data_source",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.ump_role_dtl",
+      "logicalName": "ump_role_dtl",
+      "schema": "dmart_mp",
+      "table": "ump_role_dtl",
+      "label": "Ump Role Dtl",
+      "source": "Data dictionary — UMP",
+      "module": "ump",
+      "moduleLabel": "UMP User Management",
+      "primaryKey": "role_id",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "role_id",
+          "type": "integer"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "role_description",
+          "type": "text"
+        },
+        {
+          "name": "role_name",
+          "type": "text"
+        },
+        {
+          "name": "updated_by",
+          "type": "text"
+        },
+        {
+          "name": "updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "workflow_applicable",
+          "type": "smallint"
+        },
+        {
+          "name": "status",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.ump_users_v",
+      "logicalName": "ump_users_v",
+      "schema": "dmart_mp",
+      "table": "ump_users_v",
+      "label": "Ump Users V",
+      "source": "database_documentation.docx",
+      "module": "ump",
+      "moduleLabel": "UMP User Management",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "bigint"
+        },
+        {
+          "name": "user_id",
+          "type": "text"
+        },
+        {
+          "name": "user_name",
+          "type": "text"
+        },
+        {
+          "name": "mobile_number",
+          "type": "bigint"
+        },
+        {
+          "name": "email_id",
+          "type": "text"
+        },
+        {
+          "name": "reference_id",
+          "type": "text"
+        },
+        {
+          "name": "ump_user_dtl_created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "active_status",
+          "type": "text"
+        },
+        {
+          "name": "user_active_status_updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "user_active_status_updated_by",
+          "type": "text"
+        },
+        {
+          "name": "last_login_time",
+          "type": "timestamptz"
+        },
+        {
+          "name": "app_id",
+          "type": "integer"
+        },
+        {
+          "name": "app_name",
+          "type": "text"
+        },
+        {
+          "name": "entity_id",
+          "type": "integer"
+        },
+        {
+          "name": "entity_name",
+          "type": "text"
+        },
+        {
+          "name": "entity_id_pk",
+          "type": "integer"
+        },
+        {
+          "name": "entity_type_name",
+          "type": "text"
+        },
+        {
+          "name": "m_ump_entity_dtl_entity_id",
+          "type": "integer"
+        },
+        {
+          "name": "m_ump_entity_dtl_entity_name",
+          "type": "text"
+        },
+        {
+          "name": "state_cd",
+          "type": "smallint"
+        },
+        {
+          "name": "state_name",
+          "type": "text"
+        },
+        {
+          "name": "cluster_id",
+          "type": "integer"
+        },
+        {
+          "name": "district_cd",
+          "type": "integer"
+        },
+        {
+          "name": "district_name",
+          "type": "text"
+        },
+        {
+          "name": "role_id",
+          "type": "integer"
+        },
+        {
+          "name": "role_name",
+          "type": "text"
+        },
+        {
+          "name": "status",
+          "type": "text"
+        },
+        {
+          "name": "role_status",
+          "type": "text"
+        },
+        {
+          "name": "user_role_mpg_updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "user_role_mpg_updated_by",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "ump_raw.ump_user_dtl",
+      "logicalName": "ump_user_dtl",
+      "schema": "ump_raw",
+      "table": "ump_user_dtl",
+      "label": "Ump User Dtl",
+      "source": "Data dictionary — UMP",
+      "module": "ump",
+      "moduleLabel": "UMP User Management",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "bigint"
+        },
+        {
+          "name": "active_yn",
+          "type": "smallint"
+        },
+        {
+          "name": "obj_aadhar_vault",
+          "type": "text"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "email_id",
+          "type": "text"
+        },
+        {
+          "name": "last_login_time",
+          "type": "timestamptz"
+        },
+        {
+          "name": "lock_yn",
+          "type": "smallint"
+        },
+        {
+          "name": "mobile_number",
+          "type": "bigint"
+        },
+        {
+          "name": "updated_by",
+          "type": "text"
+        },
+        {
+          "name": "updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "user_age",
+          "type": "smallint"
+        },
+        {
+          "name": "user_gender",
+          "type": "text"
+        },
+        {
+          "name": "user_id",
+          "type": "text"
+        },
+        {
+          "name": "user_name",
+          "type": "text"
+        },
+        {
+          "name": "user_state_code",
+          "type": "smallint"
+        },
+        {
+          "name": "user_dob",
+          "type": "text"
+        },
+        {
+          "name": "reference_id",
+          "type": "text"
+        },
+        {
+          "name": "default_authmode",
+          "type": "integer"
+        },
+        {
+          "name": "failed_attempts",
+          "type": "integer"
+        },
+        {
+          "name": "present_address",
+          "type": "text"
+        },
+        {
+          "name": "aadhaar_address",
+          "type": "text"
+        },
+        {
+          "name": "language",
+          "type": "text"
+        },
+        {
+          "name": "user_enrollment",
+          "type": "text"
+        },
+        {
+          "name": "user_designation",
+          "type": "text"
+        },
+        {
+          "name": "otp_failed_updation",
+          "type": "timestamptz"
+        },
+        {
+          "name": "otp_failed_count",
+          "type": "integer"
+        },
+        {
+          "name": "aadhaar_display_code",
+          "type": "text"
+        },
+        {
+          "name": "ekyc_flag",
+          "type": "text"
+        },
+        {
+          "name": "csc_id",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "ump_raw.user_master_ump",
+      "logicalName": "user_master_ump",
+      "schema": "ump_raw",
+      "table": "user_master_ump",
+      "label": "User Master Ump",
+      "source": "database_documentation.docx",
+      "module": "ump",
+      "moduleLabel": "UMP User Management",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "bigint"
+        },
+        {
+          "name": "user_id",
+          "type": "text"
+        },
+        {
+          "name": "user_name",
+          "type": "text"
+        },
+        {
+          "name": "email_id",
+          "type": "text"
+        },
+        {
+          "name": "mobile_number",
+          "type": "bigint"
+        },
+        {
+          "name": "user_gender",
+          "type": "text"
+        },
+        {
+          "name": "user_state_code",
+          "type": "smallint"
+        },
+        {
+          "name": "csc_id",
+          "type": "text"
+        },
+        {
+          "name": "active_status",
+          "type": "text"
+        },
+        {
+          "name": "user_dtl_id",
+          "type": "bigint"
+        },
+        {
+          "name": "entity_id",
+          "type": "integer"
+        },
+        {
+          "name": "entity_name",
+          "type": "text"
+        },
+        {
+          "name": "entity_description",
+          "type": "text"
+        },
+        {
+          "name": "entity_state_code",
+          "type": "smallint"
+        },
+        {
+          "name": "status",
+          "type": "text"
+        },
+        {
+          "name": "role_status",
+          "type": "text"
+        },
+        {
+          "name": "role_id",
+          "type": "integer"
+        },
+        {
+          "name": "app_id",
+          "type": "integer"
+        },
+        {
+          "name": "app_description",
+          "type": "text"
+        },
+        {
+          "name": "app_name",
+          "type": "text"
+        },
+        {
+          "name": "app_status",
+          "type": "text"
+        },
+        {
+          "name": "role_name",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.pro_workflow_users_t",
+      "logicalName": "pro_workflow_users_t",
+      "schema": "dmart_mp",
+      "table": "pro_workflow_users_t",
+      "label": "Pro Workflow Users T",
+      "source": "database_documentation.docx",
+      "module": "workflow",
+      "moduleLabel": "Users & Workflow",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "table_name",
+          "type": "text"
+        },
+        {
+          "name": "id_pk",
+          "type": "integer"
+        },
+        {
+          "name": "registration_id",
+          "type": "text"
+        },
+        {
+          "name": "workflow_role",
+          "type": "text"
+        },
+        {
+          "name": "status_id",
+          "type": "numeric"
+        },
+        {
+          "name": "status_descrption",
+          "type": "text"
+        },
+        {
+          "name": "workflow_process_code",
+          "type": "text"
+        },
+        {
+          "name": "workflow_user",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "last_action_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "initiated_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "approved_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "transaction_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "final_level",
+          "type": "smallint"
+        },
+        {
+          "name": "active_flag",
+          "type": "smallint"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "remarks",
+          "type": "text"
+        },
+        {
+          "name": "json_object",
+          "type": "text"
+        },
+        {
+          "name": "patient_state_code",
+          "type": "smallint"
+        },
+        {
+          "name": "patient_district_code",
+          "type": "smallint"
+        },
+        {
+          "name": "patient_state_name",
+          "type": "text"
+        },
+        {
+          "name": "patient_district_name",
+          "type": "text"
+        },
+        {
+          "name": "hospital_code",
+          "type": "text"
+        },
+        {
+          "name": "hospital_name",
+          "type": "text"
+        },
+        {
+          "name": "hospital_state_cd",
+          "type": "smallint"
+        },
+        {
+          "name": "hospital_district_cd",
+          "type": "smallint"
+        },
+        {
+          "name": "hosp_district_name",
+          "type": "text"
+        },
+        {
+          "name": "hosp_state_name",
+          "type": "text"
+        },
+        {
+          "name": "hospital_type",
+          "type": "text"
+        },
+        {
+          "name": "mobile_number",
+          "type": "bigint"
+        },
+        {
+          "name": "user_id",
+          "type": "text"
+        },
+        {
+          "name": "user_name",
+          "type": "text"
+        },
+        {
+          "name": "last_insert_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "m_flag",
+          "type": "integer"
+        },
+        {
+          "name": "dashboard_workflow_role",
+          "type": "text"
+        },
+        {
+          "name": "pendency_age",
+          "type": "text"
+        },
+        {
+          "name": "ppd_tat",
+          "type": "text"
+        },
+        {
+          "name": "overall_tat",
+          "type": "text"
+        },
+        {
+          "name": "service_request_type",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.t_workflow_transaction_audit",
+      "logicalName": "t_workflow_transaction_audit",
+      "schema": "dmart_mp",
+      "table": "t_workflow_transaction_audit",
+      "label": "T Workflow Transaction Audit",
+      "source": "database_documentation.docx",
+      "module": "workflow",
+      "moduleLabel": "Users & Workflow",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "integer"
+        },
+        {
+          "name": "work_id_pk",
+          "type": "integer"
+        },
+        {
+          "name": "workflow_transaction_id",
+          "type": "bigint"
+        },
+        {
+          "name": "status_id",
+          "type": "numeric"
+        },
+        {
+          "name": "service_request_type",
+          "type": "text"
+        },
+        {
+          "name": "json_object",
+          "type": "text"
+        },
+        {
+          "name": "workflow_process_code",
+          "type": "text"
+        },
+        {
+          "name": "remarks",
+          "type": "text"
+        },
+        {
+          "name": "criteria_code",
+          "type": "text"
+        },
+        {
+          "name": "workflow_id",
+          "type": "text"
+        },
+        {
+          "name": "previous_workflow_role",
+          "type": "text"
+        },
+        {
+          "name": "acted_workflow_user",
+          "type": "text"
+        },
+        {
+          "name": "version",
+          "type": "text"
+        },
+        {
+          "name": "final_level",
+          "type": "smallint"
+        },
+        {
+          "name": "cluster_id",
+          "type": "bigint"
+        },
+        {
+          "name": "active_flag",
+          "type": "smallint"
+        },
+        {
+          "name": "transaction_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "verified",
+          "type": "text"
+        },
+        {
+          "name": "time_taken_by_user",
+          "type": "numeric"
+        },
+        {
+          "name": "time_taken_at_level",
+          "type": "numeric"
+        },
+        {
+          "name": "current_entity_id",
+          "type": "text"
+        },
+        {
+          "name": "current_tpa_group",
+          "type": "text"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_by",
+          "type": "text"
+        },
+        {
+          "name": "updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "hist_created_by",
+          "type": "text"
+        },
+        {
+          "name": "hist_created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "check_list_json",
+          "type": "text"
+        },
+        {
+          "name": "is_migrated",
+          "type": "text"
+        },
+        {
+          "name": "reason_desc",
+          "type": "text"
+        },
+        {
+          "name": "reason_id",
+          "type": "text"
+        },
+        {
+          "name": "priority",
+          "type": "integer"
+        },
+        {
+          "name": "state_cd",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.t_workflow_transaction_audit_hem",
+      "logicalName": "t_workflow_transaction_audit_hem",
+      "schema": "dmart_mp",
+      "table": "t_workflow_transaction_audit_hem",
+      "label": "T Workflow Transaction Audit Hem",
+      "source": "database_documentation.docx",
+      "module": "workflow",
+      "moduleLabel": "Users & Workflow",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "integer"
+        },
+        {
+          "name": "work_id_pk",
+          "type": "integer"
+        },
+        {
+          "name": "workflow_transaction_id",
+          "type": "integer"
+        },
+        {
+          "name": "status_id",
+          "type": "numeric"
+        },
+        {
+          "name": "service_request_type",
+          "type": "text"
+        },
+        {
+          "name": "json_object",
+          "type": "text"
+        },
+        {
+          "name": "workflow_process_code",
+          "type": "text"
+        },
+        {
+          "name": "remarks",
+          "type": "text"
+        },
+        {
+          "name": "criteria_code",
+          "type": "text"
+        },
+        {
+          "name": "workflow_id",
+          "type": "text"
+        },
+        {
+          "name": "previous_workflow_role",
+          "type": "text"
+        },
+        {
+          "name": "acted_workflow_user",
+          "type": "text"
+        },
+        {
+          "name": "version",
+          "type": "text"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_by",
+          "type": "text"
+        },
+        {
+          "name": "updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "hist_created_by",
+          "type": "text"
+        },
+        {
+          "name": "hist_created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "final_level",
+          "type": "smallint"
+        },
+        {
+          "name": "cluster_id",
+          "type": "integer"
+        },
+        {
+          "name": "latest_rejection",
+          "type": "smallint"
+        },
+        {
+          "name": "active_flag",
+          "type": "smallint"
+        },
+        {
+          "name": "physical_report",
+          "type": "text"
+        },
+        {
+          "name": "attachment",
+          "type": "text"
+        },
+        {
+          "name": "transaction_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "admission_type",
+          "type": "text"
+        },
+        {
+          "name": "scheme_code",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.workflow_users_t",
+      "logicalName": "workflow_users_t",
+      "schema": "dmart_mp",
+      "table": "workflow_users_t",
+      "label": "Workflow Users T",
+      "source": "database_documentation.docx",
+      "module": "workflow",
+      "moduleLabel": "Users & Workflow",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "table_name",
+          "type": "text"
+        },
+        {
+          "name": "id_pk",
+          "type": "integer"
+        },
+        {
+          "name": "registration_id",
+          "type": "text"
+        },
+        {
+          "name": "workflow_role",
+          "type": "text"
+        },
+        {
+          "name": "status_id",
+          "type": "numeric"
+        },
+        {
+          "name": "status_descrption",
+          "type": "text"
+        },
+        {
+          "name": "workflow_process_code",
+          "type": "text"
+        },
+        {
+          "name": "workflow_user",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "last_action_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "initiated_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "approved_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "transaction_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "final_level",
+          "type": "smallint"
+        },
+        {
+          "name": "active_flag",
+          "type": "smallint"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "remarks",
+          "type": "text"
+        },
+        {
+          "name": "json_object",
+          "type": "text"
+        },
+        {
+          "name": "patient_state_code",
+          "type": "smallint"
+        },
+        {
+          "name": "patient_district_code",
+          "type": "smallint"
+        },
+        {
+          "name": "patient_state_name",
+          "type": "text"
+        },
+        {
+          "name": "patient_district_name",
+          "type": "text"
+        },
+        {
+          "name": "hospital_code",
+          "type": "text"
+        },
+        {
+          "name": "hospital_name",
+          "type": "text"
+        },
+        {
+          "name": "hospital_state_cd",
+          "type": "smallint"
+        },
+        {
+          "name": "hospital_district_cd",
+          "type": "smallint"
+        },
+        {
+          "name": "hosp_district_name",
+          "type": "text"
+        },
+        {
+          "name": "hosp_state_name",
+          "type": "text"
+        },
+        {
+          "name": "hospital_type",
+          "type": "text"
+        },
+        {
+          "name": "mobile_number",
+          "type": "bigint"
+        },
+        {
+          "name": "user_id",
+          "type": "text"
+        },
+        {
+          "name": "user_name",
+          "type": "text"
+        },
+        {
+          "name": "last_insert_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "m_flag",
+          "type": "integer"
+        },
+        {
+          "name": "dashboard_workflow_role",
+          "type": "text"
+        },
+        {
+          "name": "pendency_age",
+          "type": "text"
+        },
+        {
+          "name": "ppd_tat",
+          "type": "text"
+        },
+        {
+          "name": "overall_tat",
+          "type": "text"
+        },
+        {
+          "name": "service_request_type",
+          "type": "text"
+        }
+      ]
+    }
+  ]
+}

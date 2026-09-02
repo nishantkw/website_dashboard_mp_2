@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, memo } from 'react'
+import { useLocation } from 'react-router-dom'
 import { Filter, RotateCcw, Search } from 'lucide-react'
 import {
-  DIVISION_OPTIONS, getDistrictsForDivision,
+  DIVISION_OPTIONS, getDistrictsForDivision, STATE_TYPE_OPTIONS,
   CLAIM_STATUS_OPTIONS, CARD_STATUS_OPTIONS, USER_STATUS_OPTIONS,
   HOSPITAL_STATUS_OPTIONS, PATIENT_STATUS_OPTIONS, INVESTIGATION_STATUS_OPTIONS,
   TRAINING_STATUS_OPTIONS, ENROLLMENT_STATUS_OPTIONS,
@@ -17,20 +18,26 @@ interface FilterSelectProps {
   value: string
   options: { value: string; label: string }[]
   onChange: (value: string) => void
+  /** Fill available row width instead of a fixed shrink-0 size — for filter bars with few fields, so the card doesn't look sparse. */
+  grow?: boolean
+  disabled?: boolean
 }
 
-const FilterSelect = memo(function FilterSelect({ label, value, options, onChange }: FilterSelectProps) {
+const FilterSelect = memo(function FilterSelect({ label, value, options, onChange, grow, disabled }: FilterSelectProps) {
   const active = Boolean(value)
   return (
-    <div className="flex shrink-0 flex-col items-center">
+    <div className={`flex flex-col items-center ${grow ? 'min-w-[160px] flex-1' : 'shrink-0'}`}>
       <label className="mb-1 block w-full text-center text-[9px] font-bold uppercase tracking-wider text-[#1a5c38]">
         {label}
       </label>
       <select
         value={value}
+        disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
-        className={`min-w-[118px] max-w-[148px] cursor-pointer rounded-lg border px-2.5 py-1.5 text-xs outline-none transition-all ${
-          active
+        className={`${grow ? 'w-full' : 'min-w-[118px] max-w-[148px]'} cursor-pointer rounded-lg border px-2.5 py-1.5 text-xs outline-none transition-all ${
+          disabled
+            ? 'cursor-not-allowed border-[#dceee3] bg-slate-50 text-slate-400'
+            : active
             ? 'border-[#2d8a4e] bg-[#edf7f0] font-semibold text-[#1a5c38] shadow-sm shadow-emerald-900/5'
             : 'border-[#c5e0ce] bg-white text-slate-700 hover:border-[#2d8a4e]/60 hover:shadow-sm'
         } focus:border-[#2d8a4e] focus:ring-2 focus:ring-[#2d8a4e]/15`}
@@ -43,7 +50,14 @@ const FilterSelect = memo(function FilterSelect({ label, value, options, onChang
   )
 })
 
+function isOverviewPath(pathname: string) {
+  const p = pathname.replace(/\/+$/, '') || '/'
+  return p === '/dashboard'
+}
+
 export default function GlobalFilterBar() {
+  const location = useLocation()
+  const overviewOnly = isOverviewPath(location.pathname)
   const { globalFilters, setGlobalFilter, clearGlobalFilters, activeGlobalCount, search, setSearch } = useGlobalFilters()
   const [localSearch, setLocalSearch] = useState(search)
 
@@ -81,16 +95,18 @@ export default function GlobalFilterBar() {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 rounded-lg border border-[#c5e0ce] bg-white px-2.5 py-1 shadow-sm">
-            <Search className="h-3.5 w-3.5 text-[#2d8a4e]" />
-            <input
-              type="text"
-              value={localSearch}
-              onChange={(e) => setLocalSearch(e.target.value)}
-              placeholder="Search records..."
-              className="w-24 bg-transparent text-xs text-slate-700 outline-none placeholder:text-[#6b9e7a] sm:w-36"
-            />
-          </div>
+          {!overviewOnly && (
+            <div className="flex items-center gap-1.5 rounded-lg border border-[#c5e0ce] bg-white px-2.5 py-1 shadow-sm">
+              <Search className="h-3.5 w-3.5 text-[#2d8a4e]" />
+              <input
+                type="text"
+                value={localSearch}
+                onChange={(e) => setLocalSearch(e.target.value)}
+                placeholder="Search records..."
+                className="w-24 bg-transparent text-xs text-slate-700 outline-none placeholder:text-[#6b9e7a] sm:w-36"
+              />
+            </div>
+          )}
           <button
             type="button"
             onClick={clearGlobalFilters}
@@ -107,27 +123,48 @@ export default function GlobalFilterBar() {
         </div>
       </div>
 
-      <div className="scrollbar-hide flex gap-2.5 overflow-x-auto px-3 py-3 sm:px-4">
-        <FilterSelect label="Division" value={globalFilters.division} options={DIVISION_OPTIONS} onChange={(v) => setGlobalFilter('division', v)} />
-        <FilterSelect label="District" value={globalFilters.district} options={dynamicDistrictOptions} onChange={(v) => setGlobalFilter('district', v)} />
-        <FilterSelect label="Claim Status" value={globalFilters.claim_status} options={CLAIM_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('claim_status', v)} />
-        <FilterSelect label="Card Status" value={globalFilters.card_status} options={CARD_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('card_status', v)} />
-        <FilterSelect label="User Status" value={globalFilters.user_status} options={USER_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('user_status', v)} />
-        <FilterSelect label="Hospital Status" value={globalFilters.hospital_status} options={HOSPITAL_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('hospital_status', v)} />
-        <FilterSelect label="Patient Status" value={globalFilters.patient_status} options={PATIENT_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('patient_status', v)} />
-        <FilterSelect label="Investigation" value={globalFilters.investigation_status} options={INVESTIGATION_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('investigation_status', v)} />
-        <FilterSelect label="Training Status" value={globalFilters.training_status} options={TRAINING_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('training_status', v)} />
-        <FilterSelect label="Enrollment" value={globalFilters.enrollment_status} options={ENROLLMENT_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('enrollment_status', v)} />
-        <FilterSelect label="Gender" value={globalFilters.gender} options={GENDER_OPTIONS} onChange={(v) => setGlobalFilter('gender', v)} />
-        <FilterSelect label="Urban/Rural" value={globalFilters.urban_rural} options={URBAN_RURAL_OPTIONS} onChange={(v) => setGlobalFilter('urban_rural', v)} />
-        <FilterSelect label="Hospital Type" value={globalFilters.hospital_type} options={HOSPITAL_TYPE_OPTIONS} onChange={(v) => setGlobalFilter('hospital_type', v)} />
-        <FilterSelect label="Case Type" value={globalFilters.case_type} options={CASE_TYPE_OPTIONS} onChange={(v) => setGlobalFilter('case_type', v)} />
-        <FilterSelect label="Role" value={globalFilters.role} options={ROLE_OPTIONS} onChange={(v) => setGlobalFilter('role', v)} />
-        <FilterSelect label="Department" value={globalFilters.department} options={DEPARTMENT_OPTIONS} onChange={(v) => setGlobalFilter('department', v)} />
-        <FilterSelect label="eKYC" value={globalFilters.ekyc} options={EKYC_OPTIONS} onChange={(v) => setGlobalFilter('ekyc', v)} />
-        <FilterSelect label="Fraud Type" value={globalFilters.fraud_type} options={FRAUD_TYPE_OPTIONS} onChange={(v) => setGlobalFilter('fraud_type', v)} />
-        <FilterSelect label="Course" value={globalFilters.course} options={COURSE_OPTIONS} onChange={(v) => setGlobalFilter('course', v)} />
-        <FilterSelect label="NABH" value={globalFilters.nabh} options={NABH_OPTIONS} onChange={(v) => setGlobalFilter('nabh', v)} />
+      <div className={overviewOnly ? 'flex flex-wrap gap-3 px-3 pb-3 pt-3 sm:px-4' : 'scrollbar-visible flex gap-2.5 overflow-x-auto px-3 pb-3 pt-3 sm:px-4'}>
+        <FilterSelect label="State Type" value={globalFilters.state_type ?? ''} options={STATE_TYPE_OPTIONS} onChange={(v) => setGlobalFilter('state_type', v)} grow={overviewOnly} />
+        <FilterSelect
+          label="Division"
+          value={globalFilters.division}
+          options={DIVISION_OPTIONS}
+          onChange={(v) => setGlobalFilter('division', v)}
+          grow={overviewOnly}
+          disabled={globalFilters.state_type === 'Portability'}
+        />
+        <FilterSelect
+          label="District"
+          value={globalFilters.district}
+          options={dynamicDistrictOptions}
+          onChange={(v) => setGlobalFilter('district', v)}
+          grow={overviewOnly}
+          disabled={globalFilters.state_type === 'Portability'}
+        />
+
+        {!overviewOnly && (
+          <>
+            <FilterSelect label="Claim Status" value={globalFilters.claim_status} options={CLAIM_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('claim_status', v)} />
+            <FilterSelect label="Card Status" value={globalFilters.card_status} options={CARD_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('card_status', v)} />
+            <FilterSelect label="User Status" value={globalFilters.user_status} options={USER_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('user_status', v)} />
+            <FilterSelect label="Hospital Status" value={globalFilters.hospital_status} options={HOSPITAL_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('hospital_status', v)} />
+            <FilterSelect label="Patient Status" value={globalFilters.patient_status} options={PATIENT_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('patient_status', v)} />
+            <FilterSelect label="Investigation" value={globalFilters.investigation_status} options={INVESTIGATION_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('investigation_status', v)} />
+            <FilterSelect label="Training Status" value={globalFilters.training_status} options={TRAINING_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('training_status', v)} />
+            <FilterSelect label="Enrollment" value={globalFilters.enrollment_status} options={ENROLLMENT_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('enrollment_status', v)} />
+            <FilterSelect label="Gender" value={globalFilters.gender} options={GENDER_OPTIONS} onChange={(v) => setGlobalFilter('gender', v)} />
+            <FilterSelect label="Urban/Rural" value={globalFilters.urban_rural} options={URBAN_RURAL_OPTIONS} onChange={(v) => setGlobalFilter('urban_rural', v)} />
+            <FilterSelect label="Hospital Type" value={globalFilters.hospital_type} options={HOSPITAL_TYPE_OPTIONS} onChange={(v) => setGlobalFilter('hospital_type', v)} />
+            <FilterSelect label="Case Type" value={globalFilters.case_type} options={CASE_TYPE_OPTIONS} onChange={(v) => setGlobalFilter('case_type', v)} />
+            <FilterSelect label="Role" value={globalFilters.role} options={ROLE_OPTIONS} onChange={(v) => setGlobalFilter('role', v)} />
+            <FilterSelect label="Department" value={globalFilters.department} options={DEPARTMENT_OPTIONS} onChange={(v) => setGlobalFilter('department', v)} />
+            <FilterSelect label="eKYC" value={globalFilters.ekyc} options={EKYC_OPTIONS} onChange={(v) => setGlobalFilter('ekyc', v)} />
+            <FilterSelect label="Fraud Type" value={globalFilters.fraud_type} options={FRAUD_TYPE_OPTIONS} onChange={(v) => setGlobalFilter('fraud_type', v)} />
+            <FilterSelect label="Course" value={globalFilters.course} options={COURSE_OPTIONS} onChange={(v) => setGlobalFilter('course', v)} />
+            <FilterSelect label="NABH" value={globalFilters.nabh} options={NABH_OPTIONS} onChange={(v) => setGlobalFilter('nabh', v)} />
+          </>
+        )}
+
         <DateRangeFilter
           variant="labeled"
           dateFrom={globalFilters.date_from}
@@ -136,6 +173,7 @@ export default function GlobalFilterBar() {
             setGlobalFilter('date_from', from)
             setGlobalFilter('date_to', to)
           }}
+          grow={overviewOnly}
         />
       </div>
     </div>

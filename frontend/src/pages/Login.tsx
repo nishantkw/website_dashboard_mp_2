@@ -1,28 +1,28 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, LogIn, ChevronRight } from 'lucide-react'
-import { useAuth } from '../auth/AuthContext'
-import { getDefaultRouteForRole, mockUsers } from '../auth/mockUsers'
-import type { UserRole } from '../auth/types'
-import { ROLE_OPTIONS, ROLE_LABELS } from '../auth/types'
+import { useAuth } from '../auth/auth-context'
+import { demoAccounts } from '../auth/mockUsers'
+import { getDefaultRouteForRole } from '../auth/permissions'
+import { ROLE_LABELS } from '../auth/types'
 
 export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [role, setRole] = useState<UserRole>('state_admin')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showDemo, setShowDemo] = useState(false)
+  const showDemoAccounts = import.meta.env.DEV
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
 
-    const result = await login({ username, password, role })
+    const result = await login({ username, password })
     setLoading(false)
 
     if (result.success && result.user) {
@@ -32,10 +32,9 @@ export default function Login() {
     }
   }
 
-  const fillDemo = (user: string, pass: string, userRole: UserRole) => {
+  const fillDemo = (user: string, pass: string) => {
     setUsername(user)
     setPassword(pass)
-    setRole(userRole)
     setError('')
     setShowDemo(false)
   }
@@ -191,24 +190,6 @@ export default function Login() {
                     </button>
                   </div>
                 </div>
-
-                <div>
-                  <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                    Select Role
-                  </label>
-                  <select
-                    value={role}
-                    onChange={(e) => setRole(e.target.value as UserRole)}
-                    className="w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#2d8a4e] focus:bg-white focus:ring-4 focus:ring-[#2d8a4e]/12"
-                    required
-                  >
-                    {ROLE_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
               </div>
 
               <button
@@ -227,14 +208,14 @@ export default function Login() {
               </button>
             </form>
 
-            {/* Demo credentials — collapsible, less clutter */}
+            {showDemoAccounts && (
             <div className="mt-5">
               <button
                 type="button"
                 onClick={() => setShowDemo((v) => !v)}
                 className="flex w-full items-center justify-between rounded-xl border border-emerald-100 bg-white/80 px-4 py-3 text-left text-sm text-[#1a5c38] transition-colors hover:bg-emerald-50/80"
               >
-                <span className="font-semibold">Demo credentials</span>
+                <span className="font-semibold">Local demo accounts</span>
                 <ChevronRight
                   className={`h-4 w-4 transition-transform ${showDemo ? 'rotate-90' : ''}`}
                 />
@@ -242,11 +223,11 @@ export default function Login() {
 
               {showDemo && (
                 <div className="mt-2 space-y-1.5 rounded-xl border border-emerald-100 bg-white p-2 shadow-sm">
-                  {mockUsers.map((u) => (
+                  {demoAccounts.map((u) => (
                     <button
                       key={u.id}
                       type="button"
-                      onClick={() => fillDemo(u.username, u.password, u.role)}
+                      onClick={() => fillDemo(u.username, u.password)}
                       className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-[#e8f5ec]"
                     >
                       <div>
@@ -259,9 +240,10 @@ export default function Login() {
                 </div>
               )}
             </div>
+            )}
 
             <p className="mt-8 text-center text-[11px] text-slate-400 lg:hidden">
-              © {new Date().getFullYear()} State Health Agency, Madhya Pradesh · Demo Mode
+              © {new Date().getFullYear()} State Health Agency, Madhya Pradesh
             </p>
           </div>
         </div>

@@ -1,0 +1,1126 @@
+{
+  "data_dictionay_user_master_ump": {
+    "file": "data_dictionay_user_master_ump.xlsx",
+    "sheet": "Sheet1",
+    "columns": [
+      {
+        "name": "id_pk",
+        "type": "integer"
+      },
+      {
+        "name": "user_id",
+        "type": "bigint"
+      },
+      {
+        "name": "user_name",
+        "type": "numeric"
+      },
+      {
+        "name": "email_id",
+        "type": "character varying"
+      },
+      {
+        "name": "mobile_number",
+        "type": "character varying"
+      },
+      {
+        "name": "user_gender",
+        "type": "character varying"
+      },
+      {
+        "name": "user_state_code",
+        "type": "character varying"
+      },
+      {
+        "name": "csc_id",
+        "type": "character varying"
+      },
+      {
+        "name": "active_status",
+        "type": "character varying"
+      },
+      {
+        "name": "user_dtl_id",
+        "type": "character varying"
+      },
+      {
+        "name": "entity_id",
+        "type": "character varying"
+      },
+      {
+        "name": "entity_name",
+        "type": "character varying"
+      },
+      {
+        "name": "entity_description",
+        "type": "character varying"
+      },
+      {
+        "name": "entity_state_code",
+        "type": "character varying"
+      },
+      {
+        "name": "status",
+        "type": "character varying"
+      },
+      {
+        "name": "role_status",
+        "type": "character varying"
+      },
+      {
+        "name": "role_id",
+        "type": "character varying"
+      },
+      {
+        "name": "app_id",
+        "type": "character varying"
+      },
+      {
+        "name": "app_description",
+        "type": "character varying"
+      },
+      {
+        "name": "app_name",
+        "type": "character varying"
+      },
+      {
+        "name": "app_status",
+        "type": "character varying"
+      },
+      {
+        "name": "role_name",
+        "type": "character varying"
+      }
+    ]
+  },
+  "Redshift BIS table (t_bis_beneficiary_dtls)": {
+    "file": "Redshift BIS table (t_bis_beneficiary_dtls).xlsx",
+    "sheet": "data_catalog_t_bis_beneficiary_",
+    "columns": [
+      {
+        "name": "id_pk",
+        "type": "bigint"
+      },
+      {
+        "name": "ben_id",
+        "type": "character varying"
+      },
+      {
+        "name": "family_id",
+        "type": "character varying"
+      },
+      {
+        "name": "member_id",
+        "type": "character varying"
+      },
+      {
+        "name": "bis_family_id",
+        "type": "character varying"
+      },
+      {
+        "name": "bis_member_id",
+        "type": "character varying"
+      },
+      {
+        "name": "ben_ref_id",
+        "type": "character varying"
+      },
+      {
+        "name": "state_cd",
+        "type": "character varying"
+      },
+      {
+        "name": "dist_cd",
+        "type": "character varying"
+      },
+      {
+        "name": "block_id",
+        "type": "character varying"
+      },
+      {
+        "name": "village_id",
+        "type": "character varying"
+      },
+      {
+        "name": "rural_urban_flag",
+        "type": "character varying"
+      },
+      {
+        "name": "house_no",
+        "type": "character varying"
+      },
+      {
+        "name": "pincode",
+        "type": "character varying"
+      },
+      {
+        "name": "address",
+        "type": "character varying"
+      },
+      {
+        "name": "dist_name",
+        "type": "character varying"
+      },
+      {
+        "name": "state_name",
+        "type": "character varying"
+      },
+      {
+        "name": "ben_mobile_no",
+        "type": "character varying"
+      },
+      {
+        "name": "ben_email_id",
+        "type": "character varying"
+      },
+      {
+        "name": "json_obj_ben_source_dtl",
+        "type": "character varying"
+      },
+      {
+        "name": "json_obj_ben_ekyc_dtl",
+        "type": "character varying"
+      },
+      {
+        "name": "obj_aadhar_vault",
+        "type": "character varying"
+      },
+      {
+        "name": "active_status",
+        "type": "smallint"
+      },
+      {
+        "name": "enrl_status",
+        "type": "character varying"
+      },
+      {
+        "name": "created_by",
+        "type": "character varying"
+      },
+      {
+        "name": "created_dt",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "updated_by",
+        "type": "character varying"
+      },
+      {
+        "name": "updated_dt",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "abha_id",
+        "type": "character varying"
+      },
+      {
+        "name": "payer_id",
+        "type": "bigint"
+      },
+      {
+        "name": "tpa_isa_id",
+        "type": "bigint"
+      },
+      {
+        "name": "json_obj_ben_othr_dtl",
+        "type": "character varying"
+      },
+      {
+        "name": "src_flag",
+        "type": "character varying"
+      },
+      {
+        "name": "aadhaar_no",
+        "type": "character varying"
+      },
+      {
+        "name": "enrol_status",
+        "type": "bigint"
+      },
+      {
+        "name": "entity_id",
+        "type": "character varying"
+      },
+      {
+        "name": "card_no",
+        "type": "character varying"
+      },
+      {
+        "name": "photo",
+        "type": "character varying"
+      },
+      {
+        "name": "relation",
+        "type": "character varying"
+      },
+      {
+        "name": "auth_mode",
+        "type": "character varying"
+      },
+      {
+        "name": "primary_auth_mode",
+        "type": "character varying"
+      },
+      {
+        "name": "new_member_flag",
+        "type": "character varying"
+      },
+      {
+        "name": "gender",
+        "type": "character varying"
+      },
+      {
+        "name": "year_of_birth",
+        "type": "character varying"
+      },
+      {
+        "name": "name",
+        "type": "character varying"
+      },
+      {
+        "name": "father_name",
+        "type": "character varying"
+      },
+      {
+        "name": "age",
+        "type": "character varying"
+      },
+      {
+        "name": "primary_ben_id",
+        "type": "character varying"
+      },
+      {
+        "name": "approve_date",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "enrol_date",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "card_status",
+        "type": "character varying"
+      },
+      {
+        "name": "aadhar_status",
+        "type": "character varying"
+      },
+      {
+        "name": "reject_date",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "date_of_birth",
+        "type": "character varying"
+      },
+      {
+        "name": "scheme_code",
+        "type": "character varying"
+      },
+      {
+        "name": "request_type",
+        "type": "character varying"
+      },
+      {
+        "name": "auth_txn",
+        "type": "character varying"
+      },
+      {
+        "name": "primary_auth_txn",
+        "type": "character varying"
+      },
+      {
+        "name": "request_agent",
+        "type": "character varying"
+      },
+      {
+        "name": "match_score",
+        "type": "character varying"
+      },
+      {
+        "name": "source_type",
+        "type": "character varying"
+      },
+      {
+        "name": "aadhaar_disp_code",
+        "type": "character varying"
+      },
+      {
+        "name": "yob_secc",
+        "type": "character varying"
+      }
+    ]
+  },
+  "Redshift BIS workflow table (t_workflow_transaction_audit)": {
+    "file": "Redshift BIS workflow table (t_workflow_transaction_audit).xlsx",
+    "sheet": "Sheet1",
+    "columns": [
+      {
+        "name": "work_id_pk",
+        "type": "integer"
+      },
+      {
+        "name": "workflow_transaction_id",
+        "type": "bigint"
+      },
+      {
+        "name": "status_id",
+        "type": "numeric"
+      },
+      {
+        "name": "service_request_type",
+        "type": "character varying"
+      },
+      {
+        "name": "json_object",
+        "type": "character varying"
+      },
+      {
+        "name": "workflow_process_code",
+        "type": "character varying"
+      },
+      {
+        "name": "remarks",
+        "type": "character varying"
+      },
+      {
+        "name": "criteria_code",
+        "type": "character varying"
+      },
+      {
+        "name": "workflow_id",
+        "type": "character varying"
+      },
+      {
+        "name": "previous_workflow_role",
+        "type": "character varying"
+      },
+      {
+        "name": "acted_workflow_user",
+        "type": "character varying"
+      },
+      {
+        "name": "version",
+        "type": "character varying"
+      },
+      {
+        "name": "final_level",
+        "type": "smallint"
+      },
+      {
+        "name": "cluster_id",
+        "type": "bigint"
+      },
+      {
+        "name": "active_flag",
+        "type": "smallint"
+      },
+      {
+        "name": "transaction_dt",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "verified",
+        "type": "character varying"
+      },
+      {
+        "name": "time_taken_by_user",
+        "type": "numeric"
+      },
+      {
+        "name": "time_taken_at_level",
+        "type": "numeric"
+      },
+      {
+        "name": "current_entity_id",
+        "type": "character varying"
+      },
+      {
+        "name": "current_tpa_group",
+        "type": "character varying"
+      },
+      {
+        "name": "created_by",
+        "type": "character varying"
+      },
+      {
+        "name": "created_dt",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "updated_by",
+        "type": "character varying"
+      },
+      {
+        "name": "updated_dt",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "hist_created_by",
+        "type": "character varying"
+      },
+      {
+        "name": "hist_created_dt",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "check_list_json",
+        "type": "character varying"
+      },
+      {
+        "name": "is_migrated",
+        "type": "character varying"
+      },
+      {
+        "name": "reason_desc",
+        "type": "character varying"
+      },
+      {
+        "name": "reason_id",
+        "type": "character varying"
+      },
+      {
+        "name": "priority",
+        "type": "integer"
+      }
+    ]
+  },
+  "Redshift TMS base table (claim_paid_excel_t)": {
+    "file": "Redshift TMS base table (claim_paid_excel_t).xlsx",
+    "sheet": "claim_paid_excel_t_data_catalog",
+    "columns": [
+      {
+        "name": "registration_id",
+        "type": "integer"
+      },
+      {
+        "name": "case_id",
+        "type": "character varying"
+      },
+      {
+        "name": "member_id",
+        "type": "character varying"
+      },
+      {
+        "name": "family_id",
+        "type": "character varying"
+      },
+      {
+        "name": "patient_name",
+        "type": "character varying"
+      },
+      {
+        "name": "patient_dob",
+        "type": "character varying"
+      },
+      {
+        "name": "patient_state_code",
+        "type": "smallint"
+      },
+      {
+        "name": "patient_district_code",
+        "type": "smallint"
+      },
+      {
+        "name": "patient_district_name",
+        "type": "character varying"
+      },
+      {
+        "name": "patient_state_name",
+        "type": "character varying"
+      },
+      {
+        "name": "gender",
+        "type": "character varying"
+      },
+      {
+        "name": "age",
+        "type": "numeric"
+      },
+      {
+        "name": "policy_code",
+        "type": "character varying"
+      },
+      {
+        "name": "renewal_code",
+        "type": "character varying"
+      },
+      {
+        "name": "category_details",
+        "type": "character varying"
+      },
+      {
+        "name": "speciality_code",
+        "type": "character varying"
+      },
+      {
+        "name": "procedure_details",
+        "type": "character varying"
+      },
+      {
+        "name": "procedure_code",
+        "type": "character varying"
+      },
+      {
+        "name": "case_type",
+        "type": "character varying"
+      },
+      {
+        "name": "status_id_pk",
+        "type": "integer"
+      },
+      {
+        "name": "case_status",
+        "type": "character varying"
+      },
+      {
+        "name": "hospital_code",
+        "type": "character varying"
+      },
+      {
+        "name": "hospital_name",
+        "type": "character varying"
+      },
+      {
+        "name": "hosp_district_name",
+        "type": "character varying"
+      },
+      {
+        "name": "hosp_state_name",
+        "type": "character varying"
+      },
+      {
+        "name": "hospital_state_cd",
+        "type": "smallint"
+      },
+      {
+        "name": "hospital_district_cd",
+        "type": "smallint"
+      },
+      {
+        "name": "hosp_pan_number",
+        "type": "character varying"
+      },
+      {
+        "name": "hospital_type",
+        "type": "character varying"
+      },
+      {
+        "name": "admission_dt",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "preauth_init_date",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "amount_preauth_initiated",
+        "type": "numeric"
+      },
+      {
+        "name": "preauth_approved_date",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "amount_preauth_approved",
+        "type": "numeric"
+      },
+      {
+        "name": "preauth_rejected_date",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "surgery_dt",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "death_dt",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "discharge_dt",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "claim_init_date",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "amount_claim_initiated",
+        "type": "numeric"
+      },
+      {
+        "name": "amount_claim_approved",
+        "type": "numeric"
+      },
+      {
+        "name": "amount_claim_paid",
+        "type": "numeric"
+      },
+      {
+        "name": "claim_rejected_date",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "rf_amount",
+        "type": "numeric"
+      },
+      {
+        "name": "tds_amount",
+        "type": "numeric"
+      },
+      {
+        "name": "utr_no",
+        "type": "character varying"
+      },
+      {
+        "name": "payment_paid_dt",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "transaction_amount",
+        "type": "numeric"
+      },
+      {
+        "name": "cpd_approved_date",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "cpd_approved_amount",
+        "type": "numeric"
+      },
+      {
+        "name": "cpd_user",
+        "type": "character varying"
+      },
+      {
+        "name": "aco_approved_date",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "aco_approved_amount",
+        "type": "numeric"
+      },
+      {
+        "name": "aco_user",
+        "type": "character varying"
+      },
+      {
+        "name": "sha_approved_date",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "sha_approved_amount",
+        "type": "numeric"
+      },
+      {
+        "name": "sha_user",
+        "type": "character varying"
+      },
+      {
+        "name": "json_object_perauth",
+        "type": "character varying"
+      },
+      {
+        "name": "json_object_claim",
+        "type": "character varying"
+      },
+      {
+        "name": "json_object_ben",
+        "type": "character varying"
+      },
+      {
+        "name": "last_insert_dt",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "src_account_no",
+        "type": "character varying"
+      },
+      {
+        "name": "src_ifsc_code",
+        "type": "character varying"
+      },
+      {
+        "name": "paid_flag",
+        "type": "character varying"
+      },
+      {
+        "name": "hosp_account_number",
+        "type": "character varying"
+      },
+      {
+        "name": "ben_ifsc_code",
+        "type": "character varying"
+      },
+      {
+        "name": "current_workflow_role",
+        "type": "character varying"
+      },
+      {
+        "name": "current_workflow_user",
+        "type": "character varying"
+      },
+      {
+        "name": "service_request_type",
+        "type": "character varying"
+      },
+      {
+        "name": "m_flag",
+        "type": "integer"
+      },
+      {
+        "name": "careplan_desc",
+        "type": "character varying"
+      },
+      {
+        "name": "discharge_type",
+        "type": "character varying"
+      },
+      {
+        "name": "admission_type",
+        "type": "character varying"
+      },
+      {
+        "name": "claim_approved_date",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "preauth_tat",
+        "type": "bigint"
+      },
+      {
+        "name": "claim_tat",
+        "type": "bigint"
+      },
+      {
+        "name": "payment_tat",
+        "type": "bigint"
+      },
+      {
+        "name": "patient_mobile_number",
+        "type": "character varying"
+      }
+    ]
+  },
+  "Redshift TMS workflow table (workflow_users_t)": {
+    "file": "Redshift TMS workflow table (workflow_users_t).xlsx",
+    "sheet": "workflow_users_t_catalog",
+    "columns": [
+      {
+        "name": "table_name",
+        "type": "character varying"
+      },
+      {
+        "name": "id_pk",
+        "type": "integer"
+      },
+      {
+        "name": "registration_id",
+        "type": "character varying"
+      },
+      {
+        "name": "workflow_role",
+        "type": "character varying"
+      },
+      {
+        "name": "status_id",
+        "type": "numeric"
+      },
+      {
+        "name": "status_descrption",
+        "type": "character varying"
+      },
+      {
+        "name": "workflow_process_code",
+        "type": "character varying"
+      },
+      {
+        "name": "workflow_user",
+        "type": "character varying"
+      },
+      {
+        "name": "created_dt",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "last_action_dt",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "initiated_amount",
+        "type": "numeric"
+      },
+      {
+        "name": "approved_amount",
+        "type": "numeric"
+      },
+      {
+        "name": "transaction_dt",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "final_level",
+        "type": "smallint"
+      },
+      {
+        "name": "active_flag",
+        "type": "smallint"
+      },
+      {
+        "name": "created_by",
+        "type": "character varying"
+      },
+      {
+        "name": "remarks",
+        "type": "character varying"
+      },
+      {
+        "name": "json_object",
+        "type": "character varying"
+      },
+      {
+        "name": "patient_state_code",
+        "type": "smallint"
+      },
+      {
+        "name": "patient_district_code",
+        "type": "smallint"
+      },
+      {
+        "name": "patient_state_name",
+        "type": "character varying"
+      },
+      {
+        "name": "patient_district_name",
+        "type": "character varying"
+      },
+      {
+        "name": "hospital_code",
+        "type": "character varying"
+      },
+      {
+        "name": "hospital_name",
+        "type": "character varying"
+      },
+      {
+        "name": "hospital_state_cd",
+        "type": "smallint"
+      },
+      {
+        "name": "hospital_district_cd",
+        "type": "smallint"
+      },
+      {
+        "name": "hosp_district_name",
+        "type": "character varying"
+      },
+      {
+        "name": "hosp_state_name",
+        "type": "character varying"
+      },
+      {
+        "name": "hospital_type",
+        "type": "character varying"
+      },
+      {
+        "name": "mobile_number",
+        "type": "bigint"
+      },
+      {
+        "name": "user_id",
+        "type": "character varying"
+      },
+      {
+        "name": "user_name",
+        "type": "character varying"
+      },
+      {
+        "name": "last_insert_dt",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "m_flag",
+        "type": "integer"
+      },
+      {
+        "name": "dashboard_workflow_role",
+        "type": "character varying"
+      },
+      {
+        "name": "pendency_age",
+        "type": "character varying"
+      },
+      {
+        "name": "ppd_tat",
+        "type": "character varying"
+      },
+      {
+        "name": "overall_tat",
+        "type": "character varying"
+      }
+    ]
+  },
+  "UMP_DataDictionary (2)": {
+    "file": "UMP_DataDictionary (2).xlsx",
+    "sheet": "UMP_DataDictionary",
+    "columns": [
+      {
+        "name": "id_pk",
+        "type": "bigint"
+      },
+      {
+        "name": "active_yn",
+        "type": "smallint"
+      },
+      {
+        "name": "obj_aadhar_vault",
+        "type": "character varying"
+      },
+      {
+        "name": "created_by",
+        "type": "character varying"
+      },
+      {
+        "name": "created_dt",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "email_id",
+        "type": "character varying"
+      },
+      {
+        "name": "last_login_time",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "lock_yn",
+        "type": "smallint"
+      },
+      {
+        "name": "mobile_number",
+        "type": "bigint"
+      },
+      {
+        "name": "updated_by",
+        "type": "character varying"
+      },
+      {
+        "name": "updated_dt",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "user_age",
+        "type": "smallint"
+      },
+      {
+        "name": "user_gender",
+        "type": "character varying"
+      },
+      {
+        "name": "user_id",
+        "type": "character varying"
+      },
+      {
+        "name": "user_name",
+        "type": "character varying"
+      },
+      {
+        "name": "user_state_code",
+        "type": "smallint"
+      },
+      {
+        "name": "user_dob",
+        "type": "character varying"
+      },
+      {
+        "name": "reference_id",
+        "type": "character varying"
+      },
+      {
+        "name": "default_authmode",
+        "type": "integer"
+      },
+      {
+        "name": "failed_attempts",
+        "type": "integer"
+      },
+      {
+        "name": "present_address",
+        "type": "character varying"
+      },
+      {
+        "name": "aadhaar_address",
+        "type": "character varying"
+      },
+      {
+        "name": "language",
+        "type": "character varying"
+      },
+      {
+        "name": "user_enrollment",
+        "type": "character varying"
+      },
+      {
+        "name": "user_designation",
+        "type": "character varying"
+      },
+      {
+        "name": "otp_failed_updation",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "otp_failed_count",
+        "type": "integer"
+      },
+      {
+        "name": "aadhaar_display_code",
+        "type": "character varying"
+      },
+      {
+        "name": "ekyc_flag",
+        "type": "character varying"
+      },
+      {
+        "name": "csc_id",
+        "type": "character varying"
+      },
+      {
+        "name": "role_id",
+        "type": "integer"
+      },
+      {
+        "name": "created_by",
+        "type": "character varying"
+      },
+      {
+        "name": "created_dt",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "role_description",
+        "type": "character varying"
+      },
+      {
+        "name": "role_name",
+        "type": "character varying"
+      },
+      {
+        "name": "updated_by",
+        "type": "character varying"
+      },
+      {
+        "name": "updated_dt",
+        "type": "timestamp without time zone"
+      },
+      {
+        "name": "workflow_applicable",
+        "type": "smallint"
+      },
+      {
+        "name": "status",
+        "type": "character varying"
+      }
+    ]
+  }
+}

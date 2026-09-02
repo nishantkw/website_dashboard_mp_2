@@ -1,120 +1,197 @@
 import ChartCard from '../../components/ui/ChartCard'
 import DataTable from '../../components/ui/DataTable'
 import { PageHeader, KPIGrid } from '../../components/ui/PageHeader'
-import { InteractiveBarChart, InteractivePieChart, InteractiveLineChart } from '../../components/charts/InteractiveCharts'
+import CardPrintingFilterBar from '../../components/layout/CardPrintingFilterBar'
+import { InteractiveBarChart, InteractivePieChart } from '../../components/charts/InteractiveCharts'
+import { useMemo } from 'react'
 import { useDrillDown } from '../../hooks/useDrillDown'
-import { useGlobalFilterData } from '../../hooks/useGlobalFilterData'
-import type { KPI } from '../../types'
-import {
-  bisKPIs, bisStatusData, bisDistrictData, bisUrbanRuralBar,
-  bisSourceTypeData, bisMonthlyTrendData, cardPrintingFunnel, bisTableData,
-} from '../../data/mockData'
+import { useCardPrintingFilters } from '../../hooks/useCardPrintingFilters'
+import { getCardPrintingFiltersForPage } from '../../data/cardPrintingFilterConfig'
+import { useApiResource } from '../../hooks/useApiResource'
+import { fetchBisCardPrinting } from '../../api/endpoints'
+import DataSourceBadge from '../../components/ui/DataSourceBadge'
+import BackendOfflineNotice from '../../components/ui/BackendOfflineNotice'
+import { schemaTableColumns } from '../../utils/schemaColumns'
+import { filterRowsForCardPrintingKpi } from '../../utils/beneficiaryCodes'
+import { filterRowsForRuralUrbanLabel } from '../../utils/ruralUrban'
+import type { KPI, TableColumn } from '../../types'
 
 const STATUS_COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#06b6d4', '#ef4444']
-const SOURCE_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#8b5cf6']
+const URBAN_RURAL_COLORS = ['#f59e0b', '#10b981']
+const DISTRICT_COLORS = ['#3b82f6', '#0ea5e9', '#06b6d4', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#6366f1']
 
-const columns = [
+const preferredColumns: TableColumn[] = [
   { key: 'card_no', label: 'Card No.' },
   { key: 'ben_id', label: 'Ben ID' },
   { key: 'family_id', label: 'Family ID' },
-  { key: 'district', label: 'District' },
-  { key: 'block', label: 'Block' },
+  { key: 'card_name', label: 'Name' },
+  { key: 'district_name', label: 'District' },
+  { key: 'sub_district_name', label: 'Sub-District' },
+  { key: 'urban_or_rural', label: 'Urban / Rural' },
+  { key: 'card_gender', label: 'Gender' },
+  { key: 'abha_no', label: 'ABHA' },
   { key: 'enroll_date', label: 'Enroll Date' },
   { key: 'approve_date', label: 'Approved' },
   { key: 'card_gen_date', label: 'Generated' },
   { key: 'card_print_date', label: 'Printed' },
-  { key: 'distribute_date', label: 'Distributed' },
-  { key: 'deliver_date', label: 'Delivered' },
-  { key: 'status', label: 'Status' },
+  { key: 'card_distribute_date', label: 'Distributed' },
+  { key: 'card_deliver_date', label: 'Delivered' },
+  { key: 'card_print_status', label: 'Status' },
   { key: 'source_type', label: 'Source' },
 ]
 
+const EMPTY = {
+  kpis: [] as KPI[],
+  charts: {} as Record<string, never>,
+  table: [] as Record<string, string | number>[],
+  columns: [] as string[],
+}
+
 export default function CardPrinting() {
-  const { openFromChart, openFromKpi, openDetail, Modal } = useDrillDown()
-  const { filterData } = useGlobalFilterData()
-  const filtered = filterData(bisTableData)
+  const filterFields = useMemo(() => getCardPrintingFiltersForPage(), [])
+  const cardFilters = useCardPrintingFilters(filterFields)
+
+  const { data, source, db, loading, error } = useApiResource(
+    () => fetchBisCardPrinting(cardFilters.queryString),
+    EMPTY,
+    [cardFilters.queryString]
+  )
+  const live = source === 'api'
+  const kpis = data.kpis ?? []
+  const statusData = data.charts?.status ?? []
+  const districtData = data.charts?.district ?? []
+  const urbanRuralData = data.charts?.urbanRural ?? []
+  const table = (data.table ?? []) as Record<string, string | number>[]
+  const filtered = live ? table : cardFilters.filterRows(table)
+  const tableColumns = useMemo(
+    () =>
+      schemaTableColumns({
+        source,
+        schemaKeys: data.columns,
+        rows: table,
+        preferredFirst: preferredColumns.map((c) => c.key),
+        demoColumns: preferredColumns,
+      }),
+    [source, data.columns, table]
+  )
+  const districtHeight = Math.max(280, Math.min(districtData.length, 14) * 36)
+
+  const { openFromChart, openFromKpi, openDetail, Modal } = useDrillDown({
+    live,
+    tableRows: filtered,
+    columns: tableColumns,
+    datasetTitle: 'Card Printing Records',
+  })
+
+  const handleKpi = (kpi: KPI) => {
+    const codedRows = filterRowsForCardPrintingKpi(filtered, kpi.label)
+    if (codedRows) {
+      openDetail({
+        title: kpi.label,
+        subtitle: `${codedRows.length} record${codedRows.length === 1 ? '' : 's'}`,
+        records: codedRows,
+        columns: tableColumns,
+        datasetTitle: 'Card Printing Records',
+        source: live ? 'api' : 'demo',
+      })
+      return
+    }
+    const ruralUrbanRows = filterRowsForRuralUrbanLabel(filtered, kpi.label)
+    if (ruralUrbanRows) {
+      openDetail({
+        title: kpi.label,
+        subtitle: `${ruralUrbanRows.length} record${ruralUrbanRows.length === 1 ? '' : 's'}`,
+        records: ruralUrbanRows,
+        columns: tableColumns,
+        datasetTitle: 'Card Printing Records',
+        source: live ? 'api' : 'demo',
+      })
+      return
+    }
+    openFromKpi(kpi.label, kpi.value, { change: kpi.change ?? 0 })
+  }
 
   return (
     <div>
       <Modal />
-      <PageHeader title="Card Printing Status" description="t_card_printing_status — ABHA card lifecycle: Enroll → Approve → Generate → Print → Distribute → Deliver" />
-      <KPIGrid kpis={bisKPIs} onKpiClick={(kpi: KPI) => openFromKpi(kpi.label, kpi.value, { change: kpi.change ?? 0 })} />
+      <PageHeader
+        title="Card Printing Status"
+        description={
+          live
+            ? `${data.schema ?? 'dmart_mp.t_card_printing_status'} — schema fields`
+            : 'Connect the backend to load card printing records'
+        }
+        badge={<DataSourceBadge source={source} db={db} />}
+      />
+      <BackendOfflineNotice error={error} loading={loading} />
 
-      {/* Row 1: Lifecycle Funnel + Status Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <ChartCard title="Card Lifecycle Funnel" subtitle="Enrolled → Approved → Generated → Printed → Distributed → Delivered" exportData={cardPrintingFunnel}>
-          <InteractiveBarChart
-            data={cardPrintingFunnel}
-            chartTitle="Card Lifecycle"
-            layout="vertical"
-            height={270}
-            onItemClick={openFromChart}
-            bars={[{ dataKey: 'value', fill: '#8b5cf6', name: 'Count' }]}
-          />
-        </ChartCard>
-        <ChartCard title="Card Status Distribution" subtitle="Current card_print_status breakdown" exportData={bisStatusData}>
-          <InteractivePieChart data={bisStatusData} colors={STATUS_COLORS} innerRadius={55} chartTitle="Card Status" onItemClick={openFromChart} />
-        </ChartCard>
-      </div>
+      <CardPrintingFilterBar
+        fields={cardFilters.resolvedFields}
+        values={cardFilters.filters}
+        onChange={cardFilters.setFilter}
+        search={cardFilters.search}
+        onSearchChange={cardFilters.setSearch}
+        onClear={cardFilters.clearFilters}
+        activeCount={cardFilters.activeCount}
+      />
 
-      {/* Row 2: District-wise + Urban/Rural */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <ChartCard title="District-wise Card Printing" subtitle="Printed vs Pending vs Delivered by district" exportData={bisDistrictData}>
-          <InteractiveBarChart
-            data={bisDistrictData}
-            chartTitle="District Printing"
-            height={270}
-            showLegend
-            onItemClick={openFromChart}
-            bars={[
-              { dataKey: 'printed', fill: '#3b82f6', name: 'Printed' },
-              { dataKey: 'delivered', fill: '#10b981', name: 'Delivered' },
-              { dataKey: 'pending', fill: '#f59e0b', name: 'Pending' },
-            ]}
-          />
-        </ChartCard>
-        <ChartCard title="Urban vs Rural Card Status" subtitle="rural_urban_flag breakdown by delivery status" exportData={bisUrbanRuralBar}>
-          <InteractiveBarChart
-            data={bisUrbanRuralBar}
-            chartTitle="Urban/Rural Cards"
-            height={270}
-            showLegend
-            onItemClick={openFromChart}
-            bars={[
-              { dataKey: 'delivered', fill: '#10b981', name: 'Delivered' },
-              { dataKey: 'printed', fill: '#3b82f6', name: 'Printed' },
-              { dataKey: 'pending', fill: '#f59e0b', name: 'Pending' },
-            ]}
-          />
-        </ChartCard>
-      </div>
+      {kpis.length > 0 && <KPIGrid kpis={kpis} onKpiClick={handleKpi} />}
 
-      {/* Row 3: Source Type + Monthly Trend */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <ChartCard title="Source Type Breakdown" subtitle="source_type — SECC / State List / Contractor / Walk-in" exportData={bisSourceTypeData}>
-          <InteractivePieChart data={bisSourceTypeData} colors={SOURCE_COLORS} chartTitle="Source Type" onItemClick={openFromChart} />
-        </ChartCard>
-        <ChartCard title="Monthly Printing Trend" subtitle="Printed vs Delivered per month (Jan–Aug 2025)" exportData={bisMonthlyTrendData}>
-          <InteractiveLineChart
-            data={bisMonthlyTrendData}
-            chartTitle="Monthly Printing"
-            height={270}
-            showLegend
-            onItemClick={openFromChart}
-            lines={[
-              { dataKey: 'printed', stroke: '#3b82f6', name: 'Printed' },
-              { dataKey: 'delivered', stroke: '#10b981', name: 'Delivered' },
-            ]}
-          />
-        </ChartCard>
-      </div>
+      {(statusData.length > 0 || urbanRuralData.length > 0) && (
+        <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {statusData.length > 0 && (
+            <ChartCard title="Card Print Status" exportData={statusData}>
+              <InteractivePieChart
+                data={statusData}
+                colors={STATUS_COLORS}
+                innerRadius={55}
+                chartTitle="Card Status"
+                onItemClick={openFromChart}
+              />
+            </ChartCard>
+          )}
+          {urbanRuralData.length > 0 && (
+            <ChartCard title="Urban vs Rural" exportData={urbanRuralData}>
+              <InteractivePieChart
+                data={urbanRuralData}
+                colors={URBAN_RURAL_COLORS}
+                innerRadius={55}
+                chartTitle="Urban/Rural"
+                onItemClick={openFromChart}
+              />
+            </ChartCard>
+          )}
+        </div>
+      )}
 
-      {/* Full Data Table */}
+      {districtData.length > 0 && (
+        <div className="mb-4">
+          <ChartCard title="Cards by District" exportData={districtData}>
+            <InteractiveBarChart
+              data={districtData}
+              chartTitle="Cards by District"
+              layout="vertical"
+              height={districtHeight}
+              integerAxis
+              onItemClick={openFromChart}
+              bars={[{ dataKey: 'value', fill: '#3b82f6', name: 'Cards' }]}
+              cellColors={DISTRICT_COLORS}
+            />
+          </ChartCard>
+        </div>
+      )}
+
       <DataTable
-        columns={columns}
+        columns={tableColumns}
         data={filtered}
-        title={`Card Records — t_card_printing_status (${filtered.length} records)`}
-        onRowClick={(row) => openDetail({ title: String(row.card_no), subtitle: 'Card Printing Record', data: row })}
+        title={`Card Records (${filtered.length}${tableColumns.length ? ` · ${tableColumns.length} schema cols` : ''})`}
+        onRowClick={(row) =>
+          openDetail({
+            title: String(row.card_no || row.ben_id || 'Card'),
+            subtitle: 'Schema record',
+            data: row,
+          })
+        }
       />
     </div>
   )

@@ -12,6 +12,7 @@ interface FilterContextValue {
 }
 
 export const defaultGlobalFilters: FilterValues = {
+  state_type: '',
   division: '',
   district: '',
   claim_status: '',
@@ -46,7 +47,12 @@ export function FilterProvider({ children }: { children: ReactNode }) {
     setGlobalFilters((prev) => {
       const updated = { ...prev, [key]: value }
 
-      if (key === 'division') {
+      if (key === 'state_type') {
+        if (value === 'Portability') {
+          updated.division = ''
+          updated.district = ''
+        }
+      } else if (key === 'division') {
         if (value && prev.district) {
           const allowedDistricts = getDistrictsForDivision(value).map((d) => d.value)
           if (!allowedDistricts.includes(prev.district)) {

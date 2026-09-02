@@ -93,6 +93,43 @@ export function getDivisionForDistrict(districtName: string): string | undefined
 
 export const DISTRICT_OPTIONS = getDistrictsForDivision()
 
+export const STATE_TYPE_OPTIONS = [
+  { value: '', label: 'Both (MP + Portability)' },
+  { value: 'MP', label: 'MP' },
+  { value: 'Portability', label: 'Portability' },
+]
+
+/** True when the name matches a district in the MP Division / District filter lists. */
+export function isMpDistrict(districtName?: string) {
+  const raw = String(districtName ?? '').trim().toLowerCase()
+  if (!raw) return false
+  if (getDivisionForDistrict(raw)) return true
+  const all = MP_DIVISIONS.flatMap((d) => d.districts)
+  return all.some((d) => {
+    const name = d.toLowerCase()
+    if (raw.includes(name)) return true
+    if (name.length >= 4 && name.includes(raw)) return true
+    return false
+  })
+}
+
+export function isMpDivisionName(divisionName?: string) {
+  const raw = String(divisionName ?? '').trim().toLowerCase()
+  if (!raw) return false
+  return MP_DIVISIONS.some((d) => d.division.toLowerCase() === raw)
+}
+
+/** MP = in SHA division/district lists; Portability = everything else. */
+export function deriveGeoStateType(row: Record<string, string | number>) {
+  const district = String(
+    row.district_name || row.dist_name || row.hosp_district_name || row.patient_district_name || ''
+  )
+  if (isMpDistrict(district)) return 'MP'
+  const division = String(row.division_name || row.division || '')
+  if (isMpDivisionName(division)) return 'MP'
+  return 'Portability'
+}
+
 export const CLAIM_STATUS_OPTIONS = [
   { value: '', label: 'All Claim Status' },
   { value: 'Paid', label: 'Paid' },
@@ -136,6 +173,77 @@ export const INVESTIGATION_STATUS_OPTIONS = [
   { value: 'Under Investigation', label: 'Under Investigation' },
   { value: 'Confirmed Fraud', label: 'Confirmed Fraud' },
   { value: 'Cleared', label: 'Cleared' },
+]
+
+/** FRS §7 case disposition values — maps to investigation_status column */
+export const SAFU_CASE_STATUS_OPTIONS = [
+  { value: '', label: 'All Case Status' },
+  { value: 'Under Investigation', label: 'Suspicious / Under Investigation' },
+  { value: 'Under Process', label: 'Under Process' },
+  { value: 'Fraud Detected', label: 'Fraud Detected' },
+  { value: 'Non-Fraud', label: 'Non-Fraud' },
+  { value: 'Query I Pending', label: 'Query I Pending (Hospital)' },
+  { value: 'Query II Pending', label: 'Query II Pending (CPD)' },
+  { value: 'Query III Pending', label: 'Query III Pending (SAFU Doctor)' },
+]
+
+export const TRIGGER_TYPE_OPTIONS = [
+  { value: '', label: 'All Trigger Types' },
+  { value: 'DUP-CLAIM', label: 'DUP-CLAIM' },
+  { value: 'DEVICE-SHARE', label: 'DEVICE-SHARE' },
+  { value: 'DOC-ANOMALY', label: 'DOC-ANOMALY' },
+  { value: 'GEO-MISMATCH', label: 'GEO-MISMATCH' },
+  { value: 'PKG-MISMATCH', label: 'PKG-MISMATCH' },
+  { value: 'AMOUNT-SPIKE', label: 'AMOUNT-SPIKE' },
+]
+
+export const TRIGGER_CODE_OPTIONS = [
+  { value: '', label: 'All Trigger Codes' },
+  { value: 'DUP-CLAIM-01', label: 'DUP-CLAIM-01' },
+  { value: 'DUP-CLAIM-05', label: 'DUP-CLAIM-05' },
+  { value: 'DEV-SHARE-01', label: 'DEV-SHARE-01' },
+  { value: 'DEV-SHARE-03', label: 'DEV-SHARE-03' },
+  { value: 'DOC-FAKE-02', label: 'DOC-FAKE-02' },
+  { value: 'DOC-FAKE-08', label: 'DOC-FAKE-08' },
+  { value: 'GEO-MIS-01', label: 'GEO-MIS-01' },
+  { value: 'GEO-MIS-03', label: 'GEO-MIS-03' },
+  { value: 'PKG-MIS-02', label: 'PKG-MIS-02' },
+  { value: 'PKG-MIS-07', label: 'PKG-MIS-07' },
+  { value: 'AMT-SPIKE-01', label: 'AMT-SPIKE-01' },
+  { value: 'AMT-SPIKE-04', label: 'AMT-SPIKE-04' },
+]
+
+export const APPLICATION_TYPE_OPTIONS = [
+  { value: '', label: 'All Application Types' },
+  { value: 'CLAIM', label: 'CLAIM' },
+  { value: 'ENROLMENT', label: 'ENROLMENT' },
+  { value: 'CARD', label: 'CARD' },
+  { value: 'PREAUTH', label: 'PREAUTH' },
+]
+
+export const ENTITY_TYPE_OPTIONS = [
+  { value: '', label: 'All Entity Types' },
+  { value: 'Hospital', label: 'Hospital' },
+  { value: 'User', label: 'User' },
+  { value: 'Beneficiary', label: 'Beneficiary' },
+]
+
+export const SAFU_DOCTOR_OPTIONS = [
+  { value: '', label: 'All SAFU Doctors' },
+  { value: 'Dr. Sunita Patel', label: 'Dr. Sunita Patel' },
+  { value: 'Dr. Rajesh Kumar', label: 'Dr. Rajesh Kumar' },
+  { value: 'Dr. Amit Singh', label: 'Dr. Amit Singh' },
+  { value: 'Dr. Priya Sharma', label: 'Dr. Priya Sharma' },
+  { value: 'Dr. Vikram Joshi', label: 'Dr. Vikram Joshi' },
+]
+
+export const SHA_AFO_OPTIONS = [
+  { value: '', label: 'All SHA-AFO Officers' },
+  { value: 'sha.reviewer01', label: 'sha.reviewer01' },
+  { value: 'sha.reviewer02', label: 'sha.reviewer02' },
+  { value: 'sha.reviewer03', label: 'sha.reviewer03' },
+  { value: 'sha.reviewer04', label: 'sha.reviewer04' },
+  { value: 'cpd.officer01', label: 'cpd.officer01' },
 ]
 
 export const TRAINING_STATUS_OPTIONS = [

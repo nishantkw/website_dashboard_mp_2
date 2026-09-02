@@ -16,7 +16,7 @@ import {
 import clsx from 'clsx'
 import { navigation } from '../../data/navigation'
 import { canAccessNavItem } from '../../auth/permissions'
-import { useAuth } from '../../auth/AuthContext'
+import { useAuth } from '../../auth/auth-context'
 import type { NavItem } from '../../types'
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -34,10 +34,17 @@ function NavIcon({ name }: { name?: string }) {
   return <Icon className="w-4 h-4 shrink-0" />
 }
 
+function isNavPathActive(navPath: string, pathname: string, exact = false) {
+  if (exact) return pathname === navPath
+  return pathname === navPath || pathname.startsWith(`${navPath}/`)
+}
+
 function NavGroup({ item }: { item: NavItem }) {
   const location = useLocation()
   const hasChildren = item.children && item.children.length > 0
-  const isChildActive = hasChildren && item.children!.some((c) => c.path === location.pathname)
+  const isChildActive =
+    hasChildren &&
+    item.children!.some((c) => c.path && isNavPathActive(c.path, location.pathname, c.end))
   const [open, setOpen] = useState(isChildActive || item.id === 'overview')
 
   if (!hasChildren && item.path) {
@@ -73,7 +80,7 @@ function NavGroup({ item }: { item: NavItem }) {
       >
         <span className="flex items-center gap-3">
           <NavIcon name={item.icon} />
-          <span className="text-left leading-tight">{item.label}</span>
+          <span className="text-left leading-snug">{item.label}</span>
         </span>
         {open ? <ChevronDown className="w-4 h-4 shrink-0" /> : <ChevronRight className="w-4 h-4 shrink-0" />}
       </button>
@@ -83,6 +90,7 @@ function NavGroup({ item }: { item: NavItem }) {
             <NavLink
               key={child.id}
               to={child.path!}
+              end={child.end}
               className={({ isActive }) =>
                 clsx(
                   'block px-3 py-2 rounded-lg text-sm transition-colors',
@@ -132,7 +140,7 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
               className="w-9 h-9 object-contain rounded-full"
             />
             <div>
-              <p className="text-white font-bold text-sm leading-tight">Analytics Dashboard</p>
+              <p className="text-sm font-bold leading-snug text-white">Analytics Dashboard</p>
               <p className="text-slate-400 text-xs font-medium">Madhya Pradesh Portal</p>
             </div>
           </div>
