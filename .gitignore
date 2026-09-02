@@ -7,6 +7,10 @@ node_modules/
 .env.*
 !.env.example
 
+# Local DB dumps (do not commit)
+.dump/
+**/.dump/
+
 # Build
 dist/
 dist-ssr/
