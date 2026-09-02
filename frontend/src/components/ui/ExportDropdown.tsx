@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Download, FileText, FileSpreadsheet, FileCode, ChevronDown } from 'lucide-react'
-import { exportToCSV, exportToExcel, exportToPDF, exportFullPagePDF, type ColumnDef } from '../../utils/exportUtils'
+import { exportToCSV, exportToExcel, exportToPDF, exportFullPagePDF, exportSheetsToCSV, exportSheetsToExcel, exportSheetsToExcelWithVisuals, type ColumnDef, type ExportSheet } from '../../utils/exportUtils'
+import { captureExportVisuals } from '../../utils/chartCapture'
 
 interface ExportDropdownProps {
   title: string
@@ -13,6 +14,13 @@ interface ExportDropdownProps {
   isFullPageExport?: boolean
   /** When set, CSV/Excel/PDF fetch this full dataset instead of the current page. */
   fetchExportData?: () => Promise<Record<string, any>[]>
+  /** KPI cards + graph series (CSV sections / Excel worksheets). */
+  sheets?: ExportSheet[]
+  fetchExportSheets?: () => Promise<ExportSheet[]>
+  /** Capture on-screen graphs as pictures inside Excel (CSV stays numbers only). */
+  includeVisuals?: boolean
+  /** Only capture the chart whose data-export-visual matches this title. */
+  visualTitle?: string
 }
 
 export default function ExportDropdown({
@@ -25,6 +33,10 @@ export default function ExportDropdown({
   variant = 'outline',
   isFullPageExport = false,
   fetchExportData,
+  sheets,
+  fetchExportSheets,
+  includeVisuals = false,
+  visualTitle,
 }: ExportDropdownProps) {
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -39,6 +51,12 @@ export default function ExportDropdown({
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  const resolveSheets = async (): Promise<ExportSheet[] | null> => {
+    if (fetchExportSheets) return fetchExportSheets()
+    if (sheets?.length) return sheets
+    return null
+  }
 
   const resolveRows = async () => {
     if (fetchExportData) return fetchExportData()
@@ -58,12 +76,59 @@ export default function ExportDropdown({
     }
   }
 
+  const runSheetExport = async (kind: 'csv' | 'excel') => {
+    if (busy) return
+    setBusy(true)
+    try {
+      const nextSheets = await resolveSheets()
+      if (nextSheets?.some((s) => s.rows?.length)) {
+        if (kind === 'csv') {
+          exportSheetsToCSV(filename, nextSheets)
+          return
+        }
+        if (includeVisuals) {
+          const visuals = await captureExportVisuals(visualTitle)
+          if (visuals.length) {
+            await exportSheetsToExcelWithVisuals(filename, title, nextSheets, visuals)
+            return
+          }
+        }
+        await exportSheetsToExcel(filename, nextSheets)
+        return
+      }
+      const rows = await resolveRows()
+      if (!rows?.length) return
+      if (kind === 'csv') {
+        exportToCSV(filename, rows, columns)
+        return
+      }
+      if (includeVisuals) {
+        const visuals = await captureExportVisuals(visualTitle)
+        if (visuals.length) {
+          await exportSheetsToExcelWithVisuals(filename, title, [{ name: visualTitle || title, rows, columns }], visuals)
+          return
+        }
+      }
+      await exportToExcel(filename, rows, columns)
+    } catch (err) {
+      console.error(err)
+      window.alert(
+        kind === 'excel'
+          ? 'Excel export failed. Try CSV, or refresh the page and export again.'
+          : 'Export failed. Please try again.'
+      )
+    } finally {
+      setBusy(false)
+      setOpen(false)
+    }
+  }
+
   const handleExportCSV = () => {
-    void runExport((rows) => exportToCSV(filename, rows, columns))
+    void runSheetExport('csv')
   }
 
   const handleExportExcel = () => {
-    void runExport((rows) => exportToExcel(filename, rows, columns))
+    void runSheetExport('excel')
   }
 
   const handleExportPDF = () => {
@@ -101,10 +166,14 @@ export default function ExportDropdown({
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-1.5 w-48 rounded-xl bg-white shadow-xl border border-slate-200 z-[110] py-1.5 animate-in fade-in zoom-in-95">
+        <div className="absolute right-0 mt-1.5 w-56 rounded-xl bg-white shadow-xl border border-slate-200 z-[110] py-1.5 animate-in fade-in zoom-in-95">
           <div className="px-3 py-1.5 border-b border-slate-100">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              {fetchExportData ? 'Full dataset' : 'Download Format'}
+              {sheets?.length || fetchExportSheets
+                ? 'Cards + graphs'
+                : fetchExportData
+                  ? 'Full dataset'
+                  : 'Download Format'}
             </p>
           </div>
 
@@ -118,7 +187,11 @@ export default function ExportDropdown({
             <div className="flex flex-col gap-0.5">
               <p className="font-semibold leading-snug">CSV Document</p>
               <p className="text-[10px] leading-relaxed text-slate-400">
-                {fetchExportData ? 'All matching rows (.csv)' : 'Comma Separated (.csv)'}
+                {sheets?.length || fetchExportSheets
+                  ? 'Numbers only — charts cannot go in CSV'
+                  : fetchExportData
+                    ? 'All matching rows (.csv)'
+                    : 'Comma Separated (.csv)'}
               </p>
             </div>
           </button>
@@ -132,7 +205,13 @@ export default function ExportDropdown({
             <FileSpreadsheet className="w-4 h-4 text-emerald-600 shrink-0" />
             <div className="flex flex-col gap-0.5">
               <p className="font-semibold leading-snug">Excel Spreadsheet</p>
-              <p className="text-[10px] leading-relaxed text-slate-400">Microsoft Excel (.xlsx)</p>
+              <p className="text-[10px] leading-relaxed text-slate-400">
+                {includeVisuals
+                  ? 'Graphs as pictures + numbers (.xlsx)'
+                  : sheets?.length || fetchExportSheets
+                    ? 'One sheet per card / graph (.xlsx)'
+                    : 'Microsoft Excel (.xlsx)'}
+              </p>
             </div>
           </button>
 

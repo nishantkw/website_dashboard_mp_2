@@ -6,7 +6,7 @@ export interface AuthContextValue {
   isAuthenticated: boolean
   isLoading: boolean
   login: (credentials: LoginCredentials) => Promise<{ success: boolean; error?: string; user?: AuthUser }>
-  logout: () => void
+  logout: () => Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

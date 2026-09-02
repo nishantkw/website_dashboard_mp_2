@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { query, closePools } from './pool.js'
+import { seedDashboardUsersIfEmpty } from './seedUsers.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const SQL_DIR = path.join(__dirname, '../../sql')
@@ -28,6 +29,7 @@ async function migrate() {
   }
 
   console.log('Migration completed successfully.')
+  await seedDashboardUsersIfEmpty()
   await closePools()
 }
 

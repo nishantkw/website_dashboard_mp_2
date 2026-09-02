@@ -14,7 +14,27 @@ import BackendOfflineNotice from '../../components/ui/BackendOfflineNotice'
 import { schemaTableColumns } from '../../utils/schemaColumns'
 import { TABLE_PAGE_SIZE } from '../../hooks/useTableControls'
 import type { KPI, TableColumn } from '../../types'
+import type { ExportSheet } from '../../utils/exportUtils'
 
+const KPI_EXPORT_COLUMNS = [
+  { key: 'card', label: 'Card' },
+  { key: 'value', label: 'Value' },
+  { key: 'change', label: 'Change %' },
+  { key: 'changeLabel', label: 'Vs' },
+]
+const CHART_EXPORT_COLUMNS = [
+  { key: 'name', label: 'Category' },
+  { key: 'value', label: 'Count' },
+]
+
+function kpisToExportRows(list: KPI[]) {
+  return list.map((k) => ({
+    card: k.label,
+    value: k.value,
+    change: k.change ?? '',
+    changeLabel: k.changeLabel ?? '',
+  }))
+}
 const TYPE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']
 const STATUS_COLORS = ['#10b981', '#ef4444', '#f59e0b', '#6366f1', '#06b6d4', '#8b5cf6', '#94a3b8']
 const LOOKUP_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444', '#94a3b8']
@@ -60,6 +80,40 @@ const deempanelPreferred: TableColumn[] = [
   { key: 'order_id', label: 'Order ID' },
   { key: 'created_by', label: 'Created By' },
 ]
+
+function isActiveHospitalRow(row: Record<string, string | number>) {
+  return /^(1|active|yes|true)$/i.test(String(row.active_status ?? '').trim())
+}
+
+function isEmpaneledHospitalRow(row: Record<string, string | number>) {
+  const desc = String(row.hosp_status_desc ?? '').trim()
+  if (desc) {
+    if (/de[- ]?empane/i.test(desc)) return false
+    return /^empane/i.test(desc)
+  }
+  const s = String(row.enrl_status ?? '').trim()
+  if (!s) return false
+  if (/de[- ]?empane/i.test(s)) return false
+  if (/^empane/i.test(s)) return true
+  return s === '1'
+}
+
+function isGovHospitalRow(row: Record<string, string | number>) {
+  return /gov|^g$/i.test(String(row.hospital_type ?? '').trim())
+}
+
+function isPrivHospitalRow(row: Record<string, string | number>) {
+  return /priv|^p$/i.test(String(row.hospital_type ?? '').trim())
+}
+
+function filterRowsForHospitalMasterKpi<T extends Record<string, string | number>>(rows: T[], label: string): T[] {
+  const key = label.trim().toLowerCase()
+  if (key === 'active') return rows.filter((row) => isActiveHospitalRow(row))
+  if (key === 'empanelled' || key === 'empaneled') return rows.filter((row) => isEmpaneledHospitalRow(row))
+  if (key === 'government') return rows.filter((row) => isGovHospitalRow(row))
+  if (key === 'private') return rows.filter((row) => isPrivHospitalRow(row))
+  return rows
+}
 
 function filterRowsForDeempanelKpi<T extends Record<string, string | number>>(rows: T[], label: string): T[] | null {
   const key = label.replace(/^deempanel\s+/i, '').trim().toLowerCase()
@@ -242,9 +296,18 @@ export default function Hospitals() {
       }
       return { rows: filtered, columns, datasetTitle: 'Hospital Records' }
     },
+    fetchDrillDown: live
+      ? async (_payload, chartTitle) => {
+          if (/lookup|deempanel|\bhem\b/i.test(chartTitle)) return null
+          const res = await fetchHospitalsExport(moduleFilters.queryString)
+          if (!res.ok) return null
+          const rows = (res.data.table ?? []) as Record<string, string | number>[]
+          return { rows, columns, datasetTitle: 'Hospital Records' }
+        }
+      : undefined,
   })
 
-  const handleKpi = (kpi: KPI) => {
+  const handleKpi = async (kpi: KPI) => {
     if (/lookup/i.test(kpi.label)) {
       openDetail({
         title: kpi.label,
@@ -280,6 +343,42 @@ export default function Hospitals() {
       })
       return
     }
+
+    if (live) {
+      openDetail({
+        title: kpi.label,
+        subtitle: 'Loading hospital records…',
+        loading: true,
+        source: 'api',
+        datasetTitle: kpi.label,
+      })
+      const res = await fetchHospitalsExport(moduleFilters.queryString)
+      if (!res.ok) {
+        openDetail({
+          title: kpi.label,
+          subtitle: res.error || 'Could not load hospitals',
+          records: [],
+          columns,
+          datasetTitle: kpi.label,
+          source: 'api',
+        })
+        return
+      }
+      const rows = filterRowsForHospitalMasterKpi(
+        (res.data.table ?? []) as Record<string, string | number>[],
+        kpi.label
+      )
+      openDetail({
+        title: kpi.label,
+        subtitle: `${rows.length.toLocaleString()} matching hospital${rows.length === 1 ? '' : 's'}`,
+        records: rows,
+        columns,
+        datasetTitle: kpi.label,
+        source: 'api',
+      })
+      return
+    }
+
     openFromKpi(kpi.label, kpi.value, { change: kpi.change ?? 0 })
   }
 
@@ -290,6 +389,53 @@ export default function Hospitals() {
     enrollmentData.length > 0 ||
     activeStatusData.length > 0 ||
     empanelmentTrend.length > 0
+
+  const exportSheets = useMemo((): ExportSheet[] => {
+    const sheets: ExportSheet[] = []
+    if (kpis.length) {
+      sheets.push({ name: 'KPI Cards', rows: kpisToExportRows(kpis), columns: KPI_EXPORT_COLUMNS })
+    }
+    if (hemKpis.length) {
+      sheets.push({ name: 'HEM KPI Cards', rows: kpisToExportRows(hemKpis), columns: KPI_EXPORT_COLUMNS })
+    }
+    if (deempanelKpis.length) {
+      sheets.push({ name: 'Deempanel KPI Cards', rows: kpisToExportRows(deempanelKpis), columns: KPI_EXPORT_COLUMNS })
+    }
+    const charts: [string, Record<string, string | number>[]][] = [
+      ['Hospital Type Distribution', typeData],
+      ['Empanelment Status', enrollmentData],
+      ['District-wise Hospitals', districtData],
+      ['Division-wise Hospitals', divisionData],
+      ['Active vs Inactive', activeStatusData],
+      ['Empanelment Trend', empanelmentTrend],
+      ['HEM Ownership', hemOwnership],
+      ['HEM Active Status', hemActive],
+      ['De-empanelment Action Type', deempanelType],
+      ['De-empanelment Trend', deempanelTrend],
+      ['Lookup Categories', lookupCategory],
+      ['Lookup Status', lookupStatus],
+    ]
+    for (const [name, rows] of charts) {
+      if (rows.length) sheets.push({ name, rows, columns: CHART_EXPORT_COLUMNS })
+    }
+    return sheets
+  }, [
+    kpis,
+    hemKpis,
+    deempanelKpis,
+    typeData,
+    enrollmentData,
+    districtData,
+    divisionData,
+    activeStatusData,
+    empanelmentTrend,
+    hemOwnership,
+    hemActive,
+    deempanelType,
+    deempanelTrend,
+    lookupCategory,
+    lookupStatus,
+  ])
 
   return (
     <div>
@@ -304,6 +450,7 @@ export default function Hospitals() {
             : 'Connect the backend to load hospital records'
         }
         badge={<DataSourceBadge source={source} db={db} />}
+        exportSheets={exportSheets}
       />
       <BackendOfflineNotice error={error} loading={loading} />
 
@@ -320,7 +467,7 @@ export default function Hospitals() {
         activeCount={moduleFilters.activeCount}
       />
 
-      {kpis.length > 0 && <KPIGrid kpis={kpis} onKpiClick={handleKpi} />}
+      {kpis.length > 0 && <KPIGrid kpis={kpis} onKpiClick={handleKpi} exportLabel="KPI Cards" />}
 
       {hasCharts && (
         <>
@@ -428,7 +575,7 @@ export default function Hospitals() {
               Hospital Empanelment Module registry (ownership, HFR ID, nodal officer, certificate)
             </p>
           </div>
-          {hemKpis.length > 0 && <KPIGrid kpis={hemKpis} onKpiClick={handleKpi} />}
+          {hemKpis.length > 0 && <KPIGrid kpis={hemKpis} onKpiClick={handleKpi} exportLabel="HEM KPI Cards" />}
           {(hemOwnership.length > 0 || hemActive.length > 0) && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
               {hemOwnership.length > 0 && (
@@ -481,7 +628,9 @@ export default function Hospitals() {
               Hospital de-empanelment, stop-payment and revoke actions (one row per hospital)
             </p>
           </div>
-          {deempanelKpis.length > 0 && <KPIGrid kpis={deempanelKpis} onKpiClick={handleKpi} />}
+          {deempanelKpis.length > 0 && (
+            <KPIGrid kpis={deempanelKpis} onKpiClick={handleKpi} exportLabel="Deempanel KPI Cards" />
+          )}
           {(deempanelType.length > 0 || deempanelTrend.length > 0) && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
               {deempanelType.length > 0 && (

@@ -30,16 +30,15 @@ export function useDrillDown(options: UseDrillDownOptions = {}) {
   const [detail, setDetail] = useState<DrillDownDetail | null>(null)
 
   const openDetail = useCallback((d: DrillDownDetail) => {
-    if (d.records?.length) {
-      setDetail({
-        ...d,
-        source: d.source ?? (optionsRef.current.live ? 'api' : 'demo'),
-      })
+    const live = optionsRef.current.live
+    const source = d.source ?? (live ? 'api' : 'demo')
+    if (d.loading || Array.isArray(d.records)) {
+      setDetail({ ...d, source })
       return
     }
 
-    const { live, columns = [], tableRows = [] } = optionsRef.current
-    if (live && !d.records?.length) {
+    const { columns = [], tableRows = [] } = optionsRef.current
+    if (live) {
       const rowData = d.data as Record<string, string | number> | undefined
       if (rowData && Object.keys(rowData).length > 0) {
         setDetail({
@@ -62,7 +61,7 @@ export function useDrillDown(options: UseDrillDownOptions = {}) {
         return
       }
     }
-    setDetail({ ...d, source: d.source ?? (live ? 'api' : 'demo') })
+    setDetail({ ...d, source })
   }, [])
 
   const openFromChart = useCallback(

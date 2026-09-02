@@ -43,8 +43,8 @@ export default function DashboardLayout() {
     isLmsPage ||
     isWorkflowPage
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     navigate('/login', { replace: true })
   }
 
