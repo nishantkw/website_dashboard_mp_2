@@ -17,6 +17,8 @@ import {
 
 const ALLOWED_ROLES = new Set(['super_admin', 'state_admin', 'bis_user', 'mp_user', 'ump_user'])
 
+const router = Router()
+
 function publicUser(row) {
   return {
     id: String(row.id),
