@@ -40,5 +40,12 @@ export function isAllowedCorsOrigin(origin) {
     .split(',')
     .map((s) => s.trim().replace(/\/$/, ''))
     .filter(Boolean)
-  return listed.includes(origin)
+  if (listed.includes(origin)) return true
+  // Keep Vercel preview/production working when CORS_ORIGIN still points at localhost.
+  try {
+    const host = new URL(origin).hostname
+    return host.endsWith('.vercel.app')
+  } catch {
+    return false
+  }
 }
