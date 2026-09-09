@@ -1,4 +1,4 @@
-﻿import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import DetailModal, { type DrillDownDetail } from '../components/ui/DetailModal'
 import { filterRowsForChartClick, type ChartClickPayload } from '../utils/chartDrillDown'
 import { filterRowsForClaimKpi } from '../utils/claimKpi'
@@ -9,6 +9,8 @@ export interface DrillDownContext {
   rows: Record<string, string | number>[]
   columns: TableColumn[]
   datasetTitle?: string
+  /** Server already applied the chart-slice filter — do not client-filter again. */
+  alreadyFiltered?: boolean
 }
 
 export interface UseDrillDownOptions {
@@ -94,14 +96,30 @@ export function useDrillDown(options: UseDrillDownOptions = {}) {
 
           if (opts.fetchDrillDown) {
             const fetched = await opts.fetchDrillDown(payload, chartTitle)
-            if (fetched) ctx = fetched
+            if (fetched) {
+              ctx = fetched
+              const records = ctx.alreadyFiltered
+                ? ctx.rows
+                : filterRowsForChartClick(ctx.rows, payload, chartTitle)
+              setDetail({
+                title: name,
+                subtitle: `${records.length.toLocaleString('en-IN')} record${records.length === 1 ? '' : 's'} · ${chartTitle}`,
+                records,
+                columns: ctx.columns,
+                datasetTitle: ctx.datasetTitle ?? opts.datasetTitle,
+                source: 'api',
+                data: payload,
+                appliedFilters,
+              })
+              return
+            }
           }
 
           if (ctx) {
             const filtered = filterRowsForChartClick(ctx.rows, payload, chartTitle)
             setDetail({
               title: name,
-              subtitle: chartTitle,
+              subtitle: `${filtered.length.toLocaleString('en-IN')} record${filtered.length === 1 ? '' : 's'} · ${chartTitle}`,
               records: filtered,
               columns: ctx.columns,
               datasetTitle: ctx.datasetTitle ?? opts.datasetTitle,

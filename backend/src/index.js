@@ -2,10 +2,12 @@ import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import cookieParser from 'cookie-parser'
+import rateLimit from 'express-rate-limit'
 import { config, isAllowedCorsOrigin } from './config.js'
 import { healthCheck, closePools } from './db/pool.js'
 import { seedDashboardUsersIfEmpty } from './db/seedUsers.js'
 import { requireAuth, requireRole, ROLES } from './middleware/auth.js'
+import { clientError } from './utils/clientError.js'
 import authRoutes from './routes/auth.js'
 import claimsRoutes from './routes/claims.js'
 import beneficiariesRoutes from './routes/beneficiaries.js'
@@ -41,20 +43,44 @@ app.use(
   })
 )
 app.use(cookieParser())
-app.use(express.json({ limit: '40mb' }))
-app.use(express.urlencoded({ extended: true, limit: '40mb' }))
+
+function isImportPath(req) {
+  return String(req.path || '').startsWith('/api/import')
+}
+
+app.use((req, res, next) => {
+  const limit = isImportPath(req) ? '40mb' : '1mb'
+  return express.json({ limit })(req, res, next)
+})
+app.use((req, res, next) => {
+  const limit = isImportPath(req) ? '40mb' : '1mb'
+  return express.urlencoded({ extended: true, limit })(req, res, next)
+})
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 1200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Try again later.' },
+})
+app.use('/api', apiLimiter)
 
 app.get('/api/health', async (_req, res) => {
   try {
     const db = await healthCheck()
     const anyOk = Object.values(db.backends).some((b) => b.ok)
-    res.status(anyOk ? 200 : 503).json({
-      ok: anyOk,
-      service: 'pmjay-dashboard-api',
-      ...db,
-    })
+    if (config.healthDetails) {
+      return res.status(anyOk ? 200 : 503).json({
+        ok: anyOk,
+        service: 'pmjay-dashboard-api',
+        ...db,
+      })
+    }
+    res.status(anyOk ? 200 : 503).json({ ok: anyOk })
   } catch (err) {
-    res.status(503).json({ ok: false, error: err.message })
+    console.error('[health]', err.message)
+    res.status(503).json({ ok: false })
   }
 })
 
@@ -77,7 +103,7 @@ app.use((err, _req, res, _next) => {
     return res.status(400).json({ error: 'Invalid request' })
   }
   console.error('[api]', err)
-  res.status(500).json({ error: err.message || 'Internal server error' })
+  res.status(500).json({ error: clientError(err) })
 })
 
 let server = null

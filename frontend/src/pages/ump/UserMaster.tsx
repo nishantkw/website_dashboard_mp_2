@@ -104,7 +104,7 @@ export default function UserMaster() {
             ? `${data.schema ?? 'ump_raw.user_master_ump'} — schema fields`
             : 'Connect the backend to load UMP user records'
         }
-        badge={<DataSourceBadge source={source} db={db} />}
+        badge={<DataSourceBadge source={source} db={db} loading={loading} />}
       />
       <BackendOfflineNotice error={error} loading={loading} />
 

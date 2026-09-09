@@ -49,10 +49,6 @@ function formatMonthLabel(ym) {
 }
 
 function formatInr(n) {
-  if (n >= 10000000) {
-    const cr = n / 10000000
-    return `₹${cr % 1 === 0 ? cr.toFixed(0) : cr.toFixed(2)} Cr`
-  }
   return `₹${Math.round(n).toLocaleString('en-IN')}`
 }
 

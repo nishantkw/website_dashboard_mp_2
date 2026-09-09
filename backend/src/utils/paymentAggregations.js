@@ -50,10 +50,6 @@ function rowDate(row) {
 }
 
 function formatInr(n) {
-  if (n >= 10000000) {
-    const cr = n / 10000000
-    return `₹${cr % 1 === 0 ? cr.toFixed(0) : cr.toFixed(2)} Cr`
-  }
   return `₹${Math.round(n).toLocaleString('en-IN')}`
 }
 
@@ -139,14 +135,14 @@ export function buildPaymentCharts(rows) {
     const ym = d.slice(0, 7)
     if (!byMonth[ym]) byMonth[ym] = { name: formatMonthLabel(ym), payments: 0, amount: 0 }
     byMonth[ym].payments += 1
-    byMonth[ym].amount += toNumber(row.transaction_amount) / 10000000
+    byMonth[ym].amount += toNumber(row.transaction_amount)
   }
   const paymentTrend = Object.keys(byMonth)
     .sort()
     .map((ym) => ({
       name: byMonth[ym].name,
       payments: byMonth[ym].payments,
-      amount: Number(byMonth[ym].amount.toFixed(4)),
+      amount: Math.round(byMonth[ym].amount * 100) / 100,
     }))
 
   return {

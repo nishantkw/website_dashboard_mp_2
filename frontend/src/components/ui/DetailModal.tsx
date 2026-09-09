@@ -11,6 +11,9 @@ import { useTableControls } from '../../hooks/useTableControls'
 import type { TableColumn } from '../../types'
 import { preferPatientGeoOrder } from '../../utils/schemaColumns'
 import { formatCodedField, isCodedColumn } from '../../utils/beneficiaryCodes'
+import { HospitalColumnHeader, HospitalStatusCell, isHospitalStatusColumn } from './HospitalStatusCells'
+import MoneyColumnHeader from './MoneyColumnHeader'
+import { formatMoneyValue, formatRowMoney, isAmountColumn, type MoneyNotation } from '../../utils/moneyFormat'
 
 export interface DrillDownDetail {
   title: string
@@ -63,6 +66,8 @@ const STATUS_FIELDS = [
 function columnLabel(key: string): string {
   if (key === 'division' || key === '_division') return 'Division'
   if (key === 'patient_district_name') return 'District'
+  if (key === 'hosp_status_desc') return 'Empanelment Status'
+  if (key === 'active_status') return 'Currently Serving'
   if (key === 'empaneled_date' || key === 'hosp_empaneled_date') return 'Empaneled On'
   if (key === 'deempanel_date' || key === 'deempaneled_date') return 'De-empanelment Date'
   if (key === 'deempanel_status') return 'De-empanelment Status'
@@ -90,6 +95,7 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
   const [districtFilter, setDistrictFilter] = useState('ALL')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
+  const [moneyNotation, setMoneyNotation] = useState<MoneyNotation>('indian')
 
   useEffect(() => {
     if (!detail || detail.loading) return
@@ -105,14 +111,26 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
 
   const dataset: ConnectedDataset | null = useMemo(() => {
     if (!detail || detail.loading) return null
-    if (detail.records && detail.columns) {
+    if (Array.isArray(detail.records)) {
+      const records = detail.records
+      const fromDetail = (detail.columns ?? [])
+        .filter((c) => c?.key)
+        .map((c) => ({ key: c.key, label: c.label || columnLabel(c.key) }))
+      const columns = fromDetail.length
+        ? fromDetail
+        : records[0]
+          ? preferPatientGeoOrder(Object.keys(records[0])).map((key) => ({
+              key,
+              label: columnLabel(key),
+            }))
+          : []
       return {
         title: detail.datasetTitle ?? detail.subtitle ?? 'Filtered Records',
         subtitle: detail.subtitle
           ? `${detail.title} · ${detail.subtitle}`
           : detail.title,
-        columns: detail.columns.map((c) => ({ key: c.key, label: c.label })),
-        records: detail.records,
+        columns,
+        records,
       }
     }
     // Single-row payload from live click — never fall back to hardcoded demo datasets
@@ -243,7 +261,8 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
     visibleColumns,
     visibleKeys,
     toggleColumn,
-    showAllColumns,
+    selectColumns,
+    deselectColumns,
     page,
     setPage,
     totalPages,
@@ -254,12 +273,18 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
   } = useTableControls(dataset?.columns ?? [], filteredRecords.length)
 
   const pageRecords = paginate(filteredRecords)
+  const hasAmountCol = (dataset?.columns ?? []).some((c) => isAmountColumn(c.key, c.label))
+  const exportRecords = useMemo(
+    () =>
+      filteredRecords.map((row) => formatRowMoney(row, moneyNotation, dataset?.columns)),
+    [filteredRecords, moneyNotation, dataset?.columns]
+  )
 
   if (!detail) return null
 
   if (detail.loading) {
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center">
         <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
         <div className="relative flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white px-10 py-8 shadow-2xl">
           <Loader2 className="h-8 w-8 animate-spin text-[#2d8a4e]" />
@@ -289,12 +314,11 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Modal Container */}
-      <div className="relative bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-5xl max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 overflow-hidden">
+      <div className="relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
         {/* Modal Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-[#eaf5ed] via-white to-white gap-3 shrink-0">
           <div className="flex items-center gap-3">
@@ -319,13 +343,14 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
               columns={dataset.columns}
               visibleKeys={visibleKeys}
               onToggle={toggleColumn}
-              onShowAll={showAllColumns}
+              onSelectKeys={selectColumns}
+              onDeselectKeys={deselectColumns}
             />
             <ExportDropdown
               title={dataset.title}
               subtitle={dataset.subtitle}
               filename={`${dataset.title.toLowerCase().replace(/\s+/g, '_')}_export`}
-              data={filteredRecords}
+              data={exportRecords}
               columns={visibleColumns}
               buttonSize="sm"
               variant="primary"
@@ -415,15 +440,23 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
         </div>
 
         {/* Tabular View Content Area */}
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-6">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 py-3">
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
             <div className="scrollbar-visible min-h-0 flex-1 overflow-x-auto overflow-y-auto">
-              <table className="w-max min-w-full text-left text-xs sm:text-sm">
+              <table className="w-full min-w-full text-left text-xs sm:text-sm">
                 <thead className="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-600 shadow-sm">
                   <tr>
                     {visibleColumns.map((col) => (
-                      <th key={col.key} className="whitespace-nowrap px-5 py-3.5">
-                        {col.label}
+                      <th key={col.key} className="whitespace-nowrap px-3 py-2.5">
+                        {hasAmountCol && isAmountColumn(col.key, col.label) ? (
+                          <MoneyColumnHeader
+                            label={col.label}
+                            notation={moneyNotation}
+                            onChange={setMoneyNotation}
+                          />
+                        ) : (
+                          <HospitalColumnHeader columnKey={col.key} label={col.label} />
+                        )}
                       </th>
                     ))}
                   </tr>
@@ -433,9 +466,27 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
                     <tr key={startIndex + idx} className="transition-colors hover:bg-slate-50/80">
                       {visibleColumns.map((col) => {
                       const val = row[col.key]
-                      const textVal = isCodedColumn(col.key)
+                      const textVal = isAmountColumn(col.key, col.label)
+                        ? formatMoneyValue(val, moneyNotation) || '—'
+                        : isCodedColumn(col.key)
                         ? formatCodedField(col.key, val) || '—'
                         : String(val ?? '—')
+
+                      if (isHospitalStatusColumn(col.key)) {
+                        return (
+                          <td key={col.key} className="whitespace-nowrap px-3 py-2.5">
+                            <HospitalStatusCell columnKey={col.key} value={val} row={row} />
+                          </td>
+                        )
+                      }
+
+                      if (isAmountColumn(col.key, col.label)) {
+                        return (
+                          <td key={col.key} className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums">
+                            {formatMoneyValue(val, moneyNotation) || '—'}
+                          </td>
+                        )
+                      }
 
                       // Badge formatting for status-like fields
                       if (col.key === 'status' || col.key === 'ekyc' || col.key === 'print_status') {
@@ -450,7 +501,7 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
                           textVal.includes('Approved') ||
                           textVal.includes('Review')
                         return (
-                          <td key={col.key} className="whitespace-nowrap px-5 py-3.5">
+                          <td key={col.key} className="whitespace-nowrap px-3 py-2.5">
                             <span
                               className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                 isGood
@@ -472,14 +523,14 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
                       // Primary Key / ID formatting
                       if (col.key.endsWith('_id') || col.key === 'code' || col.key === 'txn_id' || col.key === 'batch_id') {
                         return (
-                          <td key={col.key} className="whitespace-nowrap px-5 py-3.5 font-mono text-xs font-bold text-[#1a5c38]">
+                          <td key={col.key} className="whitespace-nowrap px-3 py-2.5 font-mono text-xs font-bold text-[#1a5c38]">
                             {textVal}
                           </td>
                         )
                       }
 
                       return (
-                        <td key={col.key} className="whitespace-nowrap px-5 py-3.5">
+                        <td key={col.key} className="max-w-[22rem] px-3 py-2.5 break-words">
                           {textVal}
                         </td>
                       )

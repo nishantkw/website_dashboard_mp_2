@@ -43,15 +43,25 @@ export function useTableControls(columns: TableColumnLike[], totalRows: number, 
     return rows.slice(startIndex, endIndex)
   }
 
+  const orderedKeys = (keys: Iterable<string>) => {
+    const next = new Set(keys)
+    return columns.map((c) => c.key).filter((k) => next.has(k))
+  }
+
   const toggleColumn = (key: string) => {
     setVisibleKeys((prev) => {
-      if (prev.includes(key)) {
-        if (prev.length <= 1) return prev
-        return prev.filter((k) => k !== key)
-      }
-      const next = new Set([...prev, key])
-      return columns.map((c) => c.key).filter((k) => next.has(k))
+      if (prev.includes(key)) return prev.filter((k) => k !== key)
+      return orderedKeys([...prev, key])
     })
+  }
+
+  const selectColumns = (keys: string[]) => {
+    setVisibleKeys((prev) => orderedKeys([...prev, ...keys]))
+  }
+
+  const deselectColumns = (keys: string[]) => {
+    const hide = new Set(keys)
+    setVisibleKeys((prev) => prev.filter((k) => !hide.has(k)))
   }
 
   const showAllColumns = () => setVisibleKeys(columns.map((c) => c.key))
@@ -60,6 +70,8 @@ export function useTableControls(columns: TableColumnLike[], totalRows: number, 
     visibleColumns,
     visibleKeys,
     toggleColumn,
+    selectColumns,
+    deselectColumns,
     showAllColumns,
     page: safePage,
     setPage,

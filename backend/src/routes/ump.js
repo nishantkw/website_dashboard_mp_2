@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { query } from '../db/pool.js'
+import { clientError } from '../utils/clientError.js'
 import { buildFilterClause } from '../utils/filters.js'
 import { serializeRows } from '../utils/serialize.js'
 import { resolveColumns, resolveColumnsMany } from '../utils/schemaColumns.js'
@@ -171,7 +172,7 @@ router.get('/users', async (req, res) => {
       detailTable,
     })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 

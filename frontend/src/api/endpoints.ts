@@ -21,6 +21,74 @@ export async function fetchCurrentUser() {
   return apiFetch<{ user: AuthUser }>('/auth/me')
 }
 
+export async function fetchAuthUsers() {
+  return apiFetch<{
+    data: Array<{
+      id: number | string
+      username: string
+      name: string
+      role: UserRole
+      department: string | null
+      active: boolean
+      created_at?: string
+    }>
+    db?: string
+  }>('/auth/users')
+}
+
+export async function createAuthUser(payload: {
+  username: string
+  name: string
+  role: UserRole
+  department?: string
+  password: string
+}) {
+  return apiFetch<{
+    user: {
+      id: number | string
+      username: string
+      name: string
+      role: UserRole
+      department: string | null
+      active: boolean
+      created_at?: string
+    }
+  }>('/auth/users', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export async function updateAuthUser(
+  id: string | number,
+  payload: { active?: boolean; name?: string; department?: string; role?: UserRole }
+) {
+  return apiFetch<{
+    user: {
+      id: number | string
+      username: string
+      name: string
+      role: UserRole
+      department: string | null
+      active: boolean
+      created_at?: string
+    }
+  }>(`/auth/users/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  })
+}
+
+export async function resetAuthUserPassword(id: string | number, password: string) {
+  return apiFetch<{ ok: boolean; user: { id: string; username: string } }>(
+    `/auth/users/${id}/password`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ password }),
+    }
+  )
+}
+
 export async function fetchOverview(qs = '') {
   return apiFetch<{
     kpis: KPI[]
@@ -36,7 +104,7 @@ export async function fetchOverview(qs = '') {
   }>(`/overview${qs}`, {}, 60000)
 }
 
-export async function fetchOverviewHospitals(qs = '') {
+export async function fetchOverviewHospitals(qs = '', timeoutMs = 60000) {
   return apiFetch<{
     table: Record<string, string | number>[]
     columns?: string[]
@@ -46,10 +114,10 @@ export async function fetchOverviewHospitals(qs = '') {
     limit?: number
     offset?: number
     db?: string
-  }>(`/overview/hospitals${qs}`, {}, 60000)
+  }>(`/overview/hospitals${qs}`, {}, timeoutMs)
 }
 
-export async function fetchBisCardPrinting(qs = '') {
+export async function fetchBisCardPrinting(qs = '', timeoutMs = 8000) {
   return apiFetch<{
     kpis: KPI[]
     charts: Record<string, ChartDataPoint[]>
@@ -59,10 +127,10 @@ export async function fetchBisCardPrinting(qs = '') {
     schema?: string
     bisSchema?: string
     db?: string
-  }>(`/bis/card-printing${qs}`)
+  }>(`/bis/card-printing${qs}`, {}, timeoutMs)
 }
 
-export async function fetchClaims(qs = '') {
+export async function fetchClaims(qs = '', timeoutMs = 8000) {
   return apiFetch<{
     kpis: KPI[]
     masterKpis?: { key: string; label: string; count: number; initiatedCr: number; approvedCr: number }[]
@@ -76,7 +144,7 @@ export async function fetchClaims(qs = '') {
     paymentSchema?: string
     paymentKpis?: KPI[]
     db?: string
-  }>(`/claims${qs}`)
+  }>(`/claims${qs}`, {}, timeoutMs)
 }
 
 export async function fetchClaimsFilterOptions() {
@@ -99,7 +167,7 @@ export async function fetchClaimsMasterReport(reportId: string, qs = '') {
   }>(`/claims/reports/${reportId}${qs}`)
 }
 
-export async function fetchBeneficiaries(qs = '') {
+export async function fetchBeneficiaries(qs = '', timeoutMs = 8000) {
   return apiFetch<{
     kpis: KPI[]
     charts: Record<string, ChartDataPoint[]>
@@ -118,7 +186,7 @@ export async function fetchBeneficiaries(qs = '') {
     bisKpis?: KPI[]
     bisColumns?: string[]
     db?: string
-  }>(`/beneficiaries${qs}`)
+  }>(`/beneficiaries${qs}`, {}, timeoutMs)
 }
 
 export async function fetchHospitals(qs = '') {
@@ -163,7 +231,7 @@ export async function fetchHospitalsExport(qs = '') {
   }>(`/hospitals/export${s ? `?${s}` : ''}`, {}, 120000)
 }
 
-export async function fetchFraud(view = 'overall', qs = '') {
+export async function fetchFraud(view = 'overall', qs = '', timeoutMs = 8000) {
   const params = new URLSearchParams(qs.replace(/^\?/, ''))
   params.set('view', view)
   return apiFetch<{
@@ -182,10 +250,10 @@ export async function fetchFraud(view = 'overall', qs = '') {
     workflowAuditColumns?: string[]
     schema?: Record<string, string>
     db?: string
-  }>(`/fraud?${params.toString()}`)
+  }>(`/fraud?${params.toString()}`, {}, timeoutMs)
 }
 
-export async function fetchWorkflow(qs = '') {
+export async function fetchWorkflow(qs = '', timeoutMs = 8000) {
   return apiFetch<{
     kpis: KPI[]
     charts: Record<string, ChartDataPoint[]>
@@ -199,10 +267,10 @@ export async function fetchWorkflow(qs = '') {
     schema?: string
     proSchema?: string
     db?: string
-  }>(`/workflow${qs}`)
+  }>(`/workflow${qs}`, {}, timeoutMs)
 }
 
-export async function fetchPatients(qs = '') {
+export async function fetchPatients(qs = '', timeoutMs = 8000) {
   return apiFetch<{
     kpis: KPI[]
     charts: Record<string, ChartDataPoint[]>
@@ -217,10 +285,10 @@ export async function fetchPatients(qs = '') {
     morthSchema?: string
     morthKpis?: KPI[]
     db?: string
-  }>(`/patients${qs}`)
+  }>(`/patients${qs}`, {}, timeoutMs)
 }
 
-export async function fetchLms(qs = '') {
+export async function fetchLms(qs = '', timeoutMs = 8000) {
   return apiFetch<{
     kpis: KPI[]
     charts: Record<string, ChartDataPoint[]>
@@ -228,7 +296,7 @@ export async function fetchLms(qs = '') {
     columns?: string[]
     schema?: string
     db?: string
-  }>(`/lms${qs}`)
+  }>(`/lms${qs}`, {}, timeoutMs)
 }
 
 export async function fetchUmpUsers(qs = '') {
@@ -362,23 +430,26 @@ export async function fetchImportUploadRows(
   id: string,
   offset = 0,
   limit = 50,
-  filters: { search?: string; hospId?: string; facilityId?: string } = {}
+  filters: { search?: string; hospId?: string; facilityId?: string } = {},
+  timeoutMs = 30000
 ) {
   const params = new URLSearchParams()
   params.set('offset', String(offset))
   params.set('limit', String(limit))
+  if (limit > 200) params.set('detail', '1')
   if (filters.search) params.set('search', filters.search)
   if (filters.hospId) params.set('hosp_id', filters.hospId)
   if (filters.facilityId) params.set('facility_id', filters.facilityId)
   return apiFetch<{
     id: string
+    source?: 'database' | 'file'
     headers: string[]
     total: number
     fileTotal?: number
     offset: number
     limit?: number
     rows: Record<string, string>[]
-  }>(`/import/uploads/${id}/rows?${params.toString()}`, {}, 30000)
+  }>(`/import/uploads/${id}/rows?${params.toString()}`, {}, timeoutMs)
 }
 
 export async function fetchImportUploadRowFilters(id: string) {

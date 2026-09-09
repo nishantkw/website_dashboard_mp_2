@@ -1,5 +1,41 @@
 import type { NavItem } from '../types'
 
+export interface DashboardSearchItem {
+  id: string
+  label: string
+  path: string
+  group?: string
+  icon?: string
+}
+
+/** Flatten sidebar nav into searchable destinations (leaves + top-level pages). */
+export function flattenNavigation(items: NavItem[]): DashboardSearchItem[] {
+  const out: DashboardSearchItem[] = []
+  for (const item of items) {
+    if (item.path) {
+      out.push({
+        id: item.id,
+        label: item.label,
+        path: item.path,
+        icon: item.icon,
+      })
+    }
+    if (item.children) {
+      for (const child of item.children) {
+        if (!child.path) continue
+        out.push({
+          id: child.id,
+          label: child.label,
+          path: child.path,
+          group: item.label,
+          icon: item.icon,
+        })
+      }
+    }
+  }
+  return out
+}
+
 export const navigation: NavItem[] = [
   {
     id: 'overview',

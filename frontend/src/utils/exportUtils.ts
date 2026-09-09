@@ -87,6 +87,15 @@ export async function exportSheetsToExcelWithVisuals(
   await writeExcelFile(filename, sheets, visuals)
 }
 
+function escapeHtml(value: unknown) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 // 3. Export Data & Reports to PDF (Print-to-PDF / PDF Window Export)
 export function exportToPDF(
   title: string,
@@ -103,12 +112,12 @@ export function exportToPDF(
     columns ||
     Object.keys(data[0]).map((k) => ({ key: k, label: k.replace(/_/g, ' ').toUpperCase() }))
 
-  const headersHtml = cols.map((c) => `<th>${c.label}</th>`).join('')
+  const headersHtml = cols.map((c) => `<th>${escapeHtml(c.label)}</th>`).join('')
   const rowsHtml = data
     .map(
       (row) =>
         `<tr>${cols
-          .map((c) => `<td>${row[c.key] ?? '—'}</td>`)
+          .map((c) => `<td>${escapeHtml(row[c.key] ?? '—')}</td>`)
           .join('')}</tr>`
     )
     .join('')
@@ -119,7 +128,7 @@ export function exportToPDF(
   const html = `<!DOCTYPE html>
 <html>
 <head>
-  <title>${docTitle}</title>
+  <title>${escapeHtml(docTitle)}</title>
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; color: #1e293b; }
     .header { border-bottom: 2px solid #2d8a4e; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
@@ -136,11 +145,11 @@ export function exportToPDF(
 <body>
   <div class="header">
     <div>
-      <div class="title">${title}</div>
-      <div class="subtitle">${subtitle || 'Ayushman Bharat PM-JAY — State Health Agency'}</div>
+      <div class="title">${escapeHtml(title)}</div>
+      <div class="subtitle">${escapeHtml(subtitle || 'Ayushman Bharat PM-JAY — State Health Agency')}</div>
     </div>
     <div class="meta">
-      <div>Generated: ${new Date().toLocaleString()}</div>
+      <div>Generated: ${escapeHtml(new Date().toLocaleString())}</div>
       <div>Records: ${data.length}</div>
     </div>
   </div>
@@ -187,12 +196,14 @@ export function exportFullPagePDF(title: string, subtitle?: string) {
     })
     .join('\n')
 
-  const contentHtml = mainEl.innerHTML
+  const clone = mainEl.cloneNode(true) as HTMLElement
+  clone.querySelectorAll('script').forEach((el) => el.remove())
+  const contentHtml = clone.innerHTML
 
   const fullHtml = `<!DOCTYPE html>
 <html>
 <head>
-  <title>${title} — Full Dashboard Report</title>
+  <title>${escapeHtml(title)} — Full Dashboard Report</title>
   <style>
     ${styleSheets}
     @page { size: A4 landscape; margin: 10mm; }
@@ -209,11 +220,11 @@ export function exportFullPagePDF(title: string, subtitle?: string) {
 <body>
   <div class="print-header">
     <div>
-      <div class="print-title">Ayushman Bharat PM-JAY — ${title}</div>
-      <div class="print-subtitle">${subtitle || 'State Health Agency Analytics Portal Report'}</div>
+      <div class="print-title">Ayushman Bharat PM-JAY — ${escapeHtml(title)}</div>
+      <div class="print-subtitle">${escapeHtml(subtitle || 'State Health Agency Analytics Portal Report')}</div>
     </div>
     <div class="print-meta">
-      <div>Report Generated: ${new Date().toLocaleString('en-IN')}</div>
+      <div>Report Generated: ${escapeHtml(new Date().toLocaleString('en-IN'))}</div>
       <div>Full Page PDF Document</div>
     </div>
   </div>
@@ -240,4 +251,5 @@ export function exportFullPagePDF(title: string, subtitle?: string) {
   printWindow.document.write(fullHtml)
   printWindow.document.close()
 }
+
 

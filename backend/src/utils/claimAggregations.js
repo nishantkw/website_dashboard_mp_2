@@ -12,7 +12,6 @@ import {
   initiatedAmount,
   preauthAmount,
   approvedAmount,
-  toCrores,
   CLAIM_KPI_KEYS,
   CLAIM_KPI_LABELS,
 } from './claimStatusMapping.js'
@@ -21,10 +20,14 @@ function emptyKpiBucket() {
   return { count: 0, initiatedCr: 0, approvedCr: 0 }
 }
 
+function roundRupees(n) {
+  return Math.round((Number(n) || 0) * 100) / 100
+}
+
 function addToBucket(bucket, row, amountFn = initiatedAmount) {
   bucket.count += 1
-  bucket.initiatedCr += toCrores(amountFn(row))
-  bucket.approvedCr += toCrores(approvedAmount(row))
+  bucket.initiatedCr += amountFn(row)
+  bucket.approvedCr += approvedAmount(row)
 }
 
 export function enrichClaimRow(row) {
@@ -58,11 +61,21 @@ export function filterClaimRows(rows, query = {}) {
   }
   if (query.district) {
     out = out.filter((r) =>
-      r._patient_district.toLowerCase().includes(String(query.district).toLowerCase())
+      String(r._patient_district || r.patient_district_name || r.hosp_district_name || '')
+        .toLowerCase()
+        .includes(String(query.district).toLowerCase())
     )
   }
   if (query.hospital_type && query.hospital_type !== 'Both') {
     out = out.filter((r) => r._hospital_type === query.hospital_type)
+  }
+  if (query.case_status) {
+    const want = String(query.case_status).trim().toLowerCase()
+    out = out.filter((r) => String(r.case_status || '').trim().toLowerCase() === want)
+  }
+  if (query.case_type) {
+    const want = String(query.case_type).trim().toLowerCase()
+    out = out.filter((r) => String(r.case_type || '').trim().toLowerCase() === want)
   }
   if (query.hospital_name) {
     const q = String(query.hospital_name).toLowerCase()
@@ -116,8 +129,8 @@ function aggregateKpis(rows) {
     key,
     label: CLAIM_KPI_LABELS[key],
     count: buckets[key].count,
-    initiatedCr: Math.round(buckets[key].initiatedCr * 100) / 100,
-    approvedCr: Math.round(buckets[key].approvedCr * 100) / 100,
+    initiatedCr: roundRupees(buckets[key].initiatedCr),
+    approvedCr: roundRupees(buckets[key].approvedCr),
   }))
 }
 
@@ -129,22 +142,22 @@ function kpiFieldsForRow(row) {
     fields[`${key}_approved_cr`] = 0
   }
   const bucket = row._kpi_bucket || classifyClaimKpi(row.case_status)
-  const claimInitCr = toCrores(initiatedAmount(row))
-  const preauthInitCr = toCrores(preauthAmount(row))
-  const apprCr = toCrores(approvedAmount(row))
+  const claimInit = initiatedAmount(row)
+  const preauthInit = preauthAmount(row)
+  const appr = approvedAmount(row)
 
   fields.preauth_initiated_count = 1
-  fields.preauth_initiated_initiated_cr = preauthInitCr
+  fields.preauth_initiated_initiated_cr = preauthInit
 
   if (isClaimInitiated(row, bucket)) {
     fields.claims_initiated_count = 1
-    fields.claims_initiated_initiated_cr = claimInitCr
+    fields.claims_initiated_initiated_cr = claimInit
   }
 
   if (bucket && bucket !== 'preauth_initiated' && bucket !== 'claims_initiated' && fields[`${bucket}_count`] !== undefined) {
     fields[`${bucket}_count`] = 1
-    fields[`${bucket}_initiated_cr`] = claimInitCr || preauthInitCr
-    fields[`${bucket}_approved_cr`] = apprCr
+    fields[`${bucket}_initiated_cr`] = claimInit || preauthInit
+    fields[`${bucket}_approved_cr`] = appr
   }
   return fields
 }
@@ -152,8 +165,8 @@ function kpiFieldsForRow(row) {
 function mergeGroupRow(target, source) {
   for (const key of CLAIM_KPI_KEYS) {
     target[`${key}_count`] = (target[`${key}_count`] || 0) + (source[`${key}_count`] || 0)
-    target[`${key}_initiated_cr`] = Math.round(((target[`${key}_initiated_cr`] || 0) + (source[`${key}_initiated_cr`] || 0)) * 100) / 100
-    target[`${key}_approved_cr`] = Math.round(((target[`${key}_approved_cr`] || 0) + (source[`${key}_approved_cr`] || 0)) * 100) / 100
+    target[`${key}_initiated_cr`] = roundRupees((target[`${key}_initiated_cr`] || 0) + (source[`${key}_initiated_cr`] || 0))
+    target[`${key}_approved_cr`] = roundRupees((target[`${key}_approved_cr`] || 0) + (source[`${key}_approved_cr`] || 0))
   }
 }
 
@@ -319,11 +332,11 @@ function buildClaimsTrend(rows) {
     if (!raw || raw.length < 7) continue
     if (!byMonth[raw]) byMonth[raw] = { name: formatTrendMonth(raw), claims: 0, amount: 0 }
     byMonth[raw].claims += 1
-    byMonth[raw].amount += toCrores(initiatedAmount(row))
+    byMonth[raw].amount += initiatedAmount(row)
   }
   return Object.entries(byMonth)
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([, m]) => ({ ...m, amount: Math.round(m.amount * 100) / 100 }))
+    .map(([, m]) => ({ ...m, amount: roundRupees(m.amount) }))
 }
 
 export function buildClaimsCharts(rows) {

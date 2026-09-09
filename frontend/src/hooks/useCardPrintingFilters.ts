@@ -2,21 +2,7 @@ import { useState, useMemo, useCallback } from 'react'
 import type { FilterField, FilterValues } from '../types'
 import { getDistrictsForDivision, getDivisionForDistrict } from '../data/filterOptions'
 import { CARD_PRINTING_SEARCH_COLUMNS } from '../data/cardPrintingFilterConfig'
-import { matchesRuralUrbanFilter, rowRuralUrbanFlag } from '../utils/ruralUrban'
-import { matchesCardFilter } from '../utils/beneficiaryCodes'
-
-function matchesSelect(row: Record<string, string | number>, columns: string[], filterVal: string) {
-  if (!filterVal) return true
-  const needle = filterVal.toLowerCase()
-  return columns.some((col) => {
-    const rowVal = String(row[col] ?? '').toLowerCase()
-    return rowVal === needle || rowVal.includes(needle)
-  })
-}
-
-function rowDistrict(row: Record<string, string | number>) {
-  return String(row.district_name ?? row.district ?? '')
-}
+import { applyPageFilters } from '../utils/applyPageFilters'
 
 export function cardPrintingFiltersToQueryString(filters: FilterValues, search: string): string {
   const params = new URLSearchParams()
@@ -67,48 +53,9 @@ export function useCardPrintingFilters(fields: FilterField[]) {
 
   const filterRows = useCallback(
     <T extends Record<string, string | number>>(rows: T[]): T[] => {
-      return rows.filter((row) => {
-        if (search) {
-          const haystack = CARD_PRINTING_SEARCH_COLUMNS.filter((c) => c in row)
-            .map((c) => String(row[c] ?? ''))
-            .join(' ')
-            .toLowerCase()
-          if (!haystack.includes(search.toLowerCase())) return false
-        }
-
-        if (filters.division) {
-          const district = rowDistrict(row)
-          const div = getDivisionForDistrict(district)
-          if (div !== filters.division) return false
-        }
-
-        if (filters.district && !matchesSelect(row, ['district_name', 'district'], filters.district)) {
-          return false
-        }
-
-        if (
-          filters.card_status &&
-          !matchesCardFilter(row.card_print_status ?? row.card_status, filters.card_status)
-        ) {
-          return false
-        }
-
-        if (filters.urban_rural && !matchesRuralUrbanFilter(rowRuralUrbanFlag(row), filters.urban_rural)) {
-          return false
-        }
-
-        if (filters.date_from || filters.date_to) {
-          const rowDate = String(row.enroll_date ?? row.approve_date ?? row.created_dt ?? '').slice(0, 10)
-          if (rowDate) {
-            if (filters.date_from && rowDate < filters.date_from) return false
-            if (filters.date_to && rowDate > filters.date_to) return false
-          }
-        }
-
-        return true
-      })
+      return applyPageFilters(rows, fields, filters, search, CARD_PRINTING_SEARCH_COLUMNS)
     },
-    [filters, search]
+    [fields, filters, search]
   )
 
   const queryString = useMemo(() => cardPrintingFiltersToQueryString(filters, search), [filters, search])

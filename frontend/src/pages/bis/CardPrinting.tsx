@@ -62,7 +62,7 @@ export default function CardPrinting() {
   const districtData = data.charts?.district ?? []
   const urbanRuralData = data.charts?.urbanRural ?? []
   const table = (data.table ?? []) as Record<string, string | number>[]
-  const filtered = live ? table : cardFilters.filterRows(table)
+  const filtered = cardFilters.filterRows(table)
   const tableColumns = useMemo(
     () =>
       schemaTableColumns({
@@ -121,7 +121,7 @@ export default function CardPrinting() {
             ? `${data.schema ?? 'dmart_mp.t_card_printing_status'} — schema fields`
             : 'Connect the backend to load card printing records'
         }
-        badge={<DataSourceBadge source={source} db={db} />}
+        badge={<DataSourceBadge source={source} db={db} loading={loading} />}
       />
       <BackendOfflineNotice error={error} loading={loading} />
 

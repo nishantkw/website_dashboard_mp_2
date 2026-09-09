@@ -80,7 +80,7 @@ export function normalizeHospitalRow(row, deempanelByHosp = new Map(), lookupByC
     hospital_code: row.hospital_code || row.facility_id || row.hosp_id,
     hospital_type: type || row.hospital_type,
     empaneled_date: formatHospitalDate(row.empaneled_date || row.hosp_empaneled_date),
-    nabh_certified: row.nabh_certified || row.quality_certification || row.accreditation_status,
+    nabh_certified: row.nabh_certified || row.quality_certification || '',
     district_name: row.district_name || row.dist_name || '',
     deempanel_date: formatHospitalDate(
       row.deempanel_date || row.deempaneled_date || row.deempanelment_date || extra.deempanel_date
@@ -89,21 +89,23 @@ export function normalizeHospitalRow(row, deempanelByHosp = new Map(), lookupByC
   }
 }
 
-export function isActiveHospital(d) {
-  return /^(1|active|yes|true)$/i.test(String(d.active_status ?? '').trim())
-}
-
 export function isEmpaneledHospital(d) {
+  const notEmpanelled = /de[- ]?empane|reject|draft|invalid|suspend|cancel|pending|not[- ]?empanel|disempanel/i
   const desc = String(d.hosp_status_desc ?? '').trim()
   if (desc) {
-    if (/de[- ]?empane/i.test(desc)) return false
+    if (notEmpanelled.test(desc)) return false
     return /^empane/i.test(desc)
   }
   const s = String(d.enrl_status ?? '').trim()
   if (!s) return false
-  if (/de[- ]?empane/i.test(s)) return false
+  if (notEmpanelled.test(s)) return false
   if (/^empane/i.test(s)) return true
   return s === '1'
+}
+
+export function isActiveHospital(d) {
+  const active = /^(1|active|yes|true)$/i.test(String(d.active_status ?? '').trim())
+  return active && isEmpaneledHospital(d)
 }
 
 export function isGovHospital(d) {

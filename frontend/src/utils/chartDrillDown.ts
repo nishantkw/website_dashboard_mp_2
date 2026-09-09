@@ -11,9 +11,14 @@ import {
   isActiveRecord,
 } from './beneficiaryCodes'
 
+import { districtsMatch } from './geoMatch'
+import { isHospitalServingClaims } from '../components/ui/HospitalStatusCells'
+
 export type ChartClickPayload = Record<string, string | number | undefined> & {
   /** Bar/line series key from Recharts click */
   _seriesKey?: string
+  /** JSON list of named categories to exclude when the "Others" bucket is clicked */
+  _othersExclude?: string
 }
 
 interface ChartRule {
@@ -170,6 +175,10 @@ const CHART_RULES: ChartRule[] = [
     fields: ['patient_district_name', '_patient_district', '_district', 'hosp_district_name', 'district_name', 'district'],
   },
   {
+    test: (t) => /district hospital/i.test(t),
+    fields: ['district_name', 'district', 'dist_name'],
+  },
+  {
     test: (t) => /division claims/i.test(t),
     fields: ['division', '_division'],
   },
@@ -314,8 +323,8 @@ const CHART_RULES: ChartRule[] = [
     fields: ['stop_payment'],
   },
   {
-    test: (t) => /hospital type/i.test(t),
-    fields: ['hospital_type', 'hosp_type'],
+    test: (t) => /^active status$/i.test(t) || /active vs inactive/i.test(t),
+    fields: [],
   },
   {
     test: (t) => /accreditation|nabh/i.test(t),
@@ -407,6 +416,34 @@ function normalize(value: string): string {
   return value.trim().toLowerCase()
 }
 
+export function isOthersCategory(name: string): boolean {
+  return /^others$/i.test(String(name ?? '').trim())
+}
+
+function parseOthersExclude(payload: ChartClickPayload): string[] {
+  const raw = payload._othersExclude
+  if (!raw) return []
+  try {
+    const parsed = JSON.parse(String(raw))
+    return Array.isArray(parsed) ? parsed.map((item) => String(item)).filter(Boolean) : []
+  } catch {
+    return String(raw)
+      .split('\n')
+      .map((item) => item.trim())
+      .filter(Boolean)
+  }
+}
+
+const DISTRICT_FIELDS = [
+  'patient_district_name',
+  '_patient_district',
+  '_district',
+  'hosp_district_name',
+  'district_name',
+  'dist_name',
+  'district',
+]
+
 function matchesCategory(
   row: Record<string, string | number>,
   fields: string[],
@@ -414,14 +451,20 @@ function matchesCategory(
   exact = false
 ): boolean {
   const cat = normalize(category)
-  if (!cat || cat === 'others') return false
+  if (!cat) return false
 
   for (const field of fields) {
     const raw = String(row[field] ?? '').trim()
     if (!raw) continue
+    if (/district/i.test(field) || field === '_district' || field === 'dist_name') {
+      if (districtsMatch(raw, category)) return true
+      continue
+    }
     const val = normalize(raw)
     if (val === cat) return true
-    if (!exact && (val.includes(cat) || cat.includes(val))) return true
+    if (/^unknown$/i.test(category) && !raw) return true
+    if (field === 'hospital_type' || field === 'hosp_type' || field === 'hosp_type_cd') continue
+    if (!exact && cat.length > 2 && (val.includes(cat) || (cat.length >= 4 && cat.includes(val)))) return true
   }
   return false
 }
@@ -447,6 +490,19 @@ export function filterRowsForChartClick(
   }
 
   const rule = findRule(chartTitle)
+  const othersExclude = parseOthersExclude(payload)
+  if (isOthersCategory(category) || othersExclude.length) {
+    const fields = rule?.fields?.length ? rule.fields : DISTRICT_FIELDS
+    const exclude = othersExclude.length ? othersExclude : []
+    if (exclude.length) {
+      return rows.filter((row) => !exclude.some((name) => matchesCategory(row, fields, name, Boolean(rule?.exact))))
+    }
+    return rows.filter((row) => {
+      const raw = fields.map((field) => String(row[field] ?? '').trim()).find(Boolean) || ''
+      return raw && !isOthersCategory(raw)
+    })
+  }
+
   if (!rule) {
     const cat = normalize(category)
     return rows.filter((row) =>
@@ -487,6 +543,11 @@ export function filterRowsForChartClick(
       const yn = String(row.active_yn ?? '').trim()
       return wantActive ? yn === '1' : yn === '0'
     })
+  }
+
+  if ((/^active status$/i.test(chartTitle) || /active vs inactive/i.test(chartTitle)) && !/hem|user/i.test(chartTitle)) {
+    const wantServing = /^active$/i.test(category)
+    return rows.filter((row) => isHospitalServingClaims(row) === wantServing)
   }
 
   if (/urban|rural/i.test(chartTitle)) {

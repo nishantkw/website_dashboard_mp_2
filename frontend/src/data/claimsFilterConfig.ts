@@ -26,7 +26,7 @@ export const CLAIMS_SEARCH_COLUMNS = [
 
 /** FRS §4 — Master Report TMS 2.0 Claim filters (patient geography, not hospital division) */
 export const CLAIMS_FILTER_FIELDS: FilterField[] = [
-  { key: 'state_type', label: 'State Type', type: 'select', options: STATE_TYPE_OPTIONS, column: 'case_type' },
+  { key: 'state_type', label: 'State Type', type: 'select', options: STATE_TYPE_OPTIONS, column: '_state_type' },
   { key: 'division', label: 'Division', type: 'select', options: DIVISION_OPTIONS, column: 'division' },
   { key: 'district', label: 'District', type: 'searchable', column: 'patient_district_name' },
   { key: 'hospital_name', label: 'Hospital Name', type: 'searchable', column: 'hospital_name' },
@@ -140,9 +140,9 @@ export function buildMasterReportTableColumns(reportId: string) {
   const kpiCols: { key: string; label: string; align?: 'right' }[] = []
   for (const kpi of CLAIM_KPI_COLUMNS) {
     kpiCols.push({ key: `${kpi.key}_count`, label: `${kpi.label} — Count`, align: 'right' })
-    kpiCols.push({ key: `${kpi.key}_initiated_cr`, label: `${kpi.label} — Init Cr`, align: 'right' })
+    kpiCols.push({ key: `${kpi.key}_initiated_cr`, label: `${kpi.label} — Initiated Amount`, align: 'right' })
     if (kpi.hasApproved) {
-      kpiCols.push({ key: `${kpi.key}_approved_cr`, label: `${kpi.label} — Appr Cr`, align: 'right' })
+      kpiCols.push({ key: `${kpi.key}_approved_cr`, label: `${kpi.label} — Approved Amount`, align: 'right' })
     }
   }
 

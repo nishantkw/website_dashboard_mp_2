@@ -12,6 +12,8 @@ import { fetchClaims } from '../../api/endpoints'
 import DataSourceBadge from '../../components/ui/DataSourceBadge'
 import BackendOfflineNotice from '../../components/ui/BackendOfflineNotice'
 import StackedHeading from '../../components/ui/StackedHeading'
+import MoneyColumnHeader from '../../components/ui/MoneyColumnHeader'
+import { formatMoneyValue, type MoneyNotation } from '../../utils/moneyFormat'
 import { schemaTableColumns } from '../../utils/schemaColumns'
 import { monthLabelToRange } from '../../utils/chartDrillDown'
 import { getClaimsFiltersForPage, buildMasterReportTableColumns } from '../../data/claimsFilterConfig'
@@ -79,13 +81,13 @@ export default function ClaimsPayments() {
   const masterKpis = data.masterKpis ?? []
   const kpis: KPI[] = data.kpis?.length
     ? data.kpis.slice(0, 6)
-    : masterKpis.slice(0, 6).map((k) => ({
+    : masterKpis.slice(0, 6).map((k, i) => ({
         label: k.label,
         value: String(k.count),
         key: k.key,
         change: 0,
         changeLabel: 'vs last month',
-        color: 'blue',
+        color: (['blue', 'green', 'emerald', 'orange', 'cyan', 'purple'] as const)[i % 6],
       }))
 
   const caseTypeData = data.charts?.caseType ?? []
@@ -115,6 +117,10 @@ export default function ClaimsPayments() {
       })),
     [data.table]
   )
+  const filteredTable = useMemo(
+    () => claimsFilters.filterRows(tableRows),
+    [claimsFilters.filterRows, tableRows]
+  )
   const summaryRows = (data.stateHospitalSummary ?? []) as Record<string, string | number>[]
 
   const summaryColumns = useMemo(() => buildMasterReportTableColumns('state-hospital-type'), [])
@@ -143,24 +149,33 @@ export default function ClaimsPayments() {
 
   const { openFromChart, openFromKpi, openDetail, closeDetail, Modal } = useDrillDown({
     live,
-    tableRows,
+    tableRows: filteredTable,
     columns,
     datasetTitle: 'Claim Records',
     resolveContext: (chartTitle) => {
       if (/payment /i.test(chartTitle)) {
         return { rows: paymentRows, columns: paymentColumns, datasetTitle: 'Payment Details' }
       }
-      return { rows: tableRows, columns, datasetTitle: 'Claim Records' }
+        return { rows: filteredTable, columns, datasetTitle: 'Claim Records' }
     },
     fetchDrillDown: live
       ? async (payload, chartTitle) => {
-          if (!/trend/i.test(chartTitle) || /payment /i.test(chartTitle)) return null
+          if (/payment /i.test(chartTitle)) return null
+          const districtName = String(payload.name ?? '').trim()
+          const wantsDistrict = /district/i.test(chartTitle) && districtName && !/^others$/i.test(districtName)
+          const wantsDivision = /division/i.test(chartTitle) && districtName && !/^others$/i.test(districtName)
+          const wantsTrend = /trend/i.test(chartTitle)
+          if (!wantsTrend && !wantsDistrict && !wantsDivision) return null
           const params = new URLSearchParams(claimsFilters.queryString.replace(/^\?/, ''))
-          const range = monthLabelToRange(String(payload.name ?? ''))
-          if (range) {
-            params.set('date_from', range.from)
-            params.set('date_to', range.to)
+          if (wantsTrend) {
+            const range = monthLabelToRange(String(payload.name ?? ''))
+            if (range) {
+              params.set('date_from', range.from)
+              params.set('date_to', range.to)
+            }
           }
+          if (wantsDistrict) params.set('district', districtName)
+          if (wantsDivision) params.set('division', districtName)
           const qs = params.toString() ? `?${params.toString()}` : ''
           const res = await fetchClaims(qs)
           if (!res.ok) return null
@@ -174,11 +189,12 @@ export default function ClaimsPayments() {
   })
 
   const [selectedKpi, setSelectedKpi] = useState<{ key: string; label: string } | null>(null)
+  const [moneyNotation, setMoneyNotation] = useState<MoneyNotation>('indian')
 
   const kpiTableRows = useMemo(() => {
-    if (!selectedKpi) return tableRows
-    return filterRowsForClaimKpi(tableRows, selectedKpi.label, selectedKpi.key) ?? tableRows
-  }, [tableRows, selectedKpi])
+    if (!selectedKpi) return filteredTable
+    return filterRowsForClaimKpi(filteredTable, selectedKpi.label, selectedKpi.key) ?? filteredTable
+  }, [filteredTable, selectedKpi])
 
   const handleKpiClick = (kpi: KPI) => {
     const key = kpi.key || resolveClaimKpiKey(kpi.label) || kpi.label
@@ -220,7 +236,7 @@ export default function ClaimsPayments() {
               } — FRS claim lifecycle KPIs by State Type & Hospital Type`
             : 'Connect the backend to load claim status data'
         }
-        badge={<DataSourceBadge source={source} db={db} />}
+        badge={<DataSourceBadge source={source} db={db} loading={loading} />}
       />
       <BackendOfflineNotice error={error} loading={loading} />
 
@@ -336,13 +352,13 @@ export default function ClaimsPayments() {
 
       {claimsTrend.length > 0 && (
         <div className="mb-4">
-          <ChartCard title="Claims Amount Trend" subtitle="Initiated amount (₹ Cr) by month" exportData={claimsTrend}>
+          <ChartCard title="Claims Amount Trend" subtitle="Initiated amount (₹) by month" exportData={claimsTrend}>
             <InteractiveLineChart
               data={claimsTrend}
               chartTitle="Claims Amount Trend"
-              height={260}
+              height={240}
               onItemClick={openFromChart}
-              lines={[{ dataKey: 'amount', stroke: '#d97706', name: 'Amount (₹ Cr)' }]}
+              lines={[{ dataKey: 'amount', stroke: '#d97706', name: 'Amount (₹)' }]}
             />
           </ChartCard>
         </div>
@@ -353,7 +369,7 @@ export default function ClaimsPayments() {
           <div className="border-b border-slate-100 px-4 py-4">
             <StackedHeading
               title="Default KPI Heads"
-              subtitle="Count and Initiated Amount (₹ Cr) per claim lifecycle stage"
+              subtitle="Count and exact initiated / approved amount per claim lifecycle stage"
             />
           </div>
           <table className="min-w-full text-xs">
@@ -361,8 +377,12 @@ export default function ClaimsPayments() {
               <tr>
                 <th className="px-3 py-2 text-left font-semibold">KPI Head</th>
                 <th className="px-3 py-2 text-right font-semibold">Count</th>
-                <th className="px-3 py-2 text-right font-semibold">Initiated (Cr)</th>
-                <th className="px-3 py-2 text-right font-semibold">Approved (Cr)</th>
+                <th className="px-3 py-2 text-right font-semibold">
+                  <MoneyColumnHeader label="Initiated Amount" notation={moneyNotation} onChange={setMoneyNotation} />
+                </th>
+                <th className="px-3 py-2 text-right font-semibold">
+                  <MoneyColumnHeader label="Approved Amount" notation={moneyNotation} onChange={setMoneyNotation} />
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -370,8 +390,8 @@ export default function ClaimsPayments() {
                 <tr key={k.key} className="border-t border-slate-100">
                   <td className="px-3 py-2 font-medium text-slate-700">{k.label}</td>
                   <td className="px-3 py-2 text-right">{k.count}</td>
-                  <td className="px-3 py-2 text-right">{k.initiatedCr}</td>
-                  <td className="px-3 py-2 text-right">{k.approvedCr}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{formatMoneyValue(k.initiatedCr, moneyNotation)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{formatMoneyValue(k.approvedCr, moneyNotation)}</td>
                 </tr>
               ))}
             </tbody>
@@ -414,7 +434,7 @@ export default function ClaimsPayments() {
           title={
             selectedKpi
               ? `${selectedKpi.label} (${kpiTableRows.length})`
-              : `Claim Detail Records (${tableRows.length}${columns.length ? ` · schema cols: ${columns.length}` : ''})`
+              : `Claim Detail Records (${filteredTable.length}${columns.length ? ` · schema cols: ${columns.length}` : ''})`
           }
           onRowClick={(row) =>
             openDetail({

@@ -97,7 +97,9 @@ export default function UsersWorkflow() {
   const tableRows = (data.table ?? []) as Record<string, string | number>[]
   const auditRows = (data.audit ?? []) as Record<string, string | number>[]
   const proRows = (data.proTable ?? []) as Record<string, string | number>[]
-  const filtered = live ? tableRows : moduleFilters.filterRows(tableRows)
+  const filtered = moduleFilters.filterRows(tableRows)
+  const auditFiltered = moduleFilters.filterRows(auditRows)
+  const proFiltered = moduleFilters.filterRows(proRows)
   const tableColumns = useMemo(
     () =>
       schemaTableColumns({
@@ -138,10 +140,10 @@ export default function UsersWorkflow() {
     datasetTitle: 'Workflow User Records',
     resolveContext: (chartTitle) => {
       if (/pro workflow/i.test(chartTitle)) {
-        return { rows: proRows, columns: proColumns, datasetTitle: 'Pro Workflow Users' }
+        return { rows: proFiltered, columns: proColumns, datasetTitle: 'Pro Workflow Users' }
       }
       if (/audit/i.test(chartTitle) || /scheme/i.test(chartTitle)) {
-        return { rows: auditRows, columns: auditColumns, datasetTitle: 'Audit Events' }
+        return { rows: auditFiltered, columns: auditColumns, datasetTitle: 'Audit Events' }
       }
       return { rows: filtered, columns: tableColumns, datasetTitle: 'Workflow User Records' }
     },
@@ -167,11 +169,11 @@ export default function UsersWorkflow() {
     let cols = tableColumns
     let dataset = 'Workflow User Records'
     if (label === 'Audit Events') {
-      records = auditRows
+      records = auditFiltered
       cols = auditColumns
       dataset = 'Audit Events'
     } else if (/^pro /i.test(label)) {
-      records = proRows
+      records = proFiltered
       cols = proColumns
       dataset = 'Pro Workflow Users'
     } else if (label === 'Claim Process') {
@@ -201,7 +203,7 @@ export default function UsersWorkflow() {
             ? `${data.schema ?? 'dmart_mp.workflow_users_t'} — unique users and roles from imported workflow data`
             : 'Connect the backend to load workflow records'
         }
-        badge={<DataSourceBadge source={source} db={db} />}
+        badge={<DataSourceBadge source={source} db={db} loading={loading} />}
       />
       <BackendOfflineNotice error={error} loading={loading} />
 
@@ -369,8 +371,8 @@ export default function UsersWorkflow() {
         <div className="mt-4">
           <DataTable
             columns={auditColumns}
-            data={auditRows}
-            title={`Audit Events (${auditRows.length}${auditColumns.length ? ` · ${auditColumns.length} schema cols` : ''})`}
+            data={auditFiltered}
+            title={`Audit Events (${auditFiltered.length}${auditColumns.length ? ` · ${auditColumns.length} schema cols` : ''})`}
             onRowClick={(row) =>
               openDetail({
                 title: String(row.acted_workflow_user || row.work_id_pk || row.id_pk || 'Audit'),
@@ -460,8 +462,8 @@ export default function UsersWorkflow() {
           )}
           <DataTable
             columns={proColumns}
-            data={proRows}
-            title={`Pro Workflow Users — dmart_mp.pro_workflow_users_t (${proRows.length}${
+            data={proFiltered}
+            title={`Pro Workflow Users — dmart_mp.pro_workflow_users_t (${proFiltered.length}${
               proColumns.length ? ` · ${proColumns.length} schema cols` : ''
             })`}
             onRowClick={(row) =>

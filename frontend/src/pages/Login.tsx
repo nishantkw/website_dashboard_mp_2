@@ -1,10 +1,11 @@
-import { useState, type FormEvent } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, LogIn, ChevronRight } from 'lucide-react'
 import { useAuth } from '../auth/auth-context'
-import { demoAccounts } from '../auth/mockUsers'
 import { getDefaultRouteForRole } from '../auth/permissions'
 import { ROLE_LABELS, ROLE_OPTIONS, type UserRole } from '../auth/types'
+
+type DemoAccount = { id: string; username: string; password: string; role: UserRole; name: string }
 
 export default function Login() {
   const { login } = useAuth()
@@ -16,7 +17,19 @@ export default function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showDemo, setShowDemo] = useState(false)
-  const showDemoAccounts = import.meta.env.DEV
+  const [demoAccounts, setDemoAccounts] = useState<DemoAccount[]>([])
+  const showDemoAccounts = import.meta.env.DEV && demoAccounts.length > 0
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) return
+    let cancelled = false
+    import('../auth/mockUsers').then((mod) => {
+      if (!cancelled) setDemoAccounts(mod.demoAccounts)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()

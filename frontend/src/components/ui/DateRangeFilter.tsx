@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { compactFilterLabelClass, compactSelectClass } from '../layout/compactFilterStyles'
 
 export type DatePreset = '' | 'today' | 'yesterday' | 'last_7' | 'last_30' | 'custom'
 
@@ -67,55 +68,55 @@ export default function DateRangeFilter({
   const selectClass =
     variant === 'compact'
       ? 'text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 outline-none focus:border-[#2d8a4e] min-w-[140px]'
-      : `${grow ? 'w-full' : 'min-w-[170px] max-w-[200px]'} cursor-pointer rounded-lg border px-2.5 py-1.5 text-xs outline-none transition-all focus:border-[#2d8a4e] focus:ring-2 focus:ring-[#2d8a4e]/15 ${
-          preset
-            ? 'border-[#2d8a4e] bg-[#edf7f0] font-semibold text-[#1a5c38] shadow-sm'
-            : 'border-[#c5e0ce] bg-white text-slate-700 hover:border-[#2d8a4e]/60'
-        }`
+      : compactSelectClass(Boolean(preset), false, grow ? 'w-full min-w-0' : 'min-w-[132px]')
 
   const dateInputClass =
     variant === 'compact'
       ? 'text-xs border border-slate-300 rounded-lg px-2 py-1.5 bg-white text-slate-700 outline-none focus:border-[#2d8a4e] w-[118px]'
-      : `${grow ? 'flex-1' : 'w-[110px]'} rounded-lg border border-[#c5e0ce] bg-white px-2.5 py-1.5 text-xs outline-none focus:border-[#2d8a4e] focus:ring-2 focus:ring-[#2d8a4e]/15`
+      : compactSelectClass(true, false, grow ? 'flex-1' : 'w-[110px]')
 
   return (
-    <div className={`flex flex-col items-center ${grow ? 'min-w-[160px] flex-1' : 'shrink-0'} ${className}`}>
-      {variant === 'labeled' && (
-        <label className="mb-1 block w-full text-center text-[9px] font-bold uppercase tracking-wider text-[#1a5c38]">
-          Date Range
-        </label>
-      )}
+    <div
+      className={`flex shrink-0 flex-nowrap items-center gap-1.5 whitespace-nowrap max-lg:col-span-2 max-lg:min-w-0 max-lg:flex-wrap max-lg:whitespace-normal ${
+        grow ? 'min-w-[140px] flex-1' : ''
+      } ${className}`}
+    >
+      <div className={`flex shrink-0 items-center gap-1.5 ${grow ? 'min-w-0 flex-1' : ''}`}>
+        {variant === 'labeled' && (
+          <label className={compactFilterLabelClass}>Date</label>
+        )}
 
-      <select
-        value={preset}
-        onChange={(e) => {
-          const next = e.target.value as DatePreset
-          setPreset(next)
-          if (next === '') {
-            lastPushed.current = { from: '', to: '' }
-            onChange('', '')
-            return
-          }
-          if (next === 'custom') return
-          const range = calcDateRange(next)
-          const from = formatLocalDate(range.from)
-          const to = formatLocalDate(range.to)
-          lastPushed.current = { from, to }
-          onChange(from, to)
-        }}
-        className={selectClass}
-        title="Date Range"
-      >
-        <option value="">Any time</option>
-        <option value="today">Today</option>
-        <option value="yesterday">Yesterday</option>
-        <option value="last_7">Last 7 days</option>
-        <option value="last_30">Last 30 days</option>
-        <option value="custom">Custom</option>
-      </select>
+        <select
+          value={preset}
+          onChange={(e) => {
+            const next = e.target.value as DatePreset
+            setPreset(next)
+            if (next === '') {
+              lastPushed.current = { from: '', to: '' }
+              onChange('', '')
+              return
+            }
+            if (next === 'custom') return
+            const range = calcDateRange(next)
+            const from = formatLocalDate(range.from)
+            const to = formatLocalDate(range.to)
+            lastPushed.current = { from, to }
+            onChange(from, to)
+          }}
+          className={selectClass}
+          title="Date Range"
+        >
+          <option value="">Any time</option>
+          <option value="today">Today</option>
+          <option value="yesterday">Yesterday</option>
+          <option value="last_7">Last 7 days</option>
+          <option value="last_30">Last 30 days</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
 
       {preset === 'custom' && (
-        <div className={`flex items-center gap-1.5 ${grow ? 'w-full' : ''} ${variant === 'labeled' ? 'mt-2' : 'mt-1.5'}`}>
+        <div className="flex shrink-0 items-center gap-1.5">
           <input
             type="date"
             value={dateFrom}

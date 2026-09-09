@@ -29,13 +29,13 @@ export default function ChartCard({ title, subtitle, children, className = '', e
             .filter((k) => k !== 'name')
             .map((k) => ({
               key: k,
-              label: k === 'value' || k === 'claims' ? 'Count' : k === 'amount' ? 'Amount (₹ Cr)' : k.replace(/_/g, ' '),
+              label: k === 'value' || k === 'claims' ? 'Count' : k === 'amount' ? 'Amount (₹)' : k.replace(/_/g, ' '),
             })),
         ]
       : CHART_EXPORT_COLUMNS
 
   return (
-    <div className={`flex h-full flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-sm ${className}`}>
+    <div className={`flex h-full flex-col rounded-xl border border-gray-100 bg-white p-5 shadow-sm ${className}`}>
       <div className="mb-5 flex shrink-0 items-start justify-between gap-3">
         <StackedHeading
           size="section"

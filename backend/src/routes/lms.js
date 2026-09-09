@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { query } from '../db/pool.js'
+import { clientError } from '../utils/clientError.js'
 import { serializeRows } from '../utils/serialize.js'
 import { resolveColumns } from '../utils/schemaColumns.js'
 import { getPrimaryTableForModule } from '../utils/schemaRegistry.js'
@@ -55,7 +56,7 @@ router.get('/', async (req, res) => {
       table,
     })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 

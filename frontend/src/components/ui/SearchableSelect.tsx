@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { ChevronDown, Search, X } from 'lucide-react'
+import { compactFilterFieldClass, compactFilterLabelClass } from '../layout/compactFilterStyles'
 
 interface SearchableSelectProps {
   label: string
@@ -8,6 +9,7 @@ interface SearchableSelectProps {
   options: { value: string; label: string }[]
   placeholder?: string
   onChange: (value: string) => void
+  layout?: 'stacked' | 'inline'
 }
 
 export default function SearchableSelect({
@@ -16,6 +18,7 @@ export default function SearchableSelect({
   options,
   placeholder,
   onChange,
+  layout = 'inline',
 }: SearchableSelectProps) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -95,16 +98,35 @@ export default function SearchableSelect({
   const displayValue = open ? query : value
 
   return (
-    <div ref={rootRef} className="relative flex shrink-0 flex-col items-center">
-      <label className="mb-1 block w-full text-center text-[9px] font-bold uppercase tracking-wider text-[#1a5c38]">
+    <div
+      ref={rootRef}
+      className={
+        layout === 'inline'
+          ? `relative ${compactFilterFieldClass}`
+          : 'relative flex shrink-0 flex-col items-center'
+      }
+    >
+      <label
+        className={
+          layout === 'inline'
+            ? compactFilterLabelClass
+            : 'mb-1 block w-full text-center text-[9px] font-bold uppercase tracking-wider text-[#1a5c38]'
+        }
+      >
         {label}
       </label>
       <div
         ref={triggerRef}
-        className={`flex min-w-[168px] max-w-[220px] items-center rounded-lg border px-2 py-1.5 transition-all ${
+        className={`flex items-center rounded-md border px-2 transition-all ${
+          layout === 'inline'
+            ? 'h-8 min-w-[148px] max-w-[200px] py-1 max-lg:w-full max-lg:min-w-0 max-lg:max-w-none'
+            : 'min-w-[168px] max-w-[220px] rounded-lg py-1.5'
+        } ${
           active || open
-            ? 'border-[#2d8a4e] bg-[#edf7f0] shadow-sm shadow-emerald-900/5'
-            : 'border-[#c5e0ce] bg-white hover:border-[#2d8a4e]/60'
+            ? 'border-[#1a5c38] bg-[#ccebd6]'
+            : layout === 'inline'
+              ? 'border-[#8ec9a4] bg-[#f4fbf7] hover:border-[#2d8a4e] hover:bg-[#e8f6ed]'
+              : 'border-[#c5e0ce] bg-white hover:border-[#2d8a4e]/60'
         }`}
       >
         <Search className="mr-1 h-3 w-3 shrink-0 text-[#2d8a4e]" />

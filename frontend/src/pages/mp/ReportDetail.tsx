@@ -132,8 +132,8 @@ function buildClaimsReportTables(apiData: ModuleApiData, source: 'api' | 'mock' 
       columns: [
         { key: 'label', label: 'KPI Head' },
         { key: 'count', label: 'Count', align: 'right' },
-        { key: 'initiatedCr', label: 'Initiated (Cr)', align: 'right' },
-        { key: 'approvedCr', label: 'Approved (Cr)', align: 'right' },
+        { key: 'initiatedCr', label: 'Initiated Amount', align: 'right' },
+        { key: 'approvedCr', label: 'Approved Amount', align: 'right' },
       ],
       data: apiData.masterKpis as unknown as Record<string, string | number>[],
     })
@@ -426,11 +426,14 @@ export default function ReportDetail() {
         }
       })
     : isClaimsReport
-      ? buildClaimsReportTables(apiData as ModuleApiData, source, report.tables)
+      ? buildClaimsReportTables(apiData as ModuleApiData, source, report.tables).map((table) => ({
+          ...table,
+          data: claimsFilters.filterRows(table.data),
+        }))
       : buildModuleTables(resolvedId, apiData as ModuleApiData, source, report.tables, filterData)
 
   const tables =
-    isBeneficiariesReport && !live
+    isBeneficiariesReport
       ? tablesRaw.map((table) => ({
           ...table,
           data: beneficiariesFilters.filterRows(table.data),
@@ -454,7 +457,7 @@ export default function ReportDetail() {
       <PageHeader
         title={report.title}
         description={report.description}
-        badge={<DataSourceBadge source={source} db={db} />}
+        badge={<DataSourceBadge source={source} db={db} loading={loading} />}
       />
       <BackendOfflineNotice error={error} loading={loading} />
 

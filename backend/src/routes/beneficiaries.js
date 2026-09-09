@@ -1,9 +1,10 @@
 import { Router } from 'express'
 import { query } from '../db/pool.js'
+import { clientError } from '../utils/clientError.js'
 import { serializeRows } from '../utils/serialize.js'
 import { resolveColumns } from '../utils/schemaColumns.js'
 import { getPrimaryTableForModule } from '../utils/schemaRegistry.js'
-import { districtsForDivision } from '../data/mpDivisions.js'
+import { pushGeoSql } from '../data/mpDivisions.js'
 import { buildKpi } from '../utils/kpiChange.js'
 import {
   filterSourceRows,
@@ -52,17 +53,7 @@ function buildBeneficiaryWhere(q) {
     parts.push(`(${ors.join(' OR ')})`)
   }
 
-  if (q.district) pushIlike(['dist_name'], q.district)
-  else if (q.division) {
-    const districts = districtsForDivision(q.division)
-    if (districts.length) {
-      const placeholders = districts.map((d) => {
-        params.push(d)
-        return `$${params.length}`
-      })
-      parts.push(`dist_name IN (${placeholders.join(', ')})`)
-    }
-  }
+  if (q.district || q.division) pushGeoSql(parts, params, q, ['dist_name', 'district_name', 'district'])
 
   if (q.gender) {
     const sql = labelledSqlMatch('gender', labelGender(q.gender), 'gender')
@@ -415,7 +406,7 @@ router.get('/', async (req, res) => {
       bisKpis: showBisSection ? bisKpis : [],
     })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 

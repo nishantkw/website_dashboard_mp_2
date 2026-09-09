@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import ExportDropdown from '../../components/ui/ExportDropdown'
 import {
   Users,
@@ -16,6 +16,14 @@ import {
   SlidersHorizontal,
 } from 'lucide-react'
 import clsx from 'clsx'
+import {
+  createAuthUser,
+  fetchAuthUsers,
+  resetAuthUserPassword,
+  updateAuthUser,
+} from '../../api/endpoints'
+import { ROLE_LABELS, type UserRole } from '../../auth/types'
+import { useAuth } from '../../auth/auth-context'
 
 interface UserRecord {
   id: string
@@ -48,58 +56,7 @@ interface AuditLog {
   timestamp: string
 }
 
-const INITIAL_USERS: UserRecord[] = [
-  {
-    id: '1',
-    username: 'superadmin',
-    name: 'Super Administrator',
-    role: 'super_admin',
-    roleLabel: 'Super Administrator',
-    department: 'State Health Agency (SHA)',
-    status: 'Active',
-    createdAt: '2025-01-10',
-  },
-  {
-    id: '2',
-    username: 'admin',
-    name: 'Admin User',
-    role: 'state_admin',
-    roleLabel: 'State Administrator',
-    department: 'State Health Agency',
-    status: 'Active',
-    createdAt: '2025-01-15',
-  },
-  {
-    id: '3',
-    username: 'bis.user',
-    name: 'Priya Sharma',
-    role: 'bis_user',
-    roleLabel: 'BIS Operator',
-    department: 'BIS - Card Printing',
-    status: 'Active',
-    createdAt: '2025-02-01',
-  },
-  {
-    id: '5',
-    username: 'mp.user',
-    name: 'Rajesh Kumar',
-    role: 'mp_user',
-    roleLabel: 'Madhya Pradesh Analyst',
-    department: 'Madhya Pradesh Data Mart',
-    status: 'Active',
-    createdAt: '2025-02-10',
-  },
-  {
-    id: '6',
-    username: 'ump.user',
-    name: 'Sunita Desai',
-    role: 'ump_user',
-    roleLabel: 'UMP Administrator',
-    department: 'User Management Platform',
-    status: 'Inactive',
-    createdAt: '2025-02-12',
-  },
-]
+const INITIAL_USERS: UserRecord[] = []
 
 const INITIAL_ROLES: RoleRecord[] = [
   {
@@ -214,65 +171,40 @@ const INITIAL_PERMISSIONS: Record<string, Record<string, boolean>> = {
   },
 }
 
-const INITIAL_LOGS: AuditLog[] = [
-  {
-    id: 'log-101',
-    username: 'superadmin',
-    userRole: 'Super Administrator',
-    action: 'CREATE_USER',
-    module: 'User Management',
-    ip: '192.168.1.45',
-    status: 'Success',
-    timestamp: '2026-08-14 11:20:15',
-  },
-  {
-    id: 'log-102',
-    username: 'admin',
-    userRole: 'State Administrator',
-    action: 'UPDATE_PERMISSIONS',
-    module: 'Permissions',
-    ip: '192.168.1.88',
-    status: 'Success',
-    timestamp: '2026-08-14 10:45:30',
-  },
-  {
-    id: 'log-103',
-    username: 'mp.user',
-    userRole: 'Madhya Pradesh Analyst',
-    action: 'LOGIN',
-    module: 'Auth',
-    ip: '10.0.4.12',
-    status: 'Success',
-    timestamp: '2026-08-14 09:12:00',
-  },
-  {
-    id: 'log-104',
-    username: 'bis.user',
-    userRole: 'BIS Operator',
-    action: 'EXPORT_DATA',
-    module: 'BIS Card Printing',
-    ip: '10.0.2.99',
-    status: 'Success',
-    timestamp: '2026-08-14 08:30:10',
-  },
-  {
-    id: 'log-105',
-    username: 'ump.user',
-    userRole: 'UMP Administrator',
-    action: 'LOGIN',
-    module: 'Auth',
-    ip: '192.168.2.14',
-    status: 'Denied',
-    timestamp: '2026-08-13 16:50:22',
-  },
-]
+const INITIAL_LOGS: AuditLog[] = []
+
+function mapApiUser(row: {
+  id: number | string
+  username: string
+  name: string
+  role: string
+  department: string | null
+  active: boolean
+  created_at?: string
+}): UserRecord {
+  const role = row.role as UserRole
+  return {
+    id: String(row.id),
+    username: row.username,
+    name: row.name,
+    role,
+    roleLabel: ROLE_LABELS[role] || row.role,
+    department: row.department || '',
+    status: row.active ? 'Active' : 'Inactive',
+    createdAt: row.created_at ? String(row.created_at).slice(0, 10) : '',
+  }
+}
 
 export default function UserManagement() {
+  const { user: currentUser } = useAuth()
   const [activeTab, setActiveTab] = useState<'users' | 'roles' | 'permissions' | 'audit'>('users')
   const [users, setUsers] = useState<UserRecord[]>(INITIAL_USERS)
   const [roles, setRoles] = useState<RoleRecord[]>(INITIAL_ROLES)
-  const [permissions, setPermissions] = useState(INITIAL_PERMISSIONS)
+  const [permissions] = useState(INITIAL_PERMISSIONS)
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_LOGS)
+  const [loadingUsers, setLoadingUsers] = useState(true)
+  const [actionError, setActionError] = useState('')
+  const [actionBusy, setActionBusy] = useState(false)
 
   // Filters & Search
   const [searchTerm, setSearchTerm] = useState('')
@@ -300,115 +232,127 @@ export default function UserManagement() {
   const [newPassword, setNewPassword] = useState('')
   const [showPasswordText, setShowPasswordText] = useState(false)
 
-  // Helper actions
-  const handleToggleUserStatus = (id: string) => {
-    setUsers((prev) =>
-      prev.map((u) => {
-        if (u.id === id) {
-          const nextStatus = u.status === 'Active' ? 'Inactive' : 'Active'
-          addAuditLog(u.username, u.roleLabel, u.status === 'Active' ? 'DEACTIVATE_USER' : 'ACTIVATE_USER', `User ID #${id} status changed to ${nextStatus}`)
-          return { ...u, status: nextStatus }
-        }
-        return u
-      })
-    )
-  }
-
-  const handleCreateUser = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!newUser.username || !newUser.name) return
-
-    const roleObj = roles.find((r) => r.name === newUser.role)
-    const created: UserRecord = {
-      id: String(Date.now()),
-      username: newUser.username.trim(),
-      name: newUser.name.trim(),
-      role: newUser.role,
-      roleLabel: roleObj?.label || newUser.role,
-      department: newUser.department.trim() || 'State Health Agency',
-      status: 'Active',
-      createdAt: new Date().toISOString().split('T')[0],
-    }
-
-    setUsers([created, ...users])
-    addAuditLog(created.username, created.roleLabel, 'CREATE_USER', `Created new user account: ${created.username}`)
-
-    setNewUser({ username: '', name: '', role: 'state_admin', department: '', password: '' })
-    setShowCreateUserModal(false)
-  }
-
-  const handleCreateRole = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!newRole.name || !newRole.label) return
-
-    const roleKey = newRole.name.toLowerCase().replace(/\s+/g, '_')
-    const created: RoleRecord = {
-      id: `r-${Date.now()}`,
-      name: roleKey,
-      label: newRole.label.trim(),
-      description: newRole.description.trim() || 'Custom system role',
-      userCount: 0,
-      status: 'Active',
-    }
-
-    setRoles([...roles, created])
-    setPermissions((prev) => ({
-      ...prev,
-      [roleKey]: {
-        overview: true,
-        user_management: false,
-        bis: false,
-        mp_claims: false,
-        mp_beneficiaries: false,
-        mp_hospitals: false,
-        mp_fraud: false,
-        mp_reports: false,
-        ump: false,
-      },
-    }))
-
-    addAuditLog('superadmin', 'Super Administrator', 'CREATE_ROLE', `Created new role: ${created.label} (${roleKey})`)
-    setNewRole({ name: '', label: '', description: '' })
-    setShowCreateRoleModal(false)
-  }
-
-  const handleTogglePermission = (roleName: string, moduleId: string) => {
-    if (roleName === 'super_admin' && moduleId === 'user_management') return // Protect super admin access
-
-    setPermissions((prev) => {
-      const currentRolePerms = prev[roleName] || {}
-      return {
-        ...prev,
-        [roleName]: {
-          ...currentRolePerms,
-          [moduleId]: !currentRolePerms[moduleId],
-        },
-      }
-    })
-    addAuditLog('superadmin', 'Super Administrator', 'UPDATE_PERMISSIONS', `Updated permission for role ${roleName} on ${moduleId}`)
-  }
-
-  const handleResetPassword = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!resetPasswordUser || !newPassword) return
-
-    addAuditLog('superadmin', 'Super Administrator', 'RESET_PASSWORD', `Reset password for user: ${resetPasswordUser.username}`)
-    setResetPasswordUser(null)
-    setNewPassword('')
-  }
-
-  const addAuditLog = (username: string, userRole: string, action: string, details: string) => {
+  const addAuditLog = useCallback((username: string, userRole: string, action: string, details: string) => {
     const log: AuditLog = {
       id: `log-${Date.now()}`,
       username,
       userRole,
       action,
       module: details ? `User Management (${details})` : 'User Management',
-      ip: '192.168.1.100',
+      ip: '—',
       status: 'Success',
       timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
     }
     setAuditLogs((prev) => [log, ...prev])
+  }, [])
+
+  const loadUsers = useCallback(async () => {
+    setLoadingUsers(true)
+    setActionError('')
+    const result = await fetchAuthUsers()
+    if (result.ok) {
+      const mapped = result.data.data.map(mapApiUser)
+      setUsers(mapped)
+      setRoles((prev) =>
+        prev.map((r) => ({
+          ...r,
+          userCount: mapped.filter((u) => u.role === r.name).length,
+        }))
+      )
+    } else {
+      setActionError(result.error || 'Unable to load users from API')
+    }
+    setLoadingUsers(false)
+  }, [])
+
+  useEffect(() => {
+    void loadUsers()
+  }, [loadUsers])
+
+  const handleToggleUserStatus = async (id: string) => {
+    const target = users.find((u) => u.id === id)
+    if (!target || actionBusy) return
+    if (currentUser?.id === id && target.status === 'Active') {
+      setActionError('You cannot deactivate your own account')
+      return
+    }
+    setActionBusy(true)
+    setActionError('')
+    const nextActive = target.status !== 'Active'
+    const result = await updateAuthUser(id, { active: nextActive })
+    setActionBusy(false)
+    if (!result.ok) {
+      setActionError(result.error || 'Unable to update user status')
+      return
+    }
+    const updated = mapApiUser(result.data.user)
+    setUsers((prev) => prev.map((u) => (u.id === id ? updated : u)))
+    addAuditLog(
+      currentUser?.username || 'admin',
+      ROLE_LABELS[currentUser?.role as UserRole] || 'Admin',
+      nextActive ? 'ACTIVATE_USER' : 'DEACTIVATE_USER',
+      `User ${target.username} → ${updated.status}`
+    )
+  }
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newUser.username || !newUser.name || !newUser.password || actionBusy) return
+    setActionBusy(true)
+    setActionError('')
+    const result = await createAuthUser({
+      username: newUser.username.trim(),
+      name: newUser.name.trim(),
+      role: newUser.role as UserRole,
+      department: newUser.department.trim(),
+      password: newUser.password,
+    })
+    setActionBusy(false)
+    if (!result.ok) {
+      setActionError(result.error || 'Unable to create user')
+      return
+    }
+    const created = mapApiUser(result.data.user)
+    setUsers((prev) => [created, ...prev])
+    addAuditLog(
+      currentUser?.username || 'admin',
+      ROLE_LABELS[currentUser?.role as UserRole] || 'Admin',
+      'CREATE_USER',
+      `Created user ${created.username}`
+    )
+    setNewUser({ username: '', name: '', role: 'state_admin', department: '', password: '' })
+    setShowCreateUserModal(false)
+  }
+
+  const handleCreateRole = (e: React.FormEvent) => {
+    e.preventDefault()
+    setActionError('Custom roles are fixed by the API. Contact an engineer to add new role types.')
+    setShowCreateRoleModal(false)
+  }
+
+  const handleTogglePermission = (_roleName: string, _moduleId: string) => {
+    setActionError('Module access is enforced by the API role middleware and cannot be changed from this UI.')
+  }
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!resetPasswordUser || !newPassword || actionBusy) return
+    setActionBusy(true)
+    setActionError('')
+    const result = await resetAuthUserPassword(resetPasswordUser.id, newPassword)
+    setActionBusy(false)
+    if (!result.ok) {
+      setActionError(result.error)
+      return
+    }
+    addAuditLog(
+      currentUser?.username || 'admin',
+      ROLE_LABELS[currentUser?.role as UserRole] || 'Admin',
+      'RESET_PASSWORD',
+      `Reset password for ${resetPasswordUser.username}`
+    )
+    setResetPasswordUser(null)
+    setNewPassword('')
   }
 
   // Filtered Users
@@ -423,13 +367,23 @@ export default function UserManagement() {
   })
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-4 lg:pt-6">
+      {actionError ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          {actionError}
+        </div>
+      ) : null}
+      {loadingUsers ? (
+        <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500">
+          Loading users from database…
+        </div>
+      ) : null}
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-4 sm:p-6 rounded-xl border border-slate-200 shadow-sm">
         <div className="min-w-0">
           <h1 className="text-xl sm:text-2xl font-bold text-slate-800">User Management</h1>
           <p className="text-slate-500 text-xs sm:text-sm mt-1 hidden sm:block">
-            Manage administrative users, custom roles, module permissions & audit logs
+            Manage administrative users. Create, deactivate, and reset passwords against Neon/Postgres.
           </p>
         </div>
 
@@ -864,9 +818,10 @@ export default function UserManagement() {
                 <input
                   type="password"
                   required
+                  minLength={10}
                   value={newUser.password}
                   onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                  placeholder="Enter initial password"
+                  placeholder="Min 10 characters"
                   className="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-[#2d8a4e]"
                 />
               </div>
@@ -975,10 +930,10 @@ export default function UserManagement() {
                   <input
                     type={showPasswordText ? 'text' : 'password'}
                     required
-                    minLength={6}
+                    minLength={10}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Enter new password (min 6 chars)"
+                    placeholder="Enter new password (min 10 chars)"
                     className="w-full px-3.5 py-2 pr-10 border border-slate-300 rounded-lg text-sm outline-none focus:border-blue-600"
                   />
                   <button

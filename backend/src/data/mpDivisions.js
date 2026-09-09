@@ -14,6 +14,83 @@ const DISTRICT_TO_DIVISION = Object.fromEntries(
   MP_DIVISIONS.flatMap((d) => d.districts.map((dist) => [dist.toLowerCase(), d.division]))
 )
 
+/** SQL: match any of these columns to a selected district (case-insensitive). */
+export function pushDistrictSql(parts, params, columns, districtName) {
+  if (!districtName || !columns?.length) return
+  const ors = columns.map((col) => {
+    params.push(`%${String(districtName).trim()}%`)
+    return `${col}::text ILIKE $${params.length}`
+  })
+  parts.push(`(${ors.join(' OR ')})`)
+}
+
+/** SQL: division filter = row district is one of that division’s districts (loose / case-insensitive). */
+export function pushDivisionSql(parts, params, columns, divisionName) {
+  const districts = districtsForDivision(divisionName)
+  if (!districts.length || !columns?.length) return
+  const ors = []
+  for (const col of columns) {
+    for (const name of districts) {
+      params.push(`%${name}%`)
+      ors.push(`${col}::text ILIKE $${params.length}`)
+    }
+  }
+  parts.push(`(${ors.join(' OR ')})`)
+}
+
+export function pushGeoSql(parts, params, q, columns) {
+  if (q.district) pushDistrictSql(parts, params, columns, q.district)
+  else if (q.division) pushDivisionSql(parts, params, columns, q.division)
+}
+
+export function normalizeDistrictName(name) {
+  return String(name ?? '')
+    .toLowerCase()
+    .replace(/\bdistrict\b/g, ' ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+}
+
+export function districtsMatch(rowDistrict, filterDistrict) {
+  const a = normalizeDistrictName(rowDistrict)
+  const b = normalizeDistrictName(filterDistrict)
+  if (!b) return true
+  if (!a) return false
+  return a === b || a.includes(b) || (b.length >= 4 && b.includes(a))
+}
+
+export function rowGeoDistrict(row = {}, columns = []) {
+  const keys = columns.length
+    ? columns
+    : [
+        'district_name',
+        'dist_name',
+        'district',
+        'patient_district_name',
+        'hosp_district_name',
+        'sub_district_name',
+        'district_cd',
+      ]
+  for (const key of keys) {
+    const val = String(row[key] ?? '').trim()
+    if (val) return val
+  }
+  return ''
+}
+
+export function matchesDistrictFilter(rowDistrict, filterDistrict) {
+  if (!filterDistrict) return true
+  return districtsMatch(rowDistrict, filterDistrict)
+}
+
+export function matchesDivisionFilter(rowDistrict, divisionName) {
+  if (!divisionName) return true
+  const allowed = districtsForDivision(divisionName)
+  if (!allowed.length) return false
+  if (allowed.some((d) => districtsMatch(rowDistrict, d))) return true
+  return divisionForDistrict(rowDistrict) === divisionName
+}
+
 export function districtsForDivision(divisionName) {
   if (!divisionName) return []
   const div = MP_DIVISIONS.find((d) => d.division.toLowerCase() === String(divisionName).toLowerCase())
@@ -22,7 +99,10 @@ export function districtsForDivision(divisionName) {
 
 export function divisionForDistrict(districtName) {
   if (!districtName) return 'Unknown'
-  return DISTRICT_TO_DIVISION[String(districtName).toLowerCase()] || 'Unknown'
+  const exact = DISTRICT_TO_DIVISION[String(districtName).toLowerCase().trim()]
+  if (exact) return exact
+  const key = Object.keys(DISTRICT_TO_DIVISION).find((d) => districtsMatch(districtName, d))
+  return key ? DISTRICT_TO_DIVISION[key] : 'Unknown'
 }
 
 export function allMpDistricts() {

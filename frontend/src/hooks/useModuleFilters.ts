@@ -1,16 +1,8 @@
 import { useState, useMemo, useCallback } from 'react'
 import type { FilterField, FilterValues } from '../types'
-import { getDistrictsForDivision, getDivisionForDistrict, deriveGeoStateType } from '../data/filterOptions'
+import { getDistrictsForDivision, getDivisionForDistrict } from '../data/filterOptions'
 import { MODULE_FILTER_META, type ModuleFilterKey } from '../data/moduleFilterConfig'
-
-function matchesSelect(row: Record<string, string | number>, columns: string[], filterVal: string) {
-  if (!filterVal) return true
-  const needle = filterVal.toLowerCase()
-  return columns.some((col) => {
-    const rowVal = String(row[col] ?? '').toLowerCase()
-    return rowVal === needle || rowVal.includes(needle)
-  })
-}
+import { applyPageFilters } from '../utils/applyPageFilters'
 
 export function moduleFiltersToQueryString(filters: FilterValues, search: string): string {
   const params = new URLSearchParams()
@@ -67,48 +59,7 @@ export function useModuleFilters(module: ModuleFilterKey, fields: FilterField[])
 
   const filterRows = useCallback(
     <T extends Record<string, string | number>>(rows: T[]): T[] => {
-      return rows.filter((row) => {
-        if (search) {
-          const haystack = meta.searchColumns
-            .filter((c) => c in row)
-            .map((c) => String(row[c] ?? ''))
-            .join(' ')
-            .toLowerCase()
-          if (!haystack.includes(search.toLowerCase())) return false
-        }
-
-        if (filters.state_type && filters.state_type !== 'Both') {
-          if (deriveGeoStateType(row) !== filters.state_type) return false
-        }
-
-        if (filters.state_type !== 'Portability' && filters.division) {
-          const district = String(row.district_name ?? row.dist_name ?? row.patient_district_name ?? row.hosp_district_name ?? '')
-          const div = getDivisionForDistrict(district)
-          if (div !== filters.division) return false
-        }
-
-        for (const field of fields) {
-          const val = filters[field.key]
-          if (!val || field.type === 'date') continue
-          if (field.key === 'state_type' || field.key === 'division') continue
-          if (filters.state_type === 'Portability' && field.key === 'district') continue
-          const cols = [field.column, field.key].filter(Boolean)
-          if (!matchesSelect(row, cols, val)) return false
-        }
-
-        if (filters.date_from || filters.date_to) {
-          const dateKey = Object.keys(row).find((k) =>
-            ['admission_dt', 'registration_date', 'created_dt', 'hosp_empaneled_date', 'empaneled_date', 'deempanel_date', 'last_login'].includes(k)
-          )
-          if (dateKey) {
-            const rowDate = String(row[dateKey]).slice(0, 10)
-            if (filters.date_from && rowDate < filters.date_from) return false
-            if (filters.date_to && rowDate > filters.date_to) return false
-          }
-        }
-
-        return true
-      })
+      return applyPageFilters(rows, fields, filters, search, meta.searchColumns)
     },
     [filters, search, fields, meta.searchColumns]
   )

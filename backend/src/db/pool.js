@@ -7,13 +7,26 @@ const { Pool } = pg
 /** @type {{ name: string, pool: import('pg').Pool }[]} */
 const pools = []
 
+function needsSsl(connectionString) {
+  const s = String(connectionString || '').toLowerCase()
+  return (
+    s.includes('sslmode=require') ||
+    s.includes('neon.tech') ||
+    s.includes('supabase') ||
+    process.env.DB_SSL === 'true'
+  )
+}
+
+function sslOption(connectionString) {
+  if (!needsSsl(connectionString)) return undefined
+  return { rejectUnauthorized: config.dbSslRejectUnauthorized }
+}
+
 function addPool(name, connectionString) {
   if (!connectionString) return
   const pool = new Pool({
     connectionString,
-    ssl: connectionString.includes('supabase') || connectionString.includes('sslmode=require')
-      ? { rejectUnauthorized: false }
-      : undefined,
+    ssl: sslOption(connectionString),
     max: 8,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 8_000,

@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { query } from '../db/pool.js'
+import { clientError } from '../utils/clientError.js'
 import { serializeRows } from '../utils/serialize.js'
 import { resolveColumns, preferPatientGeoOrder } from '../utils/schemaColumns.js'
 import { buildClaimsDashboard, buildMasterReport } from '../utils/claimAggregations.js'
@@ -104,17 +105,18 @@ router.get('/', async (req, res) => {
       paymentSchema: payment.table.length ? 'dmart_mp.payment_dtls' : '',
       columns,
       paymentColumns: payment.columns,
-      kpis: dashboard.kpis.map((k) => {
+      kpis: dashboard.kpis.map((k, i) => {
         const bucketRows = rows.filter((r) => (r._kpi_bucket || '') === k.key)
         const mom = monthOverMonthChange(bucketRows.length ? bucketRows : rows)
+        const palette = ['blue', 'green', 'emerald', 'orange', 'cyan', 'purple', 'indigo', 'violet', 'red']
         return {
           key: k.key,
           label: k.label,
           value: String(k.count),
-          subValue: `₹${k.initiatedCr} Cr initiated`,
+          subValue: `₹${Number(k.initiatedCr || 0).toLocaleString('en-IN')} initiated`,
           change: mom.change,
           changeLabel: mom.changeLabel,
-          color: 'blue',
+          color: palette[i % palette.length],
           meta: k,
         }
       }),
@@ -122,11 +124,11 @@ router.get('/', async (req, res) => {
       masterKpis: dashboard.kpis,
       stateHospitalSummary: dashboard.stateHospitalSummary,
       charts: { ...dashboard.charts, ...buildPaymentCharts(payment.table) },
-      table: rows.slice(0, req.query.date_from || req.query.date_to ? 10000 : 2000),
+      table: rows.slice(0, req.query.date_from || req.query.date_to || req.query.district || req.query.division || req.query.detail ? 10000 : 2000),
       paymentTable: payment.table,
     })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 
@@ -196,7 +198,7 @@ router.get('/filter-options', async (_req, res) => {
 
     res.json({ hospitals, specialties, patientStates, patientDistricts, patientGeo })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 
@@ -250,7 +252,7 @@ router.get('/reports/:reportId', async (req, res) => {
       total: reportRows.length,
     })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 

@@ -6,7 +6,7 @@ export const ROLES = {
   bis: ['super_admin', 'state_admin', 'bis_user'],
   mp: ['super_admin', 'state_admin', 'mp_user'],
   ump: ['super_admin', 'state_admin', 'ump_user'],
-  import: ['super_admin', 'state_admin', 'bis_user', 'mp_user', 'ump_user'],
+  import: ['super_admin', 'state_admin'],
 }
 
 function publicUser(row) {
