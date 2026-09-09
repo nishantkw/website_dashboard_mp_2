@@ -147,7 +147,7 @@ export default function ExportDropdown({
 
   const variantClasses =
     variant === 'primary'
-      ? 'bg-[#2d8a4e] hover:bg-[#247a42] text-white shadow-sm font-semibold'
+      ? 'bg-[#2d8a4e] hover:bg-[#1a5c38] text-white shadow-sm font-semibold'
       : variant === 'ghost'
       ? 'text-slate-600 hover:bg-slate-100 font-medium'
       : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium shadow-xs'

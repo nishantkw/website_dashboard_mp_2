@@ -5,7 +5,7 @@ const ROLE_ROUTE_ACCESS: Record<UserRole, string[]> = {
   state_admin: ['*'],
   bis_user: ['/dashboard/bis'],
   mp_user: ['/dashboard/mp'],
-  ump_user: ['/dashboard/ump', '/dashboard/admin/import-bulk-data'],
+  ump_user: ['/dashboard/ump'],
 }
 
 export function canAccessRoute(role: UserRole, path: string): boolean {
@@ -19,9 +19,9 @@ export function canAccessNavItem(role: UserRole, navId: string): boolean {
   const navAccess: Record<UserRole, string[]> = {
     super_admin: ['overview', 'user_management', 'import_bulk_data', 'bis', 'mp', 'ump'],
     state_admin: ['overview', 'user_management', 'import_bulk_data', 'bis', 'mp', 'ump'],
-    bis_user: ['bis', 'import_bulk_data'],
-    mp_user: ['mp', 'import_bulk_data'],
-    ump_user: ['ump', 'import_bulk_data'],
+    bis_user: ['bis'],
+    mp_user: ['mp'],
+    ump_user: ['ump'],
   }
   return navAccess[role]?.includes(navId) ?? false
 }
@@ -42,4 +42,3 @@ export function getDefaultRouteForRole(role: UserRole): string {
       return '/dashboard'
   }
 }
-

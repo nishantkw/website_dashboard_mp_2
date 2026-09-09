@@ -43,16 +43,16 @@ export default function KPICard({ kpi, onClick, selected = false }: KPICardProps
       onClick={handleClick}
       aria-pressed={selected}
       className={clsx(
-        'rounded-xl border p-5 text-left w-full cursor-pointer group relative transition-all',
+        'w-full cursor-pointer rounded-xl border p-5 text-left group relative transition-all',
         selected
-          ? 'bg-white border-[#2d8a4e] shadow-lg ring-2 ring-[#2d8a4e]/25 scale-[1.01]'
-          : 'bg-white border-gray-200 shadow-sm hover:shadow-lg hover:border-[#2d8a4e]/40 hover:scale-[1.02] active:scale-[0.99]'
+          ? 'scale-[1.01] border-[#2d8a4e] bg-white shadow-lg ring-2 ring-[#2d8a4e]/25'
+          : 'border-gray-100 bg-white shadow-sm hover:scale-[1.02] hover:border-[#2d8a4e]/40 hover:shadow-lg active:scale-[0.99]'
       )}
     >
       <div className="flex items-start justify-between">
         <p
           className={clsx(
-            'text-sm font-medium mb-1 transition-colors',
+            'mb-1 text-sm font-medium transition-colors',
             selected ? 'text-[#2d8a4e]' : 'text-gray-500 group-hover:text-[#2d8a4e]'
           )}
         >
@@ -60,15 +60,15 @@ export default function KPICard({ kpi, onClick, selected = false }: KPICardProps
         </p>
         <ExternalLink
           className={clsx(
-            'w-3.5 h-3.5 shrink-0 transition-all',
-            selected ? 'text-[#2d8a4e] opacity-100' : 'text-gray-300 group-hover:text-[#2d8a4e] opacity-0 group-hover:opacity-100'
+            'h-3.5 w-3.5 shrink-0 transition-all',
+            selected
+              ? 'text-[#2d8a4e] opacity-100'
+              : 'text-gray-300 opacity-0 group-hover:text-[#2d8a4e] group-hover:opacity-100'
           )}
         />
       </div>
       <p className="text-2xl font-bold text-gray-900">{kpi.value}</p>
-      {kpi.subValue && (
-        <p className="mt-0.5 text-xs text-slate-500">{kpi.subValue}</p>
-      )}
+      {kpi.subValue && <p className="mt-0.5 text-xs text-slate-500">{kpi.subValue}</p>}
       {hasChange && (
         <div className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
           {isPositive ? (

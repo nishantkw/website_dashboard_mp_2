@@ -57,7 +57,7 @@ export default function ClaimMasterReport() {
             ? (reportMeta?.description ?? 'Aggregated claim lifecycle report')
             : 'Connect the backend to load master report data'
         }
-        badge={<DataSourceBadge source={source} db={db} />}
+        badge={<DataSourceBadge source={source} db={db} loading={loading} />}
       />
       <BackendOfflineNotice error={error} loading={loading} />
 

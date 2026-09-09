@@ -139,11 +139,11 @@ export default function Beneficiaries() {
   const bisRows = (data.bisTable ?? []) as Record<string, string | number>[]
   const histRows = (data.histTable ?? []) as Record<string, string | number>[]
   const histKpis = data.histKpis ?? []
-  const filtered = live ? tableRows : benFilters.filterRows(tableRows)
-  const sourceFiltered = live ? sourceRows : benFilters.filterRows(sourceRows)
-  const disabledFiltered = live ? disabledRows : benFilters.filterRows(disabledRows)
-  const bisFiltered = live ? bisRows : benFilters.filterRows(bisRows)
-  const histFiltered = live ? histRows : benFilters.filterRows(histRows)
+  const filtered = benFilters.filterRows(tableRows)
+  const sourceFiltered = benFilters.filterRows(sourceRows)
+  const disabledFiltered = benFilters.filterRows(disabledRows)
+  const bisFiltered = benFilters.filterRows(bisRows)
+  const histFiltered = benFilters.filterRows(histRows)
   const columns = useMemo(
     () =>
       schemaTableColumns({
@@ -316,7 +316,7 @@ export default function Beneficiaries() {
               } — ${columns.length} schema fields`
             : 'Connect the backend to load beneficiary records'
         }
-        badge={<DataSourceBadge source={source} db={db} />}
+        badge={<DataSourceBadge source={source} db={db} loading={loading} />}
       />
       <BackendOfflineNotice error={error} loading={loading} />
 

@@ -2,21 +2,7 @@ import { useState, useMemo, useCallback } from 'react'
 import type { FilterField, FilterValues } from '../types'
 import { getDistrictsForDivision, getDivisionForDistrict } from '../data/filterOptions'
 import { BENEFICIARIES_SEARCH_COLUMNS } from '../data/beneficiariesFilterConfig'
-import { matchesRuralUrbanFilter, rowRuralUrbanFlag } from '../utils/ruralUrban'
-import { matchesGenderFilter, matchesEnrlFilter, matchesCardFilter, matchesEkycFilter } from '../utils/beneficiaryCodes'
-
-function matchesSelect(row: Record<string, string | number>, columns: string[], filterVal: string) {
-  if (!filterVal) return true
-  const needle = filterVal.toLowerCase()
-  return columns.some((col) => {
-    const rowVal = String(row[col] ?? '').toLowerCase()
-    return rowVal === needle || rowVal.includes(needle)
-  })
-}
-
-function rowDistrict(row: Record<string, string | number>) {
-  return String(row.dist_name ?? row.district ?? '')
-}
+import { applyPageFilters } from '../utils/applyPageFilters'
 
 export function beneficiariesFiltersToQueryString(filters: FilterValues, search: string): string {
   const params = new URLSearchParams()
@@ -67,43 +53,9 @@ export function useBeneficiariesFilters(fields: FilterField[]) {
 
   const filterRows = useCallback(
     <T extends Record<string, string | number>>(rows: T[]): T[] => {
-      return rows.filter((row) => {
-        if (search) {
-          const haystack = BENEFICIARIES_SEARCH_COLUMNS.filter((c) => c in row)
-            .map((c) => String(row[c] ?? ''))
-            .join(' ')
-            .toLowerCase()
-          if (!haystack.includes(search.toLowerCase())) return false
-        }
-
-        if (filters.division) {
-          const district = rowDistrict(row)
-          const div = getDivisionForDistrict(district)
-          if (div !== filters.division) return false
-        }
-
-        if (filters.district && !matchesSelect(row, ['dist_name', 'district'], filters.district)) {
-          return false
-        }
-
-        if (filters.gender && !matchesGenderFilter(row.gender, filters.gender)) return false
-
-        if (filters.enrollment_status && !matchesEnrlFilter(row.enrl_status, filters.enrollment_status)) {
-          return false
-        }
-
-        if (filters.card_status && !matchesCardFilter(row.card_status, filters.card_status)) return false
-
-        if (filters.urban_rural && !matchesRuralUrbanFilter(rowRuralUrbanFlag(row), filters.urban_rural)) {
-          return false
-        }
-
-        if (filters.ekyc && !matchesEkycFilter(row, filters.ekyc)) return false
-
-        return true
-      })
+      return applyPageFilters(rows, fields, filters, search, BENEFICIARIES_SEARCH_COLUMNS)
     },
-    [filters, search]
+    [fields, filters, search]
   )
 
   const queryString = useMemo(() => beneficiariesFiltersToQueryString(filters, search), [filters, search])

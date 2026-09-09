@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { clientError } from '../utils/clientError.js'
 import { buildKpi } from '../utils/kpiChange.js'
 import { buildHospitalCharts, buildLookupCharts, buildDeempanelCharts, buildHemCharts } from '../utils/hospitalAggregations.js'
 import { resolveColumns } from '../utils/schemaColumns.js'
@@ -52,7 +53,7 @@ router.get('/export', async (req, res) => {
     res.setHeader('Content-Disposition', 'attachment; filename="hospital_records.csv"')
     res.send(rowsToCsv(table, columns))
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 
@@ -288,7 +289,7 @@ router.get('/', async (req, res) => {
         : [],
     })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 

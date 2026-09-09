@@ -1,6 +1,6 @@
 import { query } from '../db/pool.js'
 import { serializeRows } from './serialize.js'
-import { districtsForDivision } from '../data/mpDivisions.js'
+import { districtsForDivision, districtsMatch } from '../data/mpDivisions.js'
 
 export const WORKFLOW_AUDIT_SOURCES = [
   { schema: 'dmart_mp', table: 't_workflow_transaction_audit' },
@@ -101,7 +101,7 @@ export function filterWorkflowRows(rows, q = {}) {
   return rows.filter((row) => {
     const district = clean(row.patient_district_name || row.hosp_district_name)
     if (q.district && !district.toLowerCase().includes(String(q.district).toLowerCase())) return false
-    if (districtAllow?.size && !districtAllow.has(district.toLowerCase())) return false
+    if (districtAllow?.size && ![...districtAllow].some((d) => districtsMatch(district, d))) return false
     if (q.patient_state) {
       const state = clean(row.patient_state_name || row.hosp_state_name)
       if (!state.toLowerCase().includes(String(q.patient_state).toLowerCase())) return false
@@ -164,10 +164,6 @@ function toNumber(val) {
 }
 
 function formatInr(n) {
-  if (n >= 10000000) {
-    const cr = n / 10000000
-    return `₹${cr % 1 === 0 ? cr.toFixed(0) : cr.toFixed(2)} Cr`
-  }
   return `₹${Math.round(n).toLocaleString('en-IN')}`
 }
 

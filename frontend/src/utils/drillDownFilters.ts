@@ -67,9 +67,13 @@ export function resolveDrillDownFilters(
     filters.patient_state = name
     filters.division = name
   } else if (looksLikeDistrictChart) {
-    filters.district = canonicalizeDistrict(name) || name
+    if (!/^others$/i.test(name)) {
+      filters.district = canonicalizeDistrict(name) || name
+    }
   } else if (looksLikeDivisionChart) {
-    filters.division = canonicalizeDivision(name) || name
+    if (!/^others$/i.test(name)) {
+      filters.division = canonicalizeDivision(name) || name
+    }
   } else {
     const district = canonicalizeDistrict(name)
     const division = canonicalizeDivision(name)
@@ -81,6 +85,10 @@ export function resolveDrillDownFilters(
     }
   }
 
+  if (/hospital type/i.test(title)) {
+    return filters
+  }
+
   const statusHit = STATUS_VALUES.find((s) => s.toLowerCase() === name.toLowerCase())
   if (statusHit && (/status|enroll|card|print|case type/i.test(title) || !filters.district)) {
     if (/status|enroll|card|print/i.test(title) || statusHit) {
@@ -89,7 +97,12 @@ export function resolveDrillDownFilters(
   }
 
   if (!filters.district && !filters.division && !filters.patient_state && !filters.status) {
-    filters.search = name
+    const skipSearch =
+      /^others$/i.test(name) ||
+      name.length <= 2 ||
+      /^(claims|hospitals|enrolled|active|count|value|amount)$/i.test(name) ||
+      /hospital type|case type|claim status|lifecycle status/i.test(title)
+    if (!skipSearch) filters.search = name
   }
 
   return filters

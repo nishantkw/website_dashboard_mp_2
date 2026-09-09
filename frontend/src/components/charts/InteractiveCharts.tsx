@@ -5,7 +5,53 @@ import {
 } from 'recharts'
 import type { ChartDataPoint } from '../../types'
 
-const CLICK_STYLE = { cursor: 'pointer' }
+const CLICK_STYLE = { cursor: 'pointer' } as const
+
+function BarValueLabel({
+  x,
+  y,
+  width,
+  height,
+  value,
+  index,
+  isVertical,
+  fontSize,
+  onClick,
+}: {
+  x?: number | string
+  y?: number | string
+  width?: number | string
+  height?: number | string
+  value?: unknown
+  index?: number
+  isVertical: boolean
+  fontSize: number
+  onClick?: (index: number) => void
+}) {
+  if (x == null || y == null || value == null || index == null) return null
+  const left = Number(x)
+  const top = Number(y)
+  const w = Number(width ?? 0)
+  const h = Number(height ?? 0)
+  return (
+    <text
+      x={isVertical ? left + w + 4 : left + w / 2}
+      y={isVertical ? top + h / 2 : top - 8}
+      textAnchor={isVertical ? 'start' : 'middle'}
+      dominantBaseline={isVertical ? 'middle' : 'auto'}
+      className="fill-slate-700"
+      fontSize={fontSize}
+      fontWeight={700}
+      style={CLICK_STYLE}
+      onClick={(e) => {
+        e.stopPropagation()
+        onClick?.(index)
+      }}
+    >
+      {formatChartValue(value)}
+    </text>
+  )
+}
 
 function formatChartValue(value: unknown): string {
   const n = Number(value)
@@ -145,6 +191,29 @@ export function InteractiveBarChart({
     onItemClick?.(entry, chartTitle)
   }
 
+  const clickFromBarEvent = (event: unknown, dataKey: string): ChartClickPayload => {
+    const evt = (event ?? {}) as Record<string, unknown>
+    const nested = (
+      evt.payload && typeof evt.payload === 'object' ? evt.payload : evt
+    ) as Record<string, unknown>
+    const category = String(nested[xKey] ?? nested.name ?? '')
+    const name = category || String(evt.name ?? '')
+    const othersExclude = /^others$/i.test(name)
+      ? JSON.stringify(
+          data
+            .map((row) => String(row[xKey] ?? row.name ?? ''))
+            .filter((label) => label && !/^others$/i.test(label))
+        )
+      : undefined
+    return {
+      ...(nested as ChartClickPayload),
+      name,
+      value: Number(nested[dataKey] ?? nested.value ?? evt.value ?? 0) || undefined,
+      _seriesKey: String(evt.dataKey ?? dataKey),
+      ...(othersExclude ? { _othersExclude: othersExclude } : {}),
+    }
+  }
+
   const longestLabel = data.reduce((n, row) => Math.max(n, String(row[xKey] ?? '').length), 0)
   const longLabels = isVertical && longestLabel > 16
   const yWidth = longLabels ? 188 : isVertical ? 120 : 44
@@ -249,23 +318,30 @@ export function InteractiveBarChart({
             radius={isVertical ? [0, 6, 6, 0] : [6, 6, 0, 0]}
             maxBarSize={isVertical ? 22 : 32}
             style={CLICK_STYLE}
-            onClick={(data) => {
-              const evt = data as { payload?: ChartClickPayload; dataKey?: string }
-              const payload = evt.payload
-              if (payload) {
-                handleClick({
-                  ...payload,
-                  _seriesKey: evt.dataKey ? String(evt.dataKey) : payload._seriesKey,
-                })
-              }
+            onClick={(event) => {
+              handleClick(clickFromBarEvent(event, bar.dataKey))
             }}
           >
             {labelsOn && (
               <LabelList
                 dataKey={bar.dataKey}
-                position={isVertical ? 'right' : 'top'}
-                formatter={(v) => formatChartValue(v)}
-                style={{ fontSize: labelFontSize, fontWeight: 700, fill: '#334155' }}
+                content={(props) => (
+                  <BarValueLabel
+                    x={props.x}
+                    y={props.y}
+                    width={props.width}
+                    height={props.height}
+                    value={props.value}
+                    index={typeof props.index === 'number' ? props.index : undefined}
+                    isVertical={isVertical}
+                    fontSize={labelFontSize}
+                    onClick={(rowIndex) => {
+                      const row = data[rowIndex]
+                      if (!row) return
+                      handleClick(clickFromBarEvent({ payload: row }, bar.dataKey))
+                    }}
+                  />
+                )}
               />
             )}
             {cellColors && barIdx === 0 && data.map((_, i) => (
@@ -350,7 +426,21 @@ export function InteractivePieChart({
               style={CLICK_STYLE}
               label={drawSliceLabels ? renderPieLabel : false}
               labelLine={false}
-              onClick={(entry) => onItemClick?.(entry as unknown as ChartClickPayload, chartTitle)}
+              onClick={(entry) => {
+                const row = (entry as { payload?: ChartClickPayload }).payload ?? (entry as ChartClickPayload)
+                const name = String(row.name ?? '')
+                const othersExclude = /^others$/i.test(name)
+                  ? JSON.stringify(
+                      slices
+                        .map((item) => String(item.name ?? ''))
+                        .filter((label) => label && !/^others$/i.test(label))
+                    )
+                  : undefined
+                onItemClick?.(
+                  { ...row, name, ...(othersExclude ? { _othersExclude: othersExclude } : {}) },
+                  chartTitle
+                )
+              }}
             >
               {slices.map((_, i) => (
                 <Cell key={i} fill={colors[i % colors.length]} style={CLICK_STYLE} />

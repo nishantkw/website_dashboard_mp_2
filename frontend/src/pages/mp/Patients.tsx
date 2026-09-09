@@ -109,8 +109,9 @@ export default function Patients() {
   const tableRows = (data.table ?? []) as Record<string, string | number>[]
   const treatmentRows = (data.treatmentTable ?? []) as Record<string, string | number>[]
   const morthRows = (data.morthTable ?? []) as Record<string, string | number>[]
-  const filtered = live ? tableRows : moduleFilters.filterRows(tableRows)
-  const treatmentFiltered = live ? treatmentRows : moduleFilters.filterRows(treatmentRows)
+  const filtered = moduleFilters.filterRows(tableRows)
+  const treatmentFiltered = moduleFilters.filterRows(treatmentRows)
+  const morthFilteredRows = moduleFilters.filterRows(morthRows)
   const columns = useMemo(
     () =>
       schemaTableColumns({
@@ -150,7 +151,7 @@ export default function Patients() {
     datasetTitle: 'Patient Records',
     resolveContext: (chartTitle) => {
       if (/morth/i.test(chartTitle)) {
-        return { rows: morthRows, columns: morthColumns, datasetTitle: 'MORTH Patients' }
+        return { rows: morthFilteredRows, columns: morthColumns, datasetTitle: 'MORTH Patients' }
       }
       if (/treatment|procedure/i.test(chartTitle)) {
         return { rows: treatmentFiltered, columns: treatmentColumns, datasetTitle: 'Treatment Details' }
@@ -170,7 +171,7 @@ export default function Patients() {
     amountData.length > 0
 
   const handleKpi = (kpi: KPI) => {
-    const morthFiltered = filterRowsForMorthKpi(morthRows, kpi.label)
+    const morthFiltered = filterRowsForMorthKpi(morthFilteredRows, kpi.label)
     if (morthFiltered) {
       openDetail({
         title: kpi.label,
@@ -208,7 +209,7 @@ export default function Patients() {
               }`
             : 'Connect the backend to load patient and treatment records'
         }
-        badge={<DataSourceBadge source={source} db={db} />}
+        badge={<DataSourceBadge source={source} db={db} loading={loading} />}
       />
       <BackendOfflineNotice error={error} loading={loading} />
 
@@ -344,8 +345,8 @@ export default function Patients() {
           )}
           <DataTable
             columns={morthColumns}
-            data={morthRows}
-            title={`MORTH Patients — dmart_mp.t_morth_patient_details (${morthRows.length}${
+            data={morthFilteredRows}
+            title={`MORTH Patients — dmart_mp.t_morth_patient_details (${morthFilteredRows.length}${
               morthColumns.length ? ` · ${morthColumns.length} schema cols` : ''
             })`}
             onRowClick={(row) =>

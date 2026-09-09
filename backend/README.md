@@ -50,7 +50,7 @@ Frontend Vite proxies `/api` → backend. Tables stay empty until you load real 
 - `npm run clear-data` (alias: `npm run seed`) — **delete all rows**; does not insert demo data  
 - Load real data with your own ETL / SQL / imports when ready  
 
-There are **no demo users or sample claims** in the backend.
+There are **no auto-seeded demo users in production**. Local/dev can seed defaults only when `ALLOW_DEFAULT_USER_SEED=true` (or non-production). Always rotate passwords before any shared deploy.
 
 ## Schema map (Data dictionary)
 

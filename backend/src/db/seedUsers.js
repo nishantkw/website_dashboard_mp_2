@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs'
+import { config } from '../config.js'
 import { query } from './pool.js'
 
 const DEFAULT_USERS = [
@@ -40,6 +41,11 @@ const DEFAULT_USERS = [
 ]
 
 export async function seedDashboardUsersIfEmpty() {
+  if (!config.allowDefaultUserSeed) {
+    console.log('[auth] default user seed disabled (production-safe)')
+    return 0
+  }
+
   const { rows } = await query('SELECT COUNT(*)::int AS n FROM app_auth.dashboard_users')
   if (rows[0]?.n > 0) return 0
 
@@ -52,8 +58,8 @@ export async function seedDashboardUsersIfEmpty() {
     )
   }
 
-  console.log(
-    `[auth] created ${DEFAULT_USERS.length} default login users — change these passwords before production`
+  console.warn(
+    `[auth] created ${DEFAULT_USERS.length} local default users — change passwords before any shared deploy`
   )
   return DEFAULT_USERS.length
 }

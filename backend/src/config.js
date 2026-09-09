@@ -25,6 +25,13 @@ export const config = {
   supabaseDbUrl: process.env.SUPABASE_DB_URL || '',
   supabaseUrl: process.env.SUPABASE_URL || '',
   supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+  /** Local/dev only: seed default dashboard users when table is empty. Never enable on Render. */
+  allowDefaultUserSeed:
+    process.env.ALLOW_DEFAULT_USER_SEED === 'true' ||
+    (process.env.NODE_ENV !== 'production' && process.env.ALLOW_DEFAULT_USER_SEED !== 'false'),
+  /** Opt-out TLS cert verification for managed DB (not recommended). Default: verify. */
+  dbSslRejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false',
+  healthDetails: process.env.HEALTH_DETAILS === 'true',
 }
 
 export function isAllowedCorsOrigin(origin) {
@@ -33,11 +40,5 @@ export function isAllowedCorsOrigin(origin) {
     .split(',')
     .map((s) => s.trim().replace(/\/$/, ''))
     .filter(Boolean)
-  if (listed.includes(origin)) return true
-  try {
-    const host = new URL(origin).hostname
-    return host.endsWith('.vercel.app')
-  } catch {
-    return false
-  }
+  return listed.includes(origin)
 }

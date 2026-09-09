@@ -85,13 +85,40 @@ export function getDistrictsForDivision(divisionName?: string) {
 
 export function getDivisionForDistrict(districtName: string): string | undefined {
   if (!districtName) return undefined
-  const divObj = MP_DIVISIONS.find((d) =>
-    d.districts.some((dist) => dist.toLowerCase() === districtName.toLowerCase())
+  const raw = districtName.toLowerCase().trim()
+  const exact = MP_DIVISIONS.find((d) =>
+    d.districts.some((dist) => dist.toLowerCase() === raw)
   )
-  return divObj?.division
+  if (exact) return exact.division
+  return MP_DIVISIONS.find((d) =>
+    d.districts.some((dist) => {
+      const name = dist.toLowerCase()
+      return raw.includes(name) || (name.length >= 4 && name.includes(raw))
+    })
+  )?.division
 }
 
 export const DISTRICT_OPTIONS = getDistrictsForDivision()
+
+function normalizeDistrictLabel(name: string) {
+  return String(name ?? '')
+    .toLowerCase()
+    .replace(/\bdistrict\b/g, ' ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+}
+
+/** Official MP district label, or null when the name is outside the SHA district list. */
+export function canonicalMpDistrict(districtName?: string): string | null {
+  const raw = String(districtName ?? '').trim()
+  if (!raw || /^unknown$/i.test(raw) || /^others$/i.test(raw)) return null
+  const list = MP_DIVISIONS.flatMap((d) => d.districts)
+  const exact = list.find((d) => d.toLowerCase() === raw.toLowerCase())
+  if (exact) return exact
+  const norm = normalizeDistrictLabel(raw)
+  if (!norm) return null
+  return list.find((d) => normalizeDistrictLabel(d) === norm) || null
+}
 
 export const STATE_TYPE_OPTIONS = [
   { value: '', label: 'Both (MP + Portability)' },
@@ -276,8 +303,6 @@ export const HOSPITAL_TYPE_OPTIONS = [
   { value: '', label: 'All Types' },
   { value: 'Government', label: 'Government' },
   { value: 'Private', label: 'Private' },
-  { value: 'Trust', label: 'Trust' },
-  { value: 'Corporate', label: 'Corporate' },
 ]
 
 export const CASE_TYPE_OPTIONS = [

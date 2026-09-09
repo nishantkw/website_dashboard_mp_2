@@ -7,6 +7,14 @@ import DateRangeFilter, { rowMatchesDateRange } from './DateRangeFilter'
 import { TABLE_PAGE_SIZE, useTableControls } from '../../hooks/useTableControls'
 import { Filter } from 'lucide-react'
 import { formatCodedField, isCodedColumn } from '../../utils/beneficiaryCodes'
+import { HospitalColumnHeader, HospitalStatusCell, isHospitalStatusColumn } from './HospitalStatusCells'
+import MoneyColumnHeader from './MoneyColumnHeader'
+import {
+  formatMoneyValue,
+  formatRowMoney,
+  isAmountColumn,
+  type MoneyNotation,
+} from '../../utils/moneyFormat'
 
 export interface ServerPagination {
   totalRows: number
@@ -35,17 +43,22 @@ function isSpecialtyColumn(key: string) {
   return key === 'specialty' || key === 'speciality_code'
 }
 
-function displayCellValue(key: string, value: unknown): string {
+function displayCellValue(key: string, value: unknown, moneyNotation: MoneyNotation, label?: string): string {
+  if (isAmountColumn(key, label)) return formatMoneyValue(value, moneyNotation)
   if (isCodedColumn(key)) return formatCodedField(key, value)
   return value == null ? '' : String(value)
 }
 
-function rowForDisplay(row: Record<string, string | number>): Record<string, string | number> {
-  const next = { ...row }
-  for (const key of Object.keys(next)) {
-    if (isCodedColumn(key)) next[key] = formatCodedField(key, next[key])
+function rowForDisplay(
+  row: Record<string, string | number>,
+  moneyNotation: MoneyNotation,
+  columns: TableColumn[]
+): Record<string, string | number> {
+  const coded = { ...row }
+  for (const key of Object.keys(coded)) {
+    if (isCodedColumn(key)) coded[key] = formatCodedField(key, coded[key])
   }
-  return next
+  return formatRowMoney(coded, moneyNotation, columns)
 }
 
 function rowHasSpecialtyChoice(row: Record<string, string | number>) {
@@ -90,8 +103,10 @@ export default function DataTable({
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [specialtyView, setSpecialtyView] = useState<'code' | 'data'>('code')
+  const [moneyNotation, setMoneyNotation] = useState<MoneyNotation>('indian')
   const hasSpecialtyCol = columns.some((c) => isSpecialtyColumn(c.key))
   const canChooseSpecialty = hasSpecialtyCol && data.some(rowHasSpecialtyChoice)
+  const hasAmountCol = columns.some((c) => isAmountColumn(c.key, c.label))
   const pageSize = serverPagination?.pageSize ?? TABLE_PAGE_SIZE
 
   const filteredData = useMemo(
@@ -103,7 +118,8 @@ export default function DataTable({
     visibleColumns,
     visibleKeys,
     toggleColumn,
-    showAllColumns,
+    selectColumns,
+    deselectColumns,
     page: clientPage,
     setPage: setClientPage,
     totalPages: clientTotalPages,
@@ -126,14 +142,21 @@ export default function DataTable({
     const mapped = canChooseSpecialty
       ? filteredData.map((row) => {
           const shown = specialtyValue(row, specialtyView)
-          return rowForDisplay({ ...row, specialty: shown, speciality_code: shown })
+          return rowForDisplay({ ...row, specialty: shown, speciality_code: shown }, moneyNotation, columns)
         })
-      : filteredData.map(rowForDisplay)
+      : filteredData.map((row) => rowForDisplay(row, moneyNotation, columns))
     return mapped
-  }, [filteredData, canChooseSpecialty, specialtyView])
+  }, [filteredData, canChooseSpecialty, specialtyView, moneyNotation, columns])
+
+  const fetchFormattedExport = fetchExportData
+    ? async () => {
+        const rows = await fetchExportData()
+        return rows.map((row) => rowForDisplay(row, moneyNotation, columns))
+      }
+    : undefined
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
       {title && (
         <div className="flex flex-col gap-2 border-b border-gray-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <h3 className="min-w-0 break-words text-base font-semibold text-gray-900">{title}</h3>
@@ -142,7 +165,8 @@ export default function DataTable({
               columns={columns}
               visibleKeys={visibleKeys}
               onToggle={toggleColumn}
-              onShowAll={showAllColumns}
+              onSelectKeys={selectColumns}
+              onDeselectKeys={deselectColumns}
             />
             <ExportDropdown
               title={title}
@@ -151,7 +175,7 @@ export default function DataTable({
               columns={exportCols}
               buttonSize="sm"
               variant="outline"
-              fetchExportData={fetchExportData}
+              fetchExportData={fetchFormattedExport}
             />
           </div>
         </div>
@@ -163,7 +187,8 @@ export default function DataTable({
             columns={columns}
             visibleKeys={visibleKeys}
             onToggle={toggleColumn}
-            onShowAll={showAllColumns}
+            onSelectKeys={selectColumns}
+            onDeselectKeys={deselectColumns}
           />
         </div>
       )}
@@ -214,6 +239,10 @@ export default function DataTable({
                         </select>
                       </label>
                     </div>
+                  ) : hasAmountCol && isAmountColumn(col.key, col.label) ? (
+                    <MoneyColumnHeader label={col.label} notation={moneyNotation} onChange={setMoneyNotation} />
+                  ) : isHospitalStatusColumn(col.key) ? (
+                    <HospitalColumnHeader columnKey={col.key} label={col.label} />
                   ) : (
                     col.label
                   )}
@@ -228,7 +257,7 @@ export default function DataTable({
                 onClick={() => onRowClick?.(row, startIndex + i)}
                 className={`border-b border-gray-50 transition-colors ${
                   onRowClick
-                    ? 'cursor-pointer hover:bg-[#e8f5ec] active:bg-[#d4edda]'
+                    ? 'cursor-pointer hover:bg-emerald-50/70 active:bg-emerald-100/80'
                     : 'hover:bg-gray-50'
                 }`}
               >
@@ -239,19 +268,28 @@ export default function DataTable({
                       isSpecialtyColumn(col.key) && specialtyView === 'data'
                         ? 'max-w-md whitespace-normal'
                         : 'whitespace-nowrap'
-                    }`}
+                    } ${isAmountColumn(col.key, col.label) ? 'tabular-nums' : ''}`}
                   >
                     {col.key === 'status' ? (
                       <StatusBadge status={String(row[col.key])} />
+                    ) : isHospitalStatusColumn(col.key) ? (
+                      <HospitalStatusCell columnKey={col.key} value={row[col.key]} row={row} />
                     ) : isSpecialtyColumn(col.key) && canChooseSpecialty ? (
                       specialtyValue(row, specialtyView)
                     ) : (
-                      displayCellValue(col.key, row[col.key])
+                      displayCellValue(col.key, row[col.key], moneyNotation, col.label)
                     )}
                   </td>
                 ))}
               </tr>
             ))}
+            {visibleColumns.length === 0 && filteredData.length > 0 && (
+              <tr>
+                <td className="px-4 py-10 text-center text-slate-400">
+                  No columns selected. Use Select all to show fields.
+                </td>
+              </tr>
+            )}
             {filteredData.length === 0 && (
               <tr>
                 <td

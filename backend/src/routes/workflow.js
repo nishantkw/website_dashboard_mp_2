@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { resolveColumns } from '../utils/schemaColumns.js'
 import { buildKpi } from '../utils/kpiChange.js'
 import { loadWorkflowDashboard, buildProWorkflowKpis, workflowUserKey } from '../utils/workflowRows.js'
+import { clientError } from '../utils/clientError.js'
 
 const router = Router()
 
@@ -83,7 +84,7 @@ router.get('/', async (req, res) => {
       proTable,
     })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 

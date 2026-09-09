@@ -1,10 +1,11 @@
 import { Router } from 'express'
 import { query } from '../db/pool.js'
+import { clientError } from '../utils/clientError.js'
 import { serializeRows } from '../utils/serialize.js'
 import { resolveColumns } from '../utils/schemaColumns.js'
 import { getPrimaryTableForModule } from '../utils/schemaRegistry.js'
 import { buildKpi } from '../utils/kpiChange.js'
-import { districtsForDivision } from '../data/mpDivisions.js'
+import { pushGeoSql } from '../data/mpDivisions.js'
 import {
   filterTreatmentRows,
   buildTreatmentCharts,
@@ -31,16 +32,8 @@ function buildPatientWhere(q) {
     parts.push(`(${ors.join(' OR ')})`)
   }
 
-  if (q.district) pushIlike(['district_name', 'patient_district_name', 'hosp_district_name'], q.district)
-  else if (q.division) {
-    const districts = districtsForDivision(q.division)
-    if (districts.length) {
-      const placeholders = districts.map((d) => {
-        params.push(d)
-        return `$${params.length}`
-      })
-      parts.push(`(district_name IN (${placeholders.join(', ')}) OR patient_district_name IN (${placeholders.join(', ')}))`)
-    }
+  if (q.district || q.division) {
+    pushGeoSql(parts, params, q, ['district_name', 'patient_district_name', 'hosp_district_name'])
   }
 
   if (q.patient_status) pushIlike(['status_id', 'patient_status', 'ip_op'], q.patient_status)
@@ -162,7 +155,7 @@ router.get('/', async (req, res) => {
       morthKpis,
     })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 

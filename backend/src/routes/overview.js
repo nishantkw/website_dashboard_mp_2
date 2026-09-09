@@ -1,10 +1,11 @@
 import { Router } from 'express'
 import { query } from '../db/pool.js'
+import { clientError } from '../utils/clientError.js'
 import { getPrimaryTableForModule } from '../utils/schemaRegistry.js'
 import { changeFromCounts, isSafeIdent, monthOverMonthChange } from '../utils/kpiChange.js'
 import { filterHospitalRows } from '../utils/hospitalFilters.js'
-import { loadClaimRows } from '../utils/claimSources.js'
-import { initiatedAmount, toCrores } from '../utils/claimStatusMapping.js'
+import { loadClaimRows, countClaimRows, monthCountsForClaimTables } from '../utils/claimSources.js'
+import { initiatedAmount } from '../utils/claimStatusMapping.js'
 import {
   tableColumnSet,
   hospitalIdentitySql,
@@ -117,7 +118,7 @@ function claimsTrendFromRows(rows) {
     const name = d.toLocaleString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' })
     const cur = byMonth.get(key) || { name, claims: 0, amount: 0 }
     cur.claims += 1
-    cur.amount += toCrores(initiatedAmount(row))
+    cur.amount += initiatedAmount(row)
     byMonth.set(key, cur)
   }
   return [...byMonth.entries()]
@@ -139,7 +140,13 @@ router.get('/', async (req, res) => {
       const id = `${primary.schema}.${primary.table}`
       schemas[mod] = id
       try {
-        if (mod === 'claims') continue
+        if (mod === 'claims') {
+          const counted = await countClaimRows(req)
+          counts.claims = counted.total
+          momByMod.claims = await monthCountsForClaimTables(req)
+          if (counted.sources.length) schemas.claims = counted.sources.join(', ')
+          continue
+        }
         counts[mod] = await countTable(primary.schema, primary.table, {
           uniqueHospital: mod === 'hospitals',
           queryParams: mod === 'hospitals' ? q : {},
@@ -164,51 +171,23 @@ router.get('/', async (req, res) => {
     } catch (err) {
       console.warn(`[overview] claims load skipped: ${err.message}`)
     }
-    counts.claims = claimRows.length
-    momByMod.claims = monthOverMonthChange(claimRows)
-    if (claimSources.length) schemas.claims = claimSources.join(', ')
+    if (counts.claims == null) counts.claims = claimRows.length
+    if (!momByMod.claims) momByMod.claims = monthOverMonthChange(claimRows)
+    if (claimSources.length && !schemas.claims) schemas.claims = claimSources.join(', ')
 
     const statusDist = { rows: namedCounts(claimRows, (r) => r.case_status) }
     const caseTypeDist = { rows: namedCounts(claimRows, (r) => r.case_type) }
     const districtDist = {
-      rows: namedCounts(claimRows, (r) => r.hosp_district_name || r._patient_district).slice(0, 10),
+      rows: namedCounts(claimRows, (r) => r._patient_district || r.patient_district_name || r.hosp_district_name).slice(0, 10),
     }
     const claimsTrend = { rows: claimsTrendFromRows(claimRows) }
 
     const hospitalsPrimary = getPrimaryTableForModule('hospitals')
-    let hospitalTypeRows
-    if (q.state_type || q.division || q.district) {
-      const loaded = await loadUniqueHospitalRows()
-      const filtered = filterHospitalRows(loaded.table, q)
-      hospitalTypeRows = hospitalTypeFromRows(filtered)
-      counts.hospitals = filtered.length
-    } else {
-      const hospitalCols = await tableColumnSet(hospitalsPrimary.schema, hospitalsPrimary.table)
-      const hospitalKeySql = hospitalIdentitySql(hospitalCols)
-      const hospitalDateCol = hospitalCols.has('hosp_empaneled_date')
-        ? 'hosp_empaneled_date'
-        : hospitalCols.has('empaneled_date')
-          ? 'empaneled_date'
-          : null
-      const hospitalOrderExtra = hospitalDateCol ? `, ${hospitalDateCol} DESC NULLS LAST` : ''
-      const hospitalTypeDist = hospitalKeySql
-        ? await query(
-            `SELECT COALESCE(hospital_type, 'Unknown') AS name, COUNT(*)::int AS value
-             FROM (
-               SELECT DISTINCT ON (${hospitalKeySql}) hospital_type
-               FROM ${hospitalsPrimary.schema}.${hospitalsPrimary.table}
-               WHERE ${hospitalKeySql} IS NOT NULL
-               ORDER BY ${hospitalKeySql}${hospitalOrderExtra}
-             ) unique_hosp
-             GROUP BY 1 ORDER BY 2 DESC`
-          )
-        : await query(
-            `SELECT COALESCE(hospital_type, 'Unknown') AS name, COUNT(*)::int AS value
-             FROM ${hospitalsPrimary.schema}.${hospitalsPrimary.table}
-             GROUP BY 1 ORDER BY 2 DESC`
-          )
-      hospitalTypeRows = hospitalTypeDist.rows
-    }
+    const loadedHospitals = await loadUniqueHospitalRows()
+    const filteredHospitals = filterHospitalRows(loadedHospitals.table, q)
+    const hospitalTypeRows = hospitalTypeFromRows(filteredHospitals)
+    counts.hospitals = filteredHospitals.length
+    if (hospitalsPrimary) schemas.hospitals = `${hospitalsPrimary.schema}.${hospitalsPrimary.table}`
 
     const firstQuery = claimDb ? { _db: claimDb } : await query('SELECT 1')
 
@@ -221,8 +200,9 @@ router.get('/', async (req, res) => {
           momByMod[mod]?.previousCount ?? 0
         )
         return {
+          key: mod,
           label,
-          value: String(counts[mod] ?? 0),
+          value: Number(counts[mod] ?? 0).toLocaleString('en-IN'),
           change: mom.change,
           changeLabel: mom.changeLabel,
           color,
@@ -237,27 +217,30 @@ router.get('/', async (req, res) => {
       },
     })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 
 router.get('/hospitals', async (req, res) => {
   try {
+    const q = req.query || {}
     const result = await loadUniqueHospitalRows()
-    const table = filterHospitalRows(result.table, stripHospitalPaging(req.query || {}))
-    const { limit, offset } = parseHospitalPaging(req.query || {})
+    const table = filterHospitalRows(result.table, stripHospitalPaging(q))
+    const detail = q.detail === '1' || q.detail === 'true'
+    const { limit, offset } = parseHospitalPaging(q)
+    const page = detail ? table : table.slice(offset, offset + limit)
     res.json({
       db: result.db,
       schema: result.schema,
       columns: result.columns,
-      table: table.slice(offset, offset + limit),
+      table: page,
       total: table.length,
       tableTotal: table.length,
-      limit,
-      offset,
+      limit: detail ? table.length : limit,
+      offset: detail ? 0 : offset,
     })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 

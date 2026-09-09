@@ -28,7 +28,7 @@ export const pageFilterConfigs: Record<string, FilterField[]> = {
     { key: 'date_to', label: 'Enroll To', type: 'date', column: 'enroll_date' },
   ],
   mp_claims: [
-    { key: 'state_type', label: 'State Type', type: 'select', options: [{ value: '', label: 'Both' }, { value: 'MP', label: 'MP' }, { value: 'Portability', label: 'Portability' }], column: 'case_type' },
+    { key: 'state_type', label: 'State Type', type: 'select', options: [{ value: '', label: 'Both' }, { value: 'MP', label: 'MP' }, { value: 'Portability', label: 'Portability' }], column: '_state_type' },
     { key: 'division', label: 'Division', type: 'select', options: DIVISION_OPTIONS, column: 'division' },
     { key: 'district', label: 'District', type: 'select', options: DISTRICT_OPTIONS, column: 'patient_district_name' },
     { key: 'hospital_name', label: 'Hospital Name', type: 'text', column: 'hospital_name' },
@@ -107,15 +107,16 @@ export const pageFilterConfigs: Record<string, FilterField[]> = {
   ],
 }
 
+/** @deprecated Use each page filter field.column — same names map to different schema fields. */
 export const rowKeyMap: Record<string, string> = {
-  division: 'division',
+  division: 'division_name',
   state: 'state',
-  district: 'district',
+  district: 'district_name',
   gender: 'gender',
   ekyc: 'ekyc',
-  urban_rural: 'urban_rural',
-  hospital_type: 'type',
-  nabh: 'nabh',
+  urban_rural: 'urban_or_rural',
+  hospital_type: 'hospital_type',
+  nabh: 'quality_certification',
   case_type: 'case_type',
   fraud_type: 'fraud_type',
   department: 'department',

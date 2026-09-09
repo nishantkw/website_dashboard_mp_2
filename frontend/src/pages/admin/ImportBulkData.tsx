@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo, type ChangeEvent } from 'react'
+import { useState, useRef, useEffect, useMemo, useCallback, type ChangeEvent } from 'react'
 import {
   UploadCloud,
   FileSpreadsheet,
@@ -29,6 +29,11 @@ import {
 import { applyMapping, labelizeColumn } from '../../utils/importCsv'
 import SearchableSelect from '../../components/ui/SearchableSelect'
 import TablePagination from '../../components/ui/TablePagination'
+import ColumnSelector from '../../components/ui/ColumnSelector'
+import ExportDropdown from '../../components/ui/ExportDropdown'
+import MoneyColumnHeader from '../../components/ui/MoneyColumnHeader'
+import { useTableControls } from '../../hooks/useTableControls'
+import { formatMoneyValue, formatRowMoney, isAmountColumn, type MoneyNotation } from '../../utils/moneyFormat'
 
 const EXTRACT_PAGE_SIZE = 50
 
@@ -149,6 +154,7 @@ export default function ImportBulkData() {
   const [extractSearch, setExtractSearch] = useState('')
   const [extractHospId, setExtractHospId] = useState('')
   const [extractFacilityId, setExtractFacilityId] = useState('')
+  const [moneyNotation, setMoneyNotation] = useState<MoneyNotation>('indian')
   const [hospIdOptions, setHospIdOptions] = useState<{ value: string; label: string }[]>([])
   const [facilityIdOptions, setFacilityIdOptions] = useState<{ value: string; label: string }[]>([])
   const [extractLoading, setExtractLoading] = useState(false)
@@ -184,6 +190,16 @@ export default function ImportBulkData() {
     () => (extractHeaders.length ? extractHeaders : detail?.headers || []),
     [extractHeaders, detail]
   )
+  const extractColumnDefs = useMemo(
+    () => tableColumns.map((key) => ({ key, label: labelizeColumn(key) })),
+    [tableColumns]
+  )
+  const { visibleColumns, visibleKeys, toggleColumn, selectColumns, deselectColumns } = useTableControls(
+    extractColumnDefs,
+    extractTotal,
+    EXTRACT_PAGE_SIZE
+  )
+  const displayColumns = extractColumnDefs.length ? visibleColumns : extractColumnDefs
   const mappedColumnKeys = useMemo(
     () => [...new Set(Object.values(mapping).filter(Boolean))],
     [mapping]
@@ -316,6 +332,32 @@ export default function ImportBulkData() {
     }
   }, [selectedId, detail, extractPage, extractSearch, extractHospId, extractFacilityId])
 
+  const fetchDbExportRows = useCallback(async () => {
+    if (!detail || !isDbEntry(detail)) return []
+    const res = await fetchImportUploadRows(
+      detail.id,
+      0,
+      100000,
+      {
+        search: extractSearch,
+        hospId: extractHospId,
+        facilityId: extractFacilityId,
+      },
+      120000
+    )
+    if (!res.ok) {
+      setPageError(res.error || 'Could not load database rows for export')
+      return []
+    }
+    const keys = visibleKeys.length ? visibleKeys : tableColumns
+    const cols = extractColumnDefs.filter((c) => keys.includes(c.key))
+    return res.data.rows.map((row) => {
+      const out: Record<string, string> = {}
+      for (const key of keys) out[key] = row[key] ?? ''
+      return formatRowMoney(out, moneyNotation, cols)
+    })
+  }, [detail, extractSearch, extractHospId, extractFacilityId, visibleKeys, tableColumns, extractColumnDefs, moneyNotation])
+
   const handleTableChange = async (tableId: string) => {
     setSelectedTableId(tableId)
     if (!detail || isDbEntry(detail)) return
@@ -409,7 +451,7 @@ export default function ImportBulkData() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 pb-12">
+    <div className="mx-auto max-w-7xl space-y-6 pb-12 pt-4 lg:pt-6">
       <div className="flex flex-col justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center">
         <div>
           <div className="flex items-center gap-2">
@@ -643,13 +685,36 @@ export default function ImportBulkData() {
 
               <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                 <div className="border-b border-slate-100 bg-slate-50 px-5 py-3">
-                  <h4 className="text-sm font-bold text-slate-800">
-                    {isDbEntry(detail) ? `Rows in ${detail.tableId || displayTitle(detail)}` : 'Extracted data from file'}
-                    {extractLoading ? ' — loading…' : ` — ${extractTotal.toLocaleString()} matching rows`}
-                    {extractFileTotal > 0 && extractFileTotal !== extractTotal
-                      ? ` of ${extractFileTotal.toLocaleString()} ${isDbEntry(detail) ? 'in table' : 'in file'}`
-                      : ''}
-                  </h4>
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <h4 className="text-sm font-bold text-slate-800">
+                      {isDbEntry(detail) ? `Rows in ${detail.tableId || displayTitle(detail)}` : 'Extracted data from file'}
+                      {extractLoading ? ' — loading…' : ` — ${extractTotal.toLocaleString()} matching rows`}
+                      {extractFileTotal > 0 && extractFileTotal !== extractTotal
+                        ? ` of ${extractFileTotal.toLocaleString()} ${isDbEntry(detail) ? 'in table' : 'in file'}`
+                        : ''}
+                    </h4>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <ColumnSelector
+                        columns={extractColumnDefs}
+                        visibleKeys={visibleKeys}
+                        onToggle={toggleColumn}
+                        onSelectKeys={selectColumns}
+                        onDeselectKeys={deselectColumns}
+                      />
+                      {isDbEntry(detail) && (
+                        <ExportDropdown
+                          title={`Rows in ${detail.tableId || displayTitle(detail)}`}
+                          subtitle="Exported from the live database"
+                          filename={`${String(detail.tableId || 'table_export').replace(/\./g, '_')}`}
+                          data={[]}
+                          columns={displayColumns.map((c) => ({ key: c.key, label: c.label }))}
+                          buttonSize="sm"
+                          variant="outline"
+                          fetchExportData={fetchDbExportRows}
+                        />
+                      )}
+                    </div>
+                  </div>
                   <div className="mt-3 flex flex-wrap items-end gap-3">
                     <label className="flex min-w-[200px] flex-1 flex-col gap-1">
                       <span className="text-[9px] font-bold uppercase tracking-wider text-[#1a5c38]">Search</span>
@@ -665,6 +730,7 @@ export default function ImportBulkData() {
                     </label>
                     {hospIdOptions.length > 0 && (
                       <SearchableSelect
+                        layout="stacked"
                         label="Hospital ID"
                         value={extractHospId}
                         options={hospIdOptions}
@@ -674,6 +740,7 @@ export default function ImportBulkData() {
                     )}
                     {facilityIdOptions.length > 0 && (
                       <SearchableSelect
+                        layout="stacked"
                         label="Facility ID"
                         value={extractFacilityId}
                         options={facilityIdOptions}
@@ -688,9 +755,17 @@ export default function ImportBulkData() {
                     <thead className="border-b border-slate-200 bg-slate-50 font-bold uppercase text-slate-600">
                       <tr>
                         <th className="px-2 py-2">#</th>
-                        {(tableColumns).map((h) => (
-                            <th key={h} className="whitespace-nowrap px-3 py-2">
-                              {h}
+                        {(displayColumns).map((col) => (
+                            <th key={col.key} className="whitespace-nowrap px-3 py-2">
+                              {isAmountColumn(col.key, col.label) ? (
+                                <MoneyColumnHeader
+                                  label={col.label}
+                                  notation={moneyNotation}
+                                  onChange={setMoneyNotation}
+                                />
+                              ) : (
+                                col.label
+                              )}
                             </th>
                           ))}
                       </tr>
@@ -699,16 +774,18 @@ export default function ImportBulkData() {
                       {extractRows.map((row, idx) => (
                         <tr key={`${extractStartIndex}-${idx}`} className="hover:bg-slate-50">
                           <td className="px-2 py-2 text-slate-400">{extractStartIndex + idx + 1}</td>
-                          {(tableColumns).map((h) => (
-                            <td key={h} className="max-w-[220px] truncate whitespace-nowrap px-3 py-2 font-medium text-slate-800">
-                              {String(row[h] ?? '—')}
+                          {(displayColumns).map((col) => (
+                            <td key={col.key} className={`max-w-[220px] truncate whitespace-nowrap px-3 py-2 font-medium text-slate-800 ${isAmountColumn(col.key, col.label) ? 'tabular-nums' : ''}`}>
+                              {isAmountColumn(col.key, col.label)
+                                ? formatMoneyValue(row[col.key], moneyNotation) || '—'
+                                : String(row[col.key] ?? '—')}
                             </td>
                           ))}
                         </tr>
                       ))}
                       {extractRows.length === 0 && (
                         <tr>
-                          <td colSpan={Math.max(tableColumns.length, 1) + 1} className="px-3 py-8 text-center text-slate-400">
+                          <td colSpan={Math.max(displayColumns.length, 1) + 1} className="px-3 py-8 text-center text-slate-400">
                             {isDbEntry(detail)
                               ? `No rows in ${detail.tableId || 'this table'}. ${
                                   detail.inserted
@@ -860,7 +937,15 @@ export default function ImportBulkData() {
                           <th className="px-2 py-2">#</th>
                           {mappedColumnKeys.map((key) => (
                             <th key={key} className="whitespace-nowrap px-3 py-2">
-                              {labelizeColumn(key)}
+                              {isAmountColumn(key, labelizeColumn(key)) ? (
+                                <MoneyColumnHeader
+                                  label={labelizeColumn(key)}
+                                  notation={moneyNotation}
+                                  onChange={setMoneyNotation}
+                                />
+                              ) : (
+                                labelizeColumn(key)
+                              )}
                             </th>
                           ))}
                         </tr>
@@ -870,8 +955,10 @@ export default function ImportBulkData() {
                           <tr key={idx} className="hover:bg-slate-50">
                             <td className="px-2 py-2 text-slate-400">{idx + 1}</td>
                             {mappedColumnKeys.map((key) => (
-                              <td key={key} className="whitespace-nowrap px-3 py-2 font-medium text-slate-800">
-                                {String(row[key] ?? '—')}
+                              <td key={key} className={`whitespace-nowrap px-3 py-2 font-medium text-slate-800 ${isAmountColumn(key) ? 'tabular-nums' : ''}`}>
+                                {isAmountColumn(key, labelizeColumn(key))
+                                  ? formatMoneyValue(row[key], moneyNotation) || '—'
+                                  : String(row[key] ?? '—')}
                               </td>
                             ))}
                           </tr>

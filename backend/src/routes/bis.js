@@ -1,10 +1,11 @@
 import { Router } from 'express'
 import { query } from '../db/pool.js'
+import { clientError } from '../utils/clientError.js'
 import { serializeRows } from '../utils/serialize.js'
 import { resolveColumns } from '../utils/schemaColumns.js'
 import { getImportTable, getPrimaryTableForModule } from '../utils/schemaRegistry.js'
 import { buildKpi } from '../utils/kpiChange.js'
-import { districtsForDivision } from '../data/mpDivisions.js'
+import { pushGeoSql, rowGeoDistrict, matchesDistrictFilter, matchesDivisionFilter } from '../data/mpDivisions.js'
 import { labelRuralUrban, isRuralFlag, isUrbanFlag, ruralUrbanSqlMatch } from '../utils/ruralUrban.js'
 import {
   labelCardStatus,
@@ -37,6 +38,20 @@ function hasKnown(entries) {
   return entries.some((e) => e.name !== 'Unknown')
 }
 
+const CARD_DISTRICT_COLUMNS = ['district_name', 'district_cd', 'sub_district_name', 'subdistrict_town']
+
+function filterCardPrintingRows(rows, q = {}) {
+  if (!q || (!q.district && !q.division && !q.card_status && !q.urban_rural && !q.date_from && !q.date_to && !q.search)) {
+    return rows
+  }
+  return rows.filter((row) => {
+    const district = rowGeoDistrict(row, CARD_DISTRICT_COLUMNS)
+    if (q.district && !matchesDistrictFilter(district, q.district)) return false
+    if (!q.district && q.division && !matchesDivisionFilter(district, q.division)) return false
+    return true
+  })
+}
+
 function buildCardPrintingWhere(q) {
   const parts = []
   const params = []
@@ -49,17 +64,7 @@ function buildCardPrintingWhere(q) {
     parts.push(`(${ors.join(' OR ')})`)
   }
 
-  if (q.district) pushIlike(['district_name'], q.district)
-  else if (q.division) {
-    const districts = districtsForDivision(q.division)
-    if (districts.length) {
-      const placeholders = districts.map((d) => {
-        params.push(d)
-        return `$${params.length}`
-      })
-      parts.push(`district_name IN (${placeholders.join(', ')})`)
-    }
-  }
+  pushGeoSql(parts, params, q, CARD_DISTRICT_COLUMNS)
 
   if (q.card_status) {
     const sql = labelledSqlMatch('card_print_status', labelCardStatus(q.card_status), 'card')
@@ -109,7 +114,7 @@ router.get('/card-printing', async (req, res) => {
       bisRows = []
     }
 
-    const table = serializeRows(rows)
+    const table = filterCardPrintingRows(serializeRows(rows), req.query)
     const bisTable = serializeRows(bisRows)
     const columns = await resolveColumns(CARD_SCHEMA, CARD_TABLE, table)
 
@@ -208,7 +213,7 @@ router.get('/card-printing', async (req, res) => {
       bisTable,
     })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 

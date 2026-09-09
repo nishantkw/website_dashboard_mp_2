@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 import { Router } from 'express'
 import multer from 'multer'
 import { query } from '../db/pool.js'
+import { clientError } from '../utils/clientError.js'
 import {
   getImportTables,
   getImportTable,
@@ -158,7 +159,14 @@ async function loadLiveTablePage(tableDef, queryParams = {}) {
   assertSafeIdent(tableDef.schema, 'schema')
   assertSafeIdent(tableDef.table, 'table')
   const offset = Math.max(0, Number(queryParams.offset || 0))
-  const limit = Math.min(200, Math.max(1, Number(queryParams.limit || 50)))
+  const wantsAll =
+    queryParams.detail === '1' ||
+    queryParams.detail === 'true' ||
+    queryParams.format === 'csv' ||
+    queryParams.format === 'json'
+  const limit = wantsAll
+    ? Math.min(100000, Math.max(1, Number(queryParams.limit || 100000)))
+    : Math.min(200, Math.max(1, Number(queryParams.limit || 50)))
   const headers = liveColumnNames(tableDef)
   const params = []
   const where = []
@@ -358,7 +366,7 @@ router.get('/tables', (_req, res) => {
     const byModule = getTablesByModule()
     res.json({ tables, byModule, total: tables.length })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 
@@ -368,7 +376,7 @@ router.get('/tables/:tableId', (req, res) => {
     if (!table) return res.status(404).json({ error: 'Table not found' })
     res.json({ table })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 
@@ -385,7 +393,7 @@ router.post('/suggest-mapping', (req, res) => {
       suggestions: rankingPayload(ranked),
     })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 
@@ -424,7 +432,7 @@ router.get('/uploads', async (_req, res) => {
     })
   } catch (err) {
     if (/does not exist/i.test(err.message)) return res.json({ uploads: [] })
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 
@@ -449,7 +457,7 @@ router.get('/uploads/:id', async (req, res) => {
       }),
     })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 
@@ -480,7 +488,7 @@ router.get('/uploads/:id/rows', async (req, res) => {
       rows: filtered.slice(offset, offset + limit),
     })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 
@@ -508,7 +516,7 @@ router.get('/uploads/:id/row-filters', async (req, res) => {
       facilityIds: distinctFieldValues(extracted, facKey),
     })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 
@@ -592,7 +600,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       ),
     })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 
@@ -624,7 +632,7 @@ router.patch('/uploads/:id', async (req, res) => {
     const updated = await getUpload(row.id)
     res.json({ upload: serializeUpload(updated, { table }) })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 
@@ -686,7 +694,7 @@ router.post('/uploads/:id/commit', async (req, res) => {
       errors: result.errors,
     })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 
@@ -698,7 +706,7 @@ router.delete('/uploads/:id', async (req, res) => {
     await query(`DELETE FROM app_auth.import_uploads WHERE id = $1`, [row.id])
     res.json({ ok: true })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 
@@ -730,7 +738,7 @@ router.post('/', async (req, res) => {
       db: (await query('SELECT 1'))._db,
     })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: clientError(err) })
   }
 })
 

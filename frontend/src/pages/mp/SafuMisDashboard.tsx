@@ -211,7 +211,7 @@ export default function SafuMisDashboard({
               ? `${config.frSection} — ${schemaLabel}`
               : 'Connect the backend to load fraud & audit records'
           }
-          badge={<DataSourceBadge source={source} db={db} />}
+          badge={<DataSourceBadge source={source} db={db} loading={loading} />}
         />
       )}
       {hideHeader && (
@@ -224,7 +224,7 @@ export default function SafuMisDashboard({
             className="min-w-0 flex-1"
           />
           <div className="shrink-0">
-            <DataSourceBadge source={source} db={db} />
+            <DataSourceBadge source={source} db={db} loading={loading} />
           </div>
         </div>
       )}

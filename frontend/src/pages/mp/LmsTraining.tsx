@@ -46,7 +46,7 @@ export default function LmsTraining() {
   const live = source === 'api'
   const kpis = data.kpis ?? []
   const tableRows = (data.table ?? []) as Record<string, string | number>[]
-  const filtered = live ? tableRows : moduleFilters.filterRows(tableRows)
+  const filtered = moduleFilters.filterRows(tableRows)
   const columns = useMemo(
     () =>
       schemaTableColumns({
@@ -76,7 +76,7 @@ export default function LmsTraining() {
             ? `${data.schema ?? 'dmart_mp.lms_user_course_completion_status'} — schema fields`
             : 'Connect the backend to load LMS records'
         }
-        badge={<DataSourceBadge source={source} db={db} />}
+        badge={<DataSourceBadge source={source} db={db} loading={loading} />}
       />
       <BackendOfflineNotice error={error} loading={loading} />
 

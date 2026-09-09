@@ -74,6 +74,7 @@ export function stripHospitalPaging(q = {}) {
   delete rest.offset
   delete rest.format
   delete rest.page
+  delete rest.detail
   return rest
 }
 

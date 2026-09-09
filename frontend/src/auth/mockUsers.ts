@@ -1,6 +1,9 @@
 import type { UserRole } from './types'
 
-/** Local/dev helper only — real login always goes through the API. */
+/**
+ * Local/dev helper only. Never imported into production bundles —
+ * Login.tsx loads this via dynamic import when import.meta.env.DEV.
+ */
 export const demoAccounts: { id: string; username: string; password: string; role: UserRole; name: string }[] = [
   {
     id: '0',

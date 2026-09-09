@@ -1,4 +1,5 @@
 import { divisionForDistrict } from '../data/mpDivisions.js'
+import { isActiveHospital } from './hospitalRows.js'
 
 function topEntries(entries, limit = 10, valueKey = 'value', othersLabel = 'Others') {
   const sorted = [...entries].sort((a, b) => Number(b[valueKey] ?? 0) - Number(a[valueKey] ?? 0))
@@ -71,12 +72,7 @@ export function buildHospitalCharts(rows) {
     8
   )
   const byEnroll = topEntries(countBy(rows, (r) => labelEmpanelmentStatus(r)), 6)
-  const byActive = countBy(rows, (r) =>
-    labelStatus(r.active_status, [
-      [/^(1|active|yes|true)$/i, 'Active'],
-      [/^(0|inactive|no|false)$/i, 'Inactive'],
-    ])
-  )
+  const byActive = countBy(rows, (r) => (isActiveHospital(r) ? 'Active' : 'Inactive'))
 
   return {
     type: byType,

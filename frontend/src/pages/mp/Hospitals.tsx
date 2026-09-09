@@ -8,13 +8,14 @@ import { useModuleFilters } from '../../hooks/useModuleFilters'
 import { getModuleFilters } from '../../data/moduleFilterConfig'
 import ModuleFilterBar from '../../components/layout/ModuleFilterBar'
 import { useApiResource } from '../../hooks/useApiResource'
-import { fetchHospitals, fetchHospitalsExport } from '../../api/endpoints'
+import { fetchHospitals, fetchHospitalsExport, fetchOverviewHospitals } from '../../api/endpoints'
 import DataSourceBadge from '../../components/ui/DataSourceBadge'
 import BackendOfflineNotice from '../../components/ui/BackendOfflineNotice'
 import { schemaTableColumns } from '../../utils/schemaColumns'
 import { TABLE_PAGE_SIZE } from '../../hooks/useTableControls'
 import type { KPI, TableColumn } from '../../types'
 import type { ExportSheet } from '../../utils/exportUtils'
+import { isHospitalEmpanelled, isHospitalServingClaims } from '../../components/ui/HospitalStatusCells'
 
 const KPI_EXPORT_COLUMNS = [
   { key: 'card', label: 'Card' },
@@ -49,7 +50,7 @@ const preferredColumns: TableColumn[] = [
   { key: 'hosp_spec_type', label: 'Specialty' },
   { key: 'nabh_certified', label: 'NABH' },
   { key: 'enrl_status', label: 'Enroll Status' },
-  { key: 'active_status', label: 'Active' },
+  { key: 'active_status', label: 'Currently Serving' },
   { key: 'accreditation_status', label: 'Accreditation' },
   { key: 'empaneled_date', label: 'Empaneled On' },
   { key: 'deempanel_status', label: 'De-empanelment Status' },
@@ -81,21 +82,12 @@ const deempanelPreferred: TableColumn[] = [
   { key: 'created_by', label: 'Created By' },
 ]
 
-function isActiveHospitalRow(row: Record<string, string | number>) {
-  return /^(1|active|yes|true)$/i.test(String(row.active_status ?? '').trim())
+function isEmpaneledHospitalRow(row: Record<string, string | number>) {
+  return isHospitalEmpanelled(row)
 }
 
-function isEmpaneledHospitalRow(row: Record<string, string | number>) {
-  const desc = String(row.hosp_status_desc ?? '').trim()
-  if (desc) {
-    if (/de[- ]?empane/i.test(desc)) return false
-    return /^empane/i.test(desc)
-  }
-  const s = String(row.enrl_status ?? '').trim()
-  if (!s) return false
-  if (/de[- ]?empane/i.test(s)) return false
-  if (/^empane/i.test(s)) return true
-  return s === '1'
+function isActiveHospitalRow(row: Record<string, string | number>) {
+  return isHospitalServingClaims(row)
 }
 
 function isGovHospitalRow(row: Record<string, string | number>) {
@@ -155,7 +147,7 @@ const hemPreferred: TableColumn[] = [
   { key: 'hosp_type_cd', label: 'Type' },
   { key: 'hosp_city', label: 'City' },
   { key: 'state_cd', label: 'State' },
-  { key: 'active_status', label: 'Active' },
+  { key: 'active_status', label: 'Currently Serving' },
   { key: 'enrl_status', label: 'Enroll Status' },
   { key: 'hosp_spec_type', label: 'Specialty' },
   { key: 'hfr_hosp_id', label: 'HFR ID' },
@@ -228,7 +220,10 @@ export default function Hospitals() {
   const lookupRows = (data.lookupTable ?? []) as Record<string, string | number>[]
   const deempanelRows = (data.deempanelTable ?? []) as Record<string, string | number>[]
   const hemRows = (data.hemTable ?? []) as Record<string, string | number>[]
-  const filtered = live ? tableRows : moduleFilters.filterRows(tableRows)
+  const filtered = moduleFilters.filterRows(tableRows)
+  const lookupFiltered = moduleFilters.filterRows(lookupRows)
+  const deempanelFiltered = moduleFilters.filterRows(deempanelRows)
+  const hemFiltered = moduleFilters.filterRows(hemRows)
 
   const fetchHospitalExport = useCallback(async () => {
     const res = await fetchHospitalsExport(moduleFilters.queryString)
@@ -286,19 +281,35 @@ export default function Hospitals() {
     datasetTitle: 'Hospital Records',
     resolveContext: (chartTitle) => {
       if (/lookup/i.test(chartTitle)) {
-        return { rows: lookupRows, columns: lookupColumns, datasetTitle: 'Hospital Lookup' }
+        return { rows: lookupFiltered, columns: lookupColumns, datasetTitle: 'Hospital Lookup' }
       }
       if (/deempanel/i.test(chartTitle)) {
-        return { rows: deempanelRows, columns: deempanelColumns, datasetTitle: 'De-empanelment Details' }
+        return { rows: deempanelFiltered, columns: deempanelColumns, datasetTitle: 'De-empanelment Details' }
       }
       if (/\bhem\b/i.test(chartTitle)) {
-        return { rows: hemRows, columns: hemColumns, datasetTitle: 'HEM Hospitals' }
+        return { rows: hemFiltered, columns: hemColumns, datasetTitle: 'HEM Hospitals' }
       }
       return { rows: filtered, columns, datasetTitle: 'Hospital Records' }
     },
     fetchDrillDown: live
-      ? async (_payload, chartTitle) => {
+      ? async (payload, chartTitle) => {
           if (/lookup|deempanel|\bhem\b/i.test(chartTitle)) return null
+          if (/hospital type/i.test(chartTitle)) {
+            const params = new URLSearchParams(moduleFilters.queryString.replace(/^\?/, ''))
+            const typeName = String(payload.name ?? '').trim()
+            const isOthers = /^others$/i.test(typeName)
+            if (typeName && !isOthers) params.set('hospital_type', typeName)
+            params.set('detail', '1')
+            const res = await fetchOverviewHospitals(`?${params.toString()}`, 120000)
+            if (!res.ok) return null
+            const rows = (res.data.table ?? []) as Record<string, string | number>[]
+            return {
+              rows,
+              columns,
+              datasetTitle: typeName ? `Hospitals — ${typeName}` : 'Hospital Records',
+              alreadyFiltered: !isOthers,
+            }
+          }
           const res = await fetchHospitalsExport(moduleFilters.queryString)
           if (!res.ok) return null
           const rows = (res.data.table ?? []) as Record<string, string | number>[]
@@ -311,32 +322,32 @@ export default function Hospitals() {
     if (/lookup/i.test(kpi.label)) {
       openDetail({
         title: kpi.label,
-        subtitle: `${lookupRows.length} record${lookupRows.length === 1 ? '' : 's'}`,
-        records: lookupRows,
+        subtitle: `${lookupFiltered.length} record${lookupFiltered.length === 1 ? '' : 's'}`,
+        records: lookupFiltered,
         columns: lookupColumns,
         datasetTitle: 'Hospital Lookup',
         source: live ? 'api' : 'demo',
       })
       return
     }
-    const hemFiltered = filterRowsForHemKpi(hemRows, kpi.label)
-    if (hemFiltered) {
+    const hemKpiRows = filterRowsForHemKpi(hemFiltered, kpi.label)
+    if (hemKpiRows) {
       openDetail({
         title: kpi.label,
-        subtitle: `${hemFiltered.length} record${hemFiltered.length === 1 ? '' : 's'}`,
-        records: hemFiltered,
+        subtitle: `${hemKpiRows.length} record${hemKpiRows.length === 1 ? '' : 's'}`,
+        records: hemKpiRows,
         columns: hemColumns,
         datasetTitle: 'HEM Hospitals',
         source: live ? 'api' : 'demo',
       })
       return
     }
-    const deempanelFiltered = filterRowsForDeempanelKpi(deempanelRows, kpi.label)
-    if (deempanelFiltered) {
+    const deempanelKpiRows = filterRowsForDeempanelKpi(deempanelFiltered, kpi.label)
+    if (deempanelKpiRows) {
       openDetail({
         title: kpi.label,
-        subtitle: `${deempanelFiltered.length} record${deempanelFiltered.length === 1 ? '' : 's'}`,
-        records: deempanelFiltered,
+        subtitle: `${deempanelKpiRows.length} record${deempanelKpiRows.length === 1 ? '' : 's'}`,
+        records: deempanelKpiRows,
         columns: deempanelColumns,
         datasetTitle: 'De-empanelment Details',
         source: live ? 'api' : 'demo',
@@ -442,14 +453,7 @@ export default function Hospitals() {
       <Modal />
       <PageHeader
         title="Hospitals & Empanelment"
-        description={
-          live
-            ? `${data.schema ?? 'dmart_mp.hospital_master_with_quality_certification_final'}${
-                data.deempanelSchema ? ` · ${data.deempanelSchema}` : ''
-              }${data.hemSchema ? ` · ${data.hemSchema}` : ''}${data.lookupSchema ? ` · ${data.lookupSchema}` : ''}`
-            : 'Connect the backend to load hospital records'
-        }
-        badge={<DataSourceBadge source={source} db={db} />}
+        badge={<DataSourceBadge source={source} db={db} loading={loading} />}
         exportSheets={exportSheets}
       />
       <BackendOfflineNotice error={error} loading={loading} />
@@ -604,8 +608,8 @@ export default function Hospitals() {
           )}
           <DataTable
             columns={hemColumns}
-            data={hemRows}
-            title={`HEM Hospital — dmart_mp.t_hem_hospital (${hemRows.length}${
+            data={hemFiltered}
+            title={`HEM Hospital — dmart_mp.t_hem_hospital (${hemFiltered.length}${
               hemColumns.length ? ` · ${hemColumns.length} schema cols` : ''
             })`}
             onRowClick={(row) =>
@@ -660,8 +664,8 @@ export default function Hospitals() {
           )}
           <DataTable
             columns={deempanelColumns}
-            data={deempanelRows}
-            title={`De-empanelment Details — dmart_mp.t_deempanelment_details (${deempanelRows.length}${
+            data={deempanelFiltered}
+            title={`De-empanelment Details — dmart_mp.t_deempanelment_details (${deempanelFiltered.length}${
               deempanelColumns.length ? ` · ${deempanelColumns.length} schema cols` : ''
             })`}
             onRowClick={(row) =>
@@ -712,8 +716,8 @@ export default function Hospitals() {
           </div>
           <DataTable
             columns={lookupColumns}
-            data={lookupRows}
-            title={`Hospital Lookup — dmart_mp.m_lookup (${lookupRows.length}${
+            data={lookupFiltered}
+            title={`Hospital Lookup — dmart_mp.m_lookup (${lookupFiltered.length}${
               lookupColumns.length ? ` · ${lookupColumns.length} schema cols` : ''
             })`}
             onRowClick={(row) =>
