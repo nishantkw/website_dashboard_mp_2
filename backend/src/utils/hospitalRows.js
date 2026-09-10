@@ -2,6 +2,17 @@ import { query } from '../db/pool.js'
 import { serializeRows } from './serialize.js'
 import { filterHospitalRows } from './hospitalFilters.js'
 import { loadUniqueHospitalRows } from './hospitalIdentity.js'
+import { deriveGeoStateType, divisionForDistrict } from '../data/mpDivisions.js'
+
+const AUX_CACHE_TTL_MS = 15 * 60 * 1000
+let deempanelDateCache = null
+let lookupCache = null
+
+function peekTimedCache(entry) {
+  if (!entry) return null
+  if (Date.now() - entry.loadedAt > AUX_CACHE_TTL_MS) return null
+  return entry.value
+}
 
 function mapHospitalType(raw, lookupByCd = new Map()) {
   const t = String(raw || '').trim()
@@ -22,6 +33,8 @@ function formatHospitalDate(v) {
 }
 
 export async function loadDeempanelDateMap() {
+  const hit = peekTimedCache(deempanelDateCache)
+  if (hit) return hit
   try {
     const { rows } = await query(
       `SELECT DISTINCT ON (hosp_id)
@@ -39,6 +52,7 @@ export async function loadDeempanelDateMap() {
         reasons: row.reasons ? String(row.reasons).trim() : '',
       })
     }
+    deempanelDateCache = { value: map, loadedAt: Date.now() }
     return map
   } catch (err) {
     console.warn(`[hospitals] deempanel dates skipped: ${err.message}`)
@@ -47,11 +61,15 @@ export async function loadDeempanelDateMap() {
 }
 
 export async function loadLookupRows() {
+  const hit = peekTimedCache(lookupCache)
+  if (hit) return hit
   try {
     const result = await query(
       `SELECT * FROM dmart_mp.m_lookup ORDER BY lookup_cd, id_pk LIMIT 5000`
     )
-    return { table: serializeRows(result.rows), db: result._db }
+    const payload = { table: serializeRows(result.rows), db: result._db }
+    lookupCache = { value: payload, loadedAt: Date.now() }
+    return payload
   } catch (err) {
     console.warn(`[hospitals] m_lookup skipped: ${err.message}`)
     return { table: [], db: null }
@@ -103,6 +121,40 @@ export function isEmpaneledHospital(d) {
   return s === '1'
 }
 
+/** Hospital master currently de-empanelled — same definition as Empanelment Status chart. */
+export function isDeempanelledHospital(d) {
+  const desc = String(d.hosp_status_desc ?? '').trim()
+  if (desc) return /de[- ]?empane|disempanel/i.test(desc)
+  const s = String(d.enrl_status ?? '').trim()
+  if (!s) return false
+  if (/de[- ]?empane|disempanel/i.test(s)) return true
+  return s === '0'
+}
+
+/** Canonical empanelment slice labels for charts/KPIs. */
+export function labelHospitalEmpanelmentStatus(row) {
+  const desc = String(row.hosp_status_desc ?? '').trim()
+  if (desc) {
+    if (/de[- ]?empane|disempanel/i.test(desc)) return 'De-empanelled'
+    if (/^empane/i.test(desc)) return 'Empanelled'
+    if (/pending/i.test(desc)) return 'Pending'
+    if (/inactive/i.test(desc)) return 'Inactive'
+    if (/reject/i.test(desc)) return 'Rejected'
+    if (/draft/i.test(desc)) return 'Draft'
+    if (/invalid/i.test(desc)) return 'Invalid'
+    if (/suspend/i.test(desc)) return 'Suspended'
+    return desc
+  }
+  const s = String(row.enrl_status ?? '').trim()
+  if (!s) return 'Unknown'
+  if (/de[- ]?empane|disempanel/i.test(s) || s === '0') return 'De-empanelled'
+  if (/^empane/i.test(s) || s === '1') return 'Empanelled'
+  if (/pending/i.test(s) || s === '2') return 'Pending'
+  if (/inactive/i.test(s)) return 'Inactive'
+  if (/^active$/i.test(s)) return 'Empanelled'
+  return s
+}
+
 export function isActiveHospital(d) {
   const active = /^(1|active|yes|true)$/i.test(String(d.active_status ?? '').trim())
   return active && isEmpaneledHospital(d)
@@ -120,12 +172,19 @@ export function isDeempanelStopPayment(d) {
   return /^(true|t|1|yes)$/i.test(String(d.stop_payment ?? '').trim())
 }
 
+/** True for de-empanel / disempanel action rows (not revoke-only). */
 export function isDeempanelDeEmpanel(d) {
-  return /de[- ]?empanel/i.test(String(d.type ?? ''))
+  const blob = [d.type, d.action_type, d.action, d.reasons, d.status]
+    .map((v) => String(v ?? '').trim())
+    .filter(Boolean)
+    .join(' ')
+  if (!blob) return false
+  if (/revoke/i.test(blob) && !/de[- ]?empanel|disempanel/i.test(blob)) return false
+  return /de[- ]?empanel|disempanel/i.test(blob)
 }
 
 export function isDeempanelRevoke(d) {
-  return /revoke/i.test(String(d.type ?? ''))
+  return /revoke/i.test(String(d.type ?? d.action_type ?? d.action ?? ''))
 }
 
 export function hasDeempanelEndDate(d) {
@@ -190,35 +249,72 @@ export async function loadHemHospitalRows() {
   }
 }
 
-function normalizeDeempanelRow(row, nameByHosp = new Map()) {
+function normalizeDeempanelRow(row, hospById = new Map()) {
   const hospId = String(row.hosp_id ?? '').trim()
   const stopRaw = String(row.stop_payment ?? '').trim()
   const statusRaw = String(row.status ?? '').trim()
+  const hosp = hospById.get(hospId) || {}
+  const district = String(hosp.district_name || row.district_name || row.dist_name || '').trim()
+  const hospitalType = String(hosp.hospital_type || '').trim()
+  const geoRow = {
+    district_name: district,
+    division_name: hosp.division_name || (district ? divisionForDistrict(district) : ''),
+  }
   return {
     ...row,
     hosp_id: hospId,
-    hospital_name: nameByHosp.get(hospId) || row.hospital_name || '',
+    hospital_name: hosp.hospital_name || row.hospital_name || '',
+    // Hospital geo / type so page filters (state_type, district, hospital_type) match KPI scope.
+    // Keep action `type` as-is; prefer hospital_type for ownership filters.
+    hospital_type: hospitalType,
+    _hospital_type: hospitalType,
+    district_name: district,
+    dist_name: district,
+    division_name: geoRow.division_name,
+    _state_type: hosp._state_type || (district ? deriveGeoStateType(geoRow) : ''),
     stop_payment: !stopRaw ? '' : isDeempanelStopPayment(row) ? 'Yes' : 'No',
     status: statusRaw === '1' ? 'Active' : statusRaw,
     deempanel_date: formatHospitalDate(row.end_date || row.start_date || row.due_date),
   }
 }
 
-export async function loadDeempanelRows(hospitalRows = []) {
+/**
+ * Load deempanel rows. When hospitalRows is an array (filtered hospital master),
+ * keep only actions for those hospitals and enrich with hospital geo/type so
+ * KPI counts and client drill-down filters stay aligned.
+ * Pass null/undefined to load all rows without hospital scoping.
+ */
+export async function loadDeempanelRows(hospitalRows = null) {
   try {
     const result = await query(
       `SELECT * FROM dmart_mp.t_deempanelment_details
        ORDER BY COALESCE(start_date, created_dt) DESC NULLS LAST
        LIMIT 5000`
     )
-    const nameByHosp = new Map()
-    for (const h of hospitalRows) {
+    const hospById = new Map()
+    const scopeToHospitals = Array.isArray(hospitalRows)
+    for (const h of hospitalRows || []) {
       const id = String(h.hosp_id ?? '').trim()
-      const name = String(h.hospital_name || h.hosp_name || '').trim()
-      if (id && name && !nameByHosp.has(id)) nameByHosp.set(id, name)
+      if (!id || hospById.has(id)) continue
+      const district = String(h.district_name || h.dist_name || '').trim()
+      const geoRow = { district_name: district, division_name: h.division_name || '' }
+      hospById.set(id, {
+        hospital_name: String(h.hospital_name || h.hosp_name || '').trim(),
+        hospital_type: String(h.hospital_type || '').trim(),
+        district_name: district,
+        division_name: h.division_name || (district ? divisionForDistrict(district) : ''),
+        _state_type: deriveGeoStateType(geoRow),
+      })
     }
+    const serialized = serializeRows(result.rows)
+      .filter((row) => {
+        if (!scopeToHospitals) return true
+        const id = String(row.hosp_id ?? '').trim()
+        return Boolean(id && hospById.has(id))
+      })
+      .map((row) => normalizeDeempanelRow(row, hospById))
     return {
-      table: serializeRows(result.rows).map((row) => normalizeDeempanelRow(row, nameByHosp)),
+      table: serialized,
       db: result._db,
     }
   } catch (err) {
@@ -232,9 +328,11 @@ export async function loadDeempanelRows(hospitalRows = []) {
  * Full unique count is table.length; callers should page the HTTP table.
  */
 export async function loadHospitalMasterRows(queryParams = {}) {
-  const unique = await loadUniqueHospitalRows()
-  const deempanelByHosp = await loadDeempanelDateMap()
-  const lookupLoad = await loadLookupRows()
+  const [unique, deempanelByHosp, lookupLoad] = await Promise.all([
+    loadUniqueHospitalRows(),
+    loadDeempanelDateMap(),
+    loadLookupRows(),
+  ])
   const lookupByCd = lookupCodeMap(lookupLoad.table)
   const merged = unique.table.map((raw) => normalizeHospitalRow(raw, deempanelByHosp, lookupByCd))
   const table = filterHospitalRows(merged, queryParams)

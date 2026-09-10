@@ -4,10 +4,10 @@ import { assertSafeIdent } from './schemaRegistry.js'
 const TABLE_KEYS = {
   claim_paid_excel_t: [['case_id'], ['registration_id', 'hospital_code']],
   claim_paid_t_portability: [['case_id']],
-  hospital_master_with_quality_certification_final: [['hosp_id'], ['facility_id']],
-  hospital_master_with_quality_certification: [['hosp_id']],
-  hospital_master: [['hospital_code'], ['facility_id']],
-  t_hem_hospital: [['hosp_id']],
+  hospital_master_with_quality_certification_final: [['facility_id'], ['hosp_id']],
+  hospital_master_with_quality_certification: [['facility_id'], ['hosp_id']],
+  hospital_master: [['facility_id'], ['hospital_code'], ['hosp_id']],
+  t_hem_hospital: [['facility_id'], ['hosp_id']],
   t_bis_beneficiary_dtls: [['member_id'], ['ben_id'], ['bis_member_id']],
   t_card_printing_status: [['card_no'], ['ben_id']],
   t_patient_dtls: [['case_id'], ['registration_id']],
@@ -29,8 +29,8 @@ const TABLE_KEYS = {
 
 const GENERIC_KEYS = [
   ['case_id'],
-  ['hosp_id'],
   ['facility_id'],
+  ['hosp_id'],
   ['member_id'],
   ['ben_id'],
   ['card_no'],
@@ -64,8 +64,8 @@ export function pickRawKeyHeaders(headers) {
   const map = new Map(headers.map((h) => [normalizeHeader(h), h]))
   const preferred = [
     'case_id',
-    'hosp_id',
     'facility_id',
+    'hosp_id',
     'member_id',
     'ben_id',
     'card_no',

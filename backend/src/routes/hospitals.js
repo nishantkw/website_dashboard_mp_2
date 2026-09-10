@@ -10,6 +10,7 @@ import {
   loadHemHospitalRows,
   isActiveHospital,
   isEmpaneledHospital,
+  isDeempanelledHospital,
   isGovHospital,
   isPrivHospital,
   isDeempanelDeEmpanel,
@@ -65,24 +66,29 @@ router.get('/', async (req, res) => {
     const totalHospitals = table.length
     const active = table.filter(isActiveHospital).length
     const empaneled = table.filter(isEmpaneledHospital).length
+    const deEmpanelledHospitals = table.filter(isDeempanelledHospital).length
     const gov = table.filter(isGovHospital).length
     const priv = table.filter(isPrivHospital).length
     const lookup = lookupTable || []
-    const lookupColumns = await resolveColumns('dmart_mp', 'm_lookup', lookup)
+    const [deempanel, hem, lookupColumns] = await Promise.all([
+      loadDeempanelRows(table),
+      loadHemHospitalRows(),
+      resolveColumns('dmart_mp', 'm_lookup', lookup),
+    ])
+    const deempanelTable = deempanel.table
+    const [deempanelColumns, hemColumns] = await Promise.all([
+      resolveColumns('dmart_mp', 't_deempanelment_details', deempanelTable),
+      resolveColumns('dmart_mp', 't_hem_hospital', hem.table),
+    ])
     const lookupCodes = new Set(lookup.map((r) => String(r.lookup_cd || '').trim()).filter(Boolean))
     const lookupCharts = buildLookupCharts(lookup)
-    const deempanel = await loadDeempanelRows(table)
-    const deempanelTable = deempanel.table
-    const deempanelColumns = await resolveColumns('dmart_mp', 't_deempanelment_details', deempanelTable)
     const deempanelHospitals = new Set(deempanelTable.map((r) => String(r.hosp_id ?? '').trim()).filter(Boolean))
-    const deEmpanelled = deempanelTable.filter(isDeempanelDeEmpanel).length
+    const deEmpanelledActions = deempanelTable.filter(isDeempanelDeEmpanel).length
     const stopPayment = deempanelTable.filter(isDeempanelStopPayment).length
     const revoke = deempanelTable.filter(isDeempanelRevoke).length
     const withEndDate = deempanelTable.filter(hasDeempanelEndDate).length
     const deempanelDateFields = ['start_date', 'end_date', 'due_date', 'created_dt']
-    const hem = await loadHemHospitalRows()
     const hemTable = hem.table
-    const hemColumns = await resolveColumns('dmart_mp', 't_hem_hospital', hemTable)
     const hemActive = hemTable.filter(isHemActive).length
     const hemGov = hemTable.filter(isHemGov).length
     const hemPriv = hemTable.filter(isHemPriv).length
@@ -116,18 +122,13 @@ router.get('/', async (req, res) => {
           rows: table,
           predicate: isEmpaneledHospital,
         }),
-        ...(deempanelTable.length
-          ? [
-              buildKpi({
-                label: 'De-empanelled',
-                value: deEmpanelled,
-                color: 'red',
-                rows: deempanelTable,
-                dateFields: deempanelDateFields,
-                predicate: isDeempanelDeEmpanel,
-              }),
-            ]
-          : []),
+        buildKpi({
+          label: 'De-empanelled',
+          value: deEmpanelledHospitals,
+          color: 'red',
+          rows: table,
+          predicate: isDeempanelledHospital,
+        }),
         buildKpi({
           label: 'Government',
           value: gov,
@@ -255,7 +256,7 @@ router.get('/', async (req, res) => {
             }),
             buildKpi({
               label: 'Deempanel De-Empanelled',
-              value: deEmpanelled,
+              value: deEmpanelledActions,
               color: 'red',
               rows: deempanelTable,
               dateFields: deempanelDateFields,

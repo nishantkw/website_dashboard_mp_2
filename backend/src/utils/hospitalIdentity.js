@@ -31,6 +31,8 @@ const HOSPITAL_LOAD_COLUMNS = [
 ]
 
 const CACHE_TTL_MS = 15 * 60 * 1000
+/** Bump when identity rules change so stale in-memory unique sets are dropped. */
+const UNIQUE_IDENTITY_VERSION = 'facility-first-v1' // hospital unique key version
 const colSetCache = new Map()
 let uniqueCache = null
 let uniqueInflight = null
@@ -55,6 +57,10 @@ export function invalidateHospitalUniqueCache() {
 
 export function peekHospitalUniqueCache() {
   if (!uniqueCache) return null
+  if (uniqueCache.identityVersion !== UNIQUE_IDENTITY_VERSION) {
+    uniqueCache = null
+    return null
+  }
   if (Date.now() - uniqueCache.loadedAt > CACHE_TTL_MS) {
     uniqueCache = null
     return null
@@ -102,16 +108,16 @@ function sqlIdentPart(cols, column, prefix) {
 }
 
 /**
- * One hospital once: hosp_id, then facility_id, then hospital_code, then name+district.
+ * One hospital once: facility_id first (canonical), then hosp_id, hospital_code, name+district.
  * Prefixes keep IDs from colliding across columns when sources are unioned.
  */
 export function hospitalIdentitySql(cols) {
   const has = (name) => cols.has(name)
   const parts = []
-  const hospId = sqlIdentPart(cols, 'hosp_id', 'hosp:')
-  if (hospId) parts.push(hospId)
   const facility = sqlIdentPart(cols, 'facility_id', 'fac:')
   if (facility) parts.push(facility)
+  const hospId = sqlIdentPart(cols, 'hosp_id', 'hosp:')
+  if (hospId) parts.push(hospId)
   const code = sqlIdentPart(cols, 'hospital_code', 'code:')
   if (code) parts.push(code)
   if (has('hosp_name') && has('district_name')) {
@@ -132,16 +138,50 @@ export function hospitalIdentitySql(cols) {
 
 /** Same uniqueness as hospitalIdentitySql, for in-memory merge. */
 export function hospitalRowIdentity(row) {
-  const id = String(row.hosp_id ?? '').trim()
-  if (id) return `hosp:${id.toLowerCase()}`
   const fac = String(row.facility_id ?? '').trim()
   if (fac) return `fac:${fac.toLowerCase()}`
+  const id = String(row.hosp_id ?? '').trim()
+  if (id) return `hosp:${id.toLowerCase()}`
   const code = String(row.hospital_code ?? '').trim()
   if (code) return `code:${code.toLowerCase()}`
   const name = String(row.hosp_name || row.hospital_name || '').trim().toLowerCase()
   const dist = String(row.district_name || row.dist_name || '').trim().toLowerCase()
   if (name || dist) return `name:${name}|${dist}`
   return ''
+}
+
+/**
+ * Collapse rows so each facility_id (and each hosp_id when facility is missing) appears once.
+ * Rows with facility_id are kept first so the same hospital is not counted twice under hosp_id.
+ */
+export function dedupeHospitalRowsByFacility(rows = []) {
+  const withFacility = []
+  const withoutFacility = []
+  for (const row of rows) {
+    if (String(row.facility_id ?? '').trim()) withFacility.push(row)
+    else withoutFacility.push(row)
+  }
+
+  const out = []
+  const seenKeys = new Set()
+  const seenFacilities = new Set()
+  const seenHospIds = new Set()
+
+  for (const row of [...withFacility, ...withoutFacility]) {
+    const fac = String(row.facility_id ?? '').trim().toLowerCase()
+    const hosp = String(row.hosp_id ?? '').trim().toLowerCase()
+    if (fac && seenFacilities.has(fac)) continue
+    if (hosp && seenHospIds.has(hosp)) continue
+
+    const key = hospitalRowIdentity(row)
+    if (!key || seenKeys.has(key)) continue
+
+    seenKeys.add(key)
+    if (fac) seenFacilities.add(fac)
+    if (hosp) seenHospIds.add(hosp)
+    out.push(row)
+  }
+  return out
 }
 
 function dateOrderColumn(cols) {
@@ -191,22 +231,30 @@ export async function countUniqueHospitals(queryParams = {}) {
 
 async function buildUniqueHospitalRows() {
   const sources = hospitalMasterSources()
-  const fetched = await Promise.all(
-    sources.map(async (src) => {
-      try {
-        const result = await queryDistinctHospitalMaster(src.schema, src.table, {
-          columns: HOSPITAL_LOAD_COLUMNS,
-        })
-        return { src, result }
-      } catch (err) {
-        console.warn(`[hospitals] unique rows skip ${src.id}: ${err.message}`)
-        return { src, result: { rows: [], _db: null } }
-      }
-    })
-  )
+
+  async function fetchOne(src) {
+    try {
+      const result = await queryDistinctHospitalMaster(src.schema, src.table, {
+        columns: HOSPITAL_LOAD_COLUMNS,
+      })
+      return { src, result }
+    } catch (err) {
+      console.warn(`[hospitals] unique rows skip ${src.id}: ${err.message}`)
+      return { src, result: { rows: [], _db: null } }
+    }
+  }
+
+  // Prefer the primary master only — scanning 2–3 overlapping masters made cold loads very slow.
+  let fetched = []
+  if (sources[0]) {
+    const primary = await fetchOne(sources[0])
+    if (primary.result.rows?.length) fetched = [primary]
+  }
+  if (!fetched.length && sources.length > 1) {
+    fetched = await Promise.all(sources.slice(1).map(fetchOne))
+  }
 
   const merged = []
-  const seen = new Set()
   const used = []
   let db = 'postgres'
 
@@ -215,16 +263,15 @@ async function buildUniqueHospitalRows() {
     db = result._db || db
     used.push(src.id)
     for (const row of serializeRows(result.rows)) {
-      const key = hospitalRowIdentity(row)
-      if (!key || seen.has(key)) continue
-      seen.add(key)
       merged.push(row)
     }
   }
 
+  const uniqueRows = dedupeHospitalRowsByFacility(merged)
+
   let columns = HOSPITAL_LOAD_COLUMNS
-  if (merged[0]) {
-    columns = HOSPITAL_LOAD_COLUMNS.filter((c) => Object.prototype.hasOwnProperty.call(merged[0], c))
+  if (uniqueRows[0]) {
+    columns = HOSPITAL_LOAD_COLUMNS.filter((c) => Object.prototype.hasOwnProperty.call(uniqueRows[0], c))
   }
 
   const nameCol = columns.includes('hosp_name')
@@ -232,10 +279,10 @@ async function buildUniqueHospitalRows() {
     : columns.includes('hospital_name')
       ? 'hospital_name'
       : columns[0]
-  merged.sort((a, b) => String(a[nameCol] ?? '').localeCompare(String(b[nameCol] ?? '')))
+  uniqueRows.sort((a, b) => String(a[nameCol] ?? '').localeCompare(String(b[nameCol] ?? '')))
 
   return {
-    table: merged,
+    table: uniqueRows,
     columns,
     schema: used.join(' + ') || 'dmart_mp.hospital_master_with_quality_certification',
     db,
@@ -250,7 +297,7 @@ export async function loadUniqueHospitalRows() {
   uniqueInflight = buildUniqueHospitalRows()
     .then((result) => {
       if (result.sourcesUsed > 0) {
-        uniqueCache = { ...result, loadedAt: Date.now() }
+        uniqueCache = { ...result, loadedAt: Date.now(), identityVersion: UNIQUE_IDENTITY_VERSION }
         return uniqueCache
       }
       return result

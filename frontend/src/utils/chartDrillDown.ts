@@ -14,6 +14,36 @@ import {
 import { districtsMatch } from './geoMatch'
 import { isHospitalServingClaims } from '../components/ui/HospitalStatusCells'
 
+function normalizeEmpanelmentSlice(val: unknown) {
+  return String(val ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+}
+
+function labelRowEmpanelmentStatus(row: Record<string, string | number>) {
+  const desc = String(row.hosp_status_desc ?? '').trim()
+  if (desc) {
+    if (/de[- ]?empane|disempanel/i.test(desc)) return 'De-empanelled'
+    if (/^empane/i.test(desc)) return 'Empanelled'
+    if (/pending/i.test(desc)) return 'Pending'
+    if (/inactive/i.test(desc)) return 'Inactive'
+    if (/reject/i.test(desc)) return 'Rejected'
+    if (/draft/i.test(desc)) return 'Draft'
+    if (/invalid/i.test(desc)) return 'Invalid'
+    if (/suspend/i.test(desc)) return 'Suspended'
+    return desc
+  }
+  const s = String(row.enrl_status ?? '').trim()
+  if (!s) return 'Unknown'
+  if (/de[- ]?empane|disempanel/i.test(s) || s === '0') return 'De-empanelled'
+  if (/^empane/i.test(s) || s === '1') return 'Empanelled'
+  if (/pending/i.test(s) || s === '2') return 'Pending'
+  if (/inactive/i.test(s)) return 'Inactive'
+  if (/^active$/i.test(s)) return 'Empanelled'
+  return s
+}
+
 export type ChartClickPayload = Record<string, string | number | undefined> & {
   /** Bar/line series key from Recharts click */
   _seriesKey?: string
@@ -548,6 +578,11 @@ export function filterRowsForChartClick(
   if ((/^active status$/i.test(chartTitle) || /active vs inactive/i.test(chartTitle)) && !/hem|user/i.test(chartTitle)) {
     const wantServing = /^active$/i.test(category)
     return rows.filter((row) => isHospitalServingClaims(row) === wantServing)
+  }
+
+  if (/empanelment status/i.test(chartTitle)) {
+    const want = normalizeEmpanelmentSlice(category)
+    return rows.filter((row) => normalizeEmpanelmentSlice(labelRowEmpanelmentStatus(row)) === want)
   }
 
   if (/urban|rural/i.test(chartTitle)) {
