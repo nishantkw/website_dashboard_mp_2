@@ -33,7 +33,8 @@ export const FILTER_COLUMN_ALIASES: Record<string, string[]> = {
   card_status: ['card_print_status', 'card_status'],
   gender: ['gender', 'card_gender'],
   enrollment_status: ['enrl_status', 'enrollment_status'],
-  hospital_type: ['hospital_type', '_hospital_type', 'hosp_type_cd', 'type'],
+  // Do not alias bare `type` — on deempanel rows that column is action type, not ownership.
+  hospital_type: ['hospital_type', '_hospital_type', 'hosp_type_cd'],
   hospital_status: ['enrl_status', 'active_status', 'hosp_status_desc', 'accreditation_status'],
   hospital_name: ['hospital_name', 'hosp_name'],
   specialty: ['category_details', 'specialty', '_specialty_data', 'type_desc', 'procedure_details'],
@@ -118,12 +119,27 @@ function matchesNabh(row: Record<string, unknown>, val: string) {
   return isNabhCertified(row) && textMatches(firstValue(row, FILTER_COLUMN_ALIASES.nabh), val)
 }
 
+const GEO_STATE_COLUMNS = [
+  '_state_type',
+  'state_type',
+  'district_name',
+  'dist_name',
+  'hosp_district_name',
+  'patient_district_name',
+  'district',
+  'division_name',
+  'division',
+  '_division',
+]
+
 function matchesStateType(row: Record<string, string | number>, field: FilterField, val: string) {
   if (!val || val === 'Both') return true
   const labelled = firstValue(row, unique([field.column, '_state_type', 'state_type']))
   if (labelled != null && /^(MP|Portability)$/i.test(String(labelled))) {
     return String(labelled).toLowerCase() === val.toLowerCase()
   }
+  // Tables without hospital geography (lookup, raw HEM, etc.) — do not invent Portability.
+  if (!hasAnyColumn(row, unique([field.column, ...GEO_STATE_COLUMNS]))) return true
   return deriveGeoStateType(row) === val
 }
 

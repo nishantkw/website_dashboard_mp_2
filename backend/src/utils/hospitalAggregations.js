@@ -1,5 +1,5 @@
 import { divisionForDistrict } from '../data/mpDivisions.js'
-import { isActiveHospital } from './hospitalRows.js'
+import { isActiveHospital, labelHospitalEmpanelmentStatus } from './hospitalRows.js'
 
 function topEntries(entries, limit = 10, valueKey = 'value', othersLabel = 'Others') {
   const sorted = [...entries].sort((a, b) => Number(b[valueKey] ?? 0) - Number(a[valueKey] ?? 0))
@@ -20,30 +20,6 @@ function countBy(rows, keyFn, valueKey = 'value') {
 }
 
 const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
-function labelStatus(val, map) {
-  const s = String(val ?? '').trim()
-  if (!s) return 'Unknown'
-  for (const [pattern, label] of map) {
-    if (pattern.test(s)) return label
-  }
-  return s
-}
-
-function labelEmpanelmentStatus(row) {
-  const desc = String(row.hosp_status_desc ?? '').trim()
-  if (desc) return desc
-  return labelStatus(row.enrl_status, [
-    [/^de[- ]?empane/i, 'De-empanelled'],
-    [/^empane/i, 'Empanelled'],
-    [/^pending/i, 'Pending'],
-    [/^inactive/i, 'Inactive'],
-    [/^active/i, 'Empanelled'],
-    [/^1$/, 'Empanelled'],
-    [/^0$/, 'De-empanelled'],
-    [/^2$/, 'Pending'],
-  ])
-}
 
 function formatMonthLabel(ym) {
   const m = String(ym).match(/^(\d{4})-(\d{2})$/)
@@ -71,7 +47,7 @@ export function buildHospitalCharts(rows) {
     countBy(rows, (r) => divisionForDistrict(String(r.district_name || ''))),
     8
   )
-  const byEnroll = topEntries(countBy(rows, (r) => labelEmpanelmentStatus(r)), 6)
+  const byEnroll = topEntries(countBy(rows, (r) => labelHospitalEmpanelmentStatus(r)), 6)
   const byActive = countBy(rows, (r) => (isActiveHospital(r) ? 'Active' : 'Inactive'))
 
   return {

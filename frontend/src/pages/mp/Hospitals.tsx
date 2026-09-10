@@ -13,8 +13,9 @@ import DataSourceBadge from '../../components/ui/DataSourceBadge'
 import BackendOfflineNotice from '../../components/ui/BackendOfflineNotice'
 import { schemaTableColumns } from '../../utils/schemaColumns'
 import { TABLE_PAGE_SIZE } from '../../hooks/useTableControls'
-import type { KPI, TableColumn } from '../../types'
+import type { FilterField, FilterValues, KPI, TableColumn } from '../../types'
 import type { ExportSheet } from '../../utils/exportUtils'
+import { applyPageFilters } from '../../utils/applyPageFilters'
 import { isHospitalEmpanelled, isHospitalServingClaims } from '../../components/ui/HospitalStatusCells'
 
 const KPI_EXPORT_COLUMNS = [
@@ -98,26 +99,50 @@ function isPrivHospitalRow(row: Record<string, string | number>) {
   return /priv|^p$/i.test(String(row.hospital_type ?? '').trim())
 }
 
+function isDeempanelledHospitalRow(row: Record<string, string | number>) {
+  const desc = String(row.hosp_status_desc ?? '').trim()
+  if (desc) return /de[- ]?empane|disempanel/i.test(desc)
+  const s = String(row.enrl_status ?? '').trim()
+  if (!s) return false
+  if (/de[- ]?empane|disempanel/i.test(s)) return true
+  return s === '0'
+}
+
 function filterRowsForHospitalMasterKpi<T extends Record<string, string | number>>(rows: T[], label: string): T[] {
   const key = label.trim().toLowerCase()
   if (key === 'active') return rows.filter((row) => isActiveHospitalRow(row))
   if (key === 'empanelled' || key === 'empaneled') return rows.filter((row) => isEmpaneledHospitalRow(row))
+  if (key === 'de-empanelled' || key === 'deempaneled' || key === 'deempanelled') {
+    return rows.filter((row) => isDeempanelledHospitalRow(row))
+  }
   if (key === 'government') return rows.filter((row) => isGovHospitalRow(row))
   if (key === 'private') return rows.filter((row) => isPrivHospitalRow(row))
   return rows
 }
 
+function isDeempanelDeEmpanelRow(row: Record<string, string | number>) {
+  const blob = [row.type, row.action_type, row.action, row.reasons, row.status]
+    .map((v) => String(v ?? '').trim())
+    .filter(Boolean)
+    .join(' ')
+  if (!blob) return false
+  if (/revoke/i.test(blob) && !/de[- ]?empanel|disempanel/i.test(blob)) return false
+  return /de[- ]?empanel|disempanel/i.test(blob)
+}
+
 function filterRowsForDeempanelKpi<T extends Record<string, string | number>>(rows: T[], label: string): T[] | null {
+  // Only section KPIs like "Deempanel De-Empanelled" — not the main hospital "De-empanelled" card.
+  if (!/^deempanel\s+/i.test(label)) return null
   const key = label.replace(/^deempanel\s+/i, '').trim().toLowerCase()
-  if (key === 'de-empanelled') {
-    return rows.filter((row) => /de[- ]?empanel/i.test(String(row.type ?? '')))
+  if (key === 'de-empanelled' || /de[- ]?empanel/.test(key)) {
+    return rows.filter((row) => isDeempanelDeEmpanelRow(row))
   }
   if (key === 'records') return rows
   if (key === 'hospitals') return rows.filter((row) => Boolean(String(row.hosp_id ?? '').trim()))
   if (key === 'stop payment') {
     return rows.filter((row) => /^(yes|true|t|1)$/i.test(String(row.stop_payment ?? '').trim()))
   }
-  if (key === 'revoke') return rows.filter((row) => /revoke/i.test(String(row.type ?? '')))
+  if (key === 'revoke') return rows.filter((row) => /revoke/i.test(String(row.type ?? row.action_type ?? '')))
   if (key === 'with end date') return rows.filter((row) => Boolean(String(row.end_date ?? '').trim()))
   return null
 }
@@ -138,6 +163,49 @@ function filterRowsForHemKpi<T extends Record<string, string | number>>(rows: T[
   if (key === 'with hfr') return rows.filter((row) => Boolean(String(row.hfr_hosp_id ?? '').trim()))
   if (key === 'nodal officer') return rows.filter((row) => Boolean(String(row.nodal_officer_name ?? '').trim()))
   return rows
+}
+
+const HEM_GEO_KEYS = [
+  '_state_type',
+  'state_type',
+  'district_name',
+  'dist_name',
+  'hosp_district_name',
+  'district',
+  'division_name',
+  'division',
+]
+
+function rowHasKeys(row: Record<string, string | number>, keys: string[]) {
+  return keys.some((k) => Object.prototype.hasOwnProperty.call(row, k))
+}
+
+/** Apply only filters whose columns exist on this secondary table (lookup / HEM / etc.). */
+function filterSecondaryHospitalTable<T extends Record<string, string | number>>(
+  rows: T[],
+  fields: FilterField[],
+  filters: FilterValues,
+  search: string
+): T[] {
+  if (!rows.length) return rows
+  const sample = rows[0]
+  const applicable = fields.filter((field) => {
+    if (field.key === 'state_type' || field.key === 'division' || field.key === 'district') {
+      return rowHasKeys(sample, HEM_GEO_KEYS)
+    }
+    if (field.key === 'nabh') {
+      return rowHasKeys(sample, ['quality_certification', 'nabh_certified', 'nabh'])
+    }
+    if (field.key === 'hospital_type') {
+      return rowHasKeys(sample, ['hospital_type', '_hospital_type', 'hosp_type_cd'])
+    }
+    if (field.key === 'hospital_status') {
+      return rowHasKeys(sample, ['enrl_status', 'active_status', 'hosp_status_desc', 'accreditation_status'])
+    }
+    return true
+  })
+  if (!applicable.length && !search.trim()) return rows
+  return applyPageFilters(rows, applicable, filters, search)
 }
 
 const hemPreferred: TableColumn[] = [
@@ -221,9 +289,28 @@ export default function Hospitals() {
   const deempanelRows = (data.deempanelTable ?? []) as Record<string, string | number>[]
   const hemRows = (data.hemTable ?? []) as Record<string, string | number>[]
   const filtered = moduleFilters.filterRows(tableRows)
-  const lookupFiltered = moduleFilters.filterRows(lookupRows)
-  const deempanelFiltered = moduleFilters.filterRows(deempanelRows)
-  const hemFiltered = moduleFilters.filterRows(hemRows)
+  // Lookup is reference data (m_lookup) — hospital geo filters do not apply.
+  const lookupFiltered = useMemo(
+    () => filterSecondaryHospitalTable(lookupRows, filterFields, moduleFilters.filters, moduleFilters.search),
+    [lookupRows, filterFields, moduleFilters.filters, moduleFilters.search]
+  )
+  // Live API already scopes deempanel to filtered hospitals (+ geo enrichment).
+  // Re-applying hospital page filters used to wipe rows (no district/state on raw deempanel).
+  const deempanelFiltered = useMemo(() => {
+    if (live) {
+      const q = moduleFilters.search.trim().toLowerCase()
+      if (!q) return deempanelRows
+      return deempanelRows.filter((row) =>
+        Object.values(row).some((v) => String(v ?? '').toLowerCase().includes(q))
+      )
+    }
+    return filterSecondaryHospitalTable(deempanelRows, filterFields, moduleFilters.filters, moduleFilters.search)
+  }, [live, deempanelRows, filterFields, moduleFilters.filters, moduleFilters.search])
+  // HEM has its own schema; only apply filters that map to HEM columns.
+  const hemFiltered = useMemo(
+    () => filterSecondaryHospitalTable(hemRows, filterFields, moduleFilters.filters, moduleFilters.search),
+    [hemRows, filterFields, moduleFilters.filters, moduleFilters.search]
+  )
 
   const fetchHospitalExport = useCallback(async () => {
     const res = await fetchHospitalsExport(moduleFilters.queryString)
@@ -482,7 +569,7 @@ export default function Hospitals() {
               </ChartCard>
             )}
             {enrollmentData.length > 0 && (
-              <ChartCard title="Empanelment Status" subtitle="From hospital status description · top 6 + Others" exportData={enrollmentData}>
+              <ChartCard title="Empanelment Status" subtitle="Hospital master status · matches De-empanelled KPI" exportData={enrollmentData}>
                 <InteractivePieChart data={enrollmentData} colors={STATUS_COLORS} innerRadius={55} chartTitle="Empanelment Status" onItemClick={openFromChart} />
               </ChartCard>
             )}
