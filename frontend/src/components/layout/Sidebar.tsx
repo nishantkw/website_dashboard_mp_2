@@ -44,6 +44,11 @@ function isNavPathActive(navPath: string, pathname: string, exact = false) {
   return pathname === navPath || pathname.startsWith(`${navPath}/`)
 }
 
+function hasActiveDescendant(item: NavItem, pathname: string): boolean {
+  if (item.path && isNavPathActive(item.path, pathname, item.end)) return true
+  return Boolean(item.children?.some((child) => hasActiveDescendant(child, pathname)))
+}
+
 function readCollapsed() {
   try {
     return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1'
@@ -122,9 +127,7 @@ function CompactNavItem({ item }: { item: NavItem }) {
   const location = useLocation()
   const { wrapRef, open, rect, show, hide } = useHoverFlyout()
   const hasChildren = Boolean(item.children?.length)
-  const isChildActive =
-    hasChildren &&
-    item.children!.some((c) => c.path && isNavPathActive(c.path, location.pathname, c.end))
+  const isChildActive = hasChildren && hasActiveDescendant(item, location.pathname)
 
   const iconBtnClass = (active: boolean) =>
     clsx(
@@ -145,6 +148,11 @@ function CompactNavItem({ item }: { item: NavItem }) {
     )
   }
 
+  const leafLinks = (item.children ?? []).flatMap(function flatten(child): NavItem[] {
+    if (child.children?.length) return child.children.flatMap(flatten)
+    return child.path ? [child] : []
+  })
+
   return (
     <div ref={wrapRef} className="flex justify-center" onMouseEnter={show} onMouseLeave={hide}>
       <button type="button" title={item.label} className={iconBtnClass(Boolean(isChildActive))}>
@@ -152,7 +160,7 @@ function CompactNavItem({ item }: { item: NavItem }) {
       </button>
       {open && rect && (
         <Flyout rect={rect} title={item.label} onMouseEnter={show} onMouseLeave={hide}>
-          {item.children?.map((child) => (
+          {leafLinks.map((child) => (
             <NavLink
               key={child.id}
               to={child.path!}
@@ -175,12 +183,68 @@ function CompactNavItem({ item }: { item: NavItem }) {
   )
 }
 
+function NavChildLink({ child }: { child: NavItem }) {
+  if (child.children?.length) {
+    return <NestedNavGroup item={child} />
+  }
+  if (!child.path) return null
+  return (
+    <NavLink
+      to={child.path}
+      end={child.end}
+      className={({ isActive }) =>
+        clsx(
+          'block px-3 py-2 rounded-lg text-sm transition-colors',
+          isActive
+            ? 'bg-[#2d8a4e] text-white font-medium'
+            : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+        )
+      }
+    >
+      {child.label}
+    </NavLink>
+  )
+}
+
+function NestedNavGroup({ item }: { item: NavItem }) {
+  const location = useLocation()
+  const isChildActive = hasActiveDescendant(item, location.pathname)
+  const [open, setOpen] = useState(isChildActive)
+
+  useEffect(() => {
+    if (isChildActive) setOpen(true)
+  }, [isChildActive])
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className={clsx(
+          'flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+          isChildActive
+            ? 'bg-slate-700/80 text-white'
+            : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+        )}
+      >
+        <span className="text-left leading-snug">{item.label}</span>
+        {open ? <ChevronDown className="h-3.5 w-3.5 shrink-0" /> : <ChevronRight className="h-3.5 w-3.5 shrink-0" />}
+      </button>
+      {open && item.children && (
+        <div className="ml-2 mt-0.5 space-y-0.5 border-l border-slate-600 pl-2">
+          {item.children.map((child) => (
+            <NavChildLink key={child.id} child={child} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function NavGroup({ item }: { item: NavItem }) {
   const location = useLocation()
   const hasChildren = item.children && item.children.length > 0
-  const isChildActive =
-    hasChildren &&
-    item.children!.some((c) => c.path && isNavPathActive(c.path, location.pathname, c.end))
+  const isChildActive = hasChildren && hasActiveDescendant(item, location.pathname)
   const [open, setOpen] = useState(isChildActive || item.id === 'overview')
 
   if (!hasChildren && item.path) {
@@ -224,21 +288,7 @@ function NavGroup({ item }: { item: NavItem }) {
       {open && item.children && (
         <div className="ml-4 mt-1 space-y-0.5 border-l border-slate-600 pl-3">
           {item.children.map((child) => (
-            <NavLink
-              key={child.id}
-              to={child.path!}
-              end={child.end}
-              className={({ isActive }) =>
-                clsx(
-                  'block px-3 py-2 rounded-lg text-sm transition-colors',
-                  isActive
-                    ? 'bg-[#2d8a4e] text-white font-medium'
-                    : 'text-slate-400 hover:bg-slate-700 hover:text-white'
-                )
-              }
-            >
-              {child.label}
-            </NavLink>
+            <NavChildLink key={child.id} child={child} />
           ))}
         </div>
       )}

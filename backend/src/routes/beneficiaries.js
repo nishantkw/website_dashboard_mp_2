@@ -145,6 +145,37 @@ async function loadHistRows(q) {
   }
 }
 
+async function loadEkycRows() {
+  const { loadTableSafe } = await import('../utils/loadTableSafe.js')
+  return loadTableSafe('dmart_mp', 't_beneficiary_ekyc_dtls_17july2025_old', {
+    orderBy: 'id_pk DESC',
+    limit: 10000,
+  })
+}
+
+async function loadPvtgRows() {
+  const { loadTableSafe } = await import('../utils/loadTableSafe.js')
+  return loadTableSafe('dmart_mp', 'pvtg_by_district_7march_v3', {
+    orderBy: '1',
+    limit: 10000,
+  })
+}
+
+async function loadDisabledSnapshotRows(q) {
+  try {
+    const { rows, _db } = await query(
+      `SELECT * FROM dmart_mp.t_bis_beneficiary_disabled_19aug2025
+       ORDER BY COALESCE(disabled_date, created_dt, updated_dt) DESC NULLS LAST LIMIT 10000`
+    )
+    const table = filterDisabledRows(serializeRows(rows), q)
+    const columns = await resolveColumns('dmart_mp', 't_bis_beneficiary_disabled_19aug2025', table)
+    return { table, columns, db: _db, schema: 'dmart_mp.t_bis_beneficiary_disabled_19aug2025' }
+  } catch (err) {
+    console.warn(`[beneficiaries] t_bis_beneficiary_disabled_19aug2025 skipped: ${err.message}`)
+    return { table: [], columns: [], db: null, schema: '' }
+  }
+}
+
 function countByLabel(table, labelFn) {
   const acc = {}
   for (const d of table) {
@@ -292,6 +323,12 @@ router.get('/', async (req, res) => {
     )
     const hist = await loadHistRows(req.query)
     if (!db) db = hist.db
+    const [ekyc, pvtg, disabledSnap] = await Promise.all([
+      loadEkycRows(),
+      loadPvtgRows(),
+      loadDisabledSnapshotRows(req.query),
+    ])
+    if (!db) db = ekyc.db || pvtg.db || disabledSnap.db
     const bisKpis = buildBisRawKpis(bisRaw.table).map((k) =>
       buildKpi({
         label: k.label,
@@ -404,6 +441,21 @@ router.get('/', async (req, res) => {
         : [],
       bisTable: showBisSection ? bisRaw.table : [],
       bisKpis: showBisSection ? bisKpis : [],
+      ekycSchema: ekyc.schema,
+      ekycTable: ekyc.table,
+      ekycColumns: ekyc.columns,
+      ekycKpis: ekyc.table.length
+        ? [buildKpi({ label: 'e-KYC Records', value: ekyc.table.length, color: 'violet', rows: ekyc.table })]
+        : [],
+      pvtgSchema: pvtg.schema,
+      pvtgTable: pvtg.table,
+      pvtgColumns: pvtg.columns,
+      pvtgKpis: pvtg.table.length
+        ? [buildKpi({ label: 'PVTG Records', value: pvtg.table.length, color: 'orange', rows: pvtg.table })]
+        : [],
+      disabledSnapSchema: disabledSnap.schema,
+      disabledSnapTable: disabledSnap.table,
+      disabledSnapColumns: disabledSnap.columns,
     })
   } catch (err) {
     res.status(500).json({ error: clientError(err) })

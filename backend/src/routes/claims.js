@@ -69,6 +69,14 @@ async function loadPaymentRows(req) {
   }
 }
 
+async function loadJsonDataRows() {
+  const { loadTableSafe } = await import('../utils/loadTableSafe.js')
+  return loadTableSafe('dmart_mp', 'json_data', {
+    orderBy: 'id DESC',
+    limit: 10000,
+  })
+}
+
 router.get('/', async (req, res) => {
   try {
     const { rows, db } = await loadClaimRows(req)
@@ -83,6 +91,7 @@ router.get('/', async (req, res) => {
         })()
     const dashboard = buildClaimsDashboard(rows)
     const payment = await loadPaymentRows(req)
+    const jsonData = await loadJsonDataRows()
     const paymentKpis = buildPaymentKpis(payment.table).map((k) =>
       buildKpi({
         label: k.label,
@@ -99,12 +108,17 @@ router.get('/', async (req, res) => {
       })
     )
 
+    const claimedTotal = jsonData.table.reduce((s, r) => s + (Number(r.claimedamount) || 0), 0)
+    const approvedTotal = jsonData.table.reduce((s, r) => s + (Number(r.approvedamount) || 0), 0)
+
     res.json({
-      db: db || payment.db,
+      db: db || payment.db || jsonData.db,
       schema: `${SCHEMA}.${TABLE}`,
       paymentSchema: payment.table.length ? 'dmart_mp.payment_dtls' : '',
+      jsonDataSchema: jsonData.schema,
       columns,
       paymentColumns: payment.columns,
+      jsonDataColumns: jsonData.columns,
       kpis: dashboard.kpis.map((k, i) => {
         const bucketRows = rows.filter((r) => (r._kpi_bucket || '') === k.key)
         const mom = monthOverMonthChange(bucketRows.length ? bucketRows : rows)
@@ -121,11 +135,34 @@ router.get('/', async (req, res) => {
         }
       }),
       paymentKpis,
+      jsonDataKpis: jsonData.table.length
+        ? [
+            buildKpi({
+              label: 'Claim Line Items',
+              value: jsonData.table.length,
+              color: 'indigo',
+              rows: jsonData.table,
+            }),
+            buildKpi({
+              label: 'Line Claimed ₹',
+              value: Math.round(claimedTotal),
+              color: 'orange',
+              rows: jsonData.table,
+            }),
+            buildKpi({
+              label: 'Line Approved ₹',
+              value: Math.round(approvedTotal),
+              color: 'green',
+              rows: jsonData.table,
+            }),
+          ]
+        : [],
       masterKpis: dashboard.kpis,
       stateHospitalSummary: dashboard.stateHospitalSummary,
       charts: { ...dashboard.charts, ...buildPaymentCharts(payment.table) },
       table: rows.slice(0, req.query.date_from || req.query.date_to || req.query.district || req.query.division || req.query.detail ? 10000 : 2000),
       paymentTable: payment.table,
+      jsonDataTable: jsonData.table,
     })
   } catch (err) {
     res.status(500).json({ error: clientError(err) })

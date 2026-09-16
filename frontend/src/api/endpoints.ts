@@ -130,6 +130,46 @@ export async function fetchBisCardPrinting(qs = '', timeoutMs = 8000) {
   }>(`/bis/card-printing${qs}`, {}, timeoutMs)
 }
 
+export async function fetchBisCardPrintData(qs = '', timeoutMs = 15000) {
+  return apiFetch<{
+    kpis: KPI[]
+    charts: Record<string, ChartDataPoint[]>
+    table: Record<string, string | number>[]
+    columns?: string[]
+    schema?: string
+    augTable?: Record<string, string | number>[]
+    augColumns?: string[]
+    augSchema?: string
+    vvsTable?: Record<string, string | number>[]
+    vvsColumns?: string[]
+    vvsSchema?: string
+    tempTable?: Record<string, string | number>[]
+    tempColumns?: string[]
+    tempSchema?: string
+    leftoverTable?: Record<string, string | number>[]
+    leftoverColumns?: string[]
+    leftoverSchema?: string
+    db?: string
+  }>(`/bis/card-print-data${qs}`, {}, timeoutMs)
+}
+
+export async function fetchBisPrintDedup(qs = '', timeoutMs = 15000) {
+  return apiFetch<{
+    kpis: KPI[]
+    charts: Record<string, ChartDataPoint[]>
+    table: Record<string, string | number>[]
+    columns?: string[]
+    schema?: string
+    batchATable?: Record<string, string | number>[]
+    batchAColumns?: string[]
+    batchASchema?: string
+    batchBTable?: Record<string, string | number>[]
+    batchBColumns?: string[]
+    batchBSchema?: string
+    db?: string
+  }>(`/bis/print-dedup${qs}`, {}, timeoutMs)
+}
+
 export async function fetchClaims(qs = '', timeoutMs = 8000) {
   return apiFetch<{
     kpis: KPI[]
@@ -138,11 +178,15 @@ export async function fetchClaims(qs = '', timeoutMs = 8000) {
     charts: Record<string, ChartDataPoint[]>
     table: Record<string, string | number>[]
     paymentTable?: Record<string, string | number>[]
+    jsonDataTable?: Record<string, string | number>[]
     columns?: string[]
     paymentColumns?: string[]
+    jsonDataColumns?: string[]
     schema?: string
     paymentSchema?: string
+    jsonDataSchema?: string
     paymentKpis?: KPI[]
+    jsonDataKpis?: KPI[]
     db?: string
   }>(`/claims${qs}`, {}, timeoutMs)
 }
@@ -175,14 +219,25 @@ export async function fetchBeneficiaries(qs = '', timeoutMs = 8000) {
     bisTable: Record<string, string | number>[]
     sourceTable?: Record<string, string | number>[]
     disabledTable?: Record<string, string | number>[]
+    ekycTable?: Record<string, string | number>[]
+    pvtgTable?: Record<string, string | number>[]
+    disabledSnapTable?: Record<string, string | number>[]
     columns?: string[]
     sourceColumns?: string[]
     disabledColumns?: string[]
+    ekycColumns?: string[]
+    pvtgColumns?: string[]
+    disabledSnapColumns?: string[]
     schema?: string
     sourceSchema?: string
     disabledSchema?: string
+    ekycSchema?: string
+    pvtgSchema?: string
+    disabledSnapSchema?: string
     bisSchema?: string
     disabledKpis?: KPI[]
+    ekycKpis?: KPI[]
+    pvtgKpis?: KPI[]
     bisKpis?: KPI[]
     bisColumns?: string[]
     db?: string
@@ -198,21 +253,37 @@ export async function fetchHospitals(qs = '') {
     total?: number
     limit?: number
     offset?: number
+    section?: string
     lookupTable?: Record<string, string | number>[]
     deempanelTable?: Record<string, string | number>[]
     hemTable?: Record<string, string | number>[]
+    manpowerTable?: Record<string, string | number>[]
     columns?: string[]
     lookupColumns?: string[]
     deempanelColumns?: string[]
     hemColumns?: string[]
+    manpowerColumns?: string[]
     schema?: string
     lookupSchema?: string
     deempanelSchema?: string
     hemSchema?: string
+    manpowerSchema?: string
     deempanelKpis?: KPI[]
     hemKpis?: KPI[]
+    manpowerKpis?: KPI[]
     db?: string
   }>(`/hospitals${qs}`, {}, 60000)
+}
+
+/** Scoped hospital payloads — each section loads only its data. */
+export async function fetchHospitalsSection(
+  section: 'overview' | 'master' | 'deempanel' | 'hem' | 'lookup' | 'manpower',
+  qs = ''
+) {
+  const params = new URLSearchParams(qs.replace(/^\?/, ''))
+  params.set('section', section)
+  const s = params.toString()
+  return fetchHospitals(s ? `?${s}` : `?section=${section}`)
 }
 
 export async function fetchHospitalsExport(qs = '') {
@@ -263,6 +334,12 @@ export async function fetchWorkflow(qs = '', timeoutMs = 8000) {
     proTable?: Record<string, string | number>[]
     proColumns?: string[]
     proKpis?: KPI[]
+    statusBisTable?: Record<string, string | number>[]
+    statusBisColumns?: string[]
+    statusBisSchema?: string
+    statusTmsTable?: Record<string, string | number>[]
+    statusTmsColumns?: string[]
+    statusTmsSchema?: string
     columns?: string[]
     schema?: string
     proSchema?: string
@@ -277,12 +354,15 @@ export async function fetchPatients(qs = '', timeoutMs = 8000) {
     table: Record<string, string | number>[]
     treatmentTable?: Record<string, string | number>[]
     morthTable?: Record<string, string | number>[]
+    stratTable?: Record<string, string | number>[]
     columns?: string[]
     treatmentColumns?: string[]
     morthColumns?: string[]
+    stratColumns?: string[]
     schema?: string
     treatmentSchema?: string
     morthSchema?: string
+    stratSchema?: string
     morthKpis?: KPI[]
     db?: string
   }>(`/patients${qs}`, {}, timeoutMs)

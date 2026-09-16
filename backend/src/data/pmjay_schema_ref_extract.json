@@ -1,0 +1,1562 @@
+{
+  "already_printed_card_no_290626": {
+    "description": "Reference list of Ayushman card numbers that have already been printed, captured as part of the 29-06 (290626) batch/run. Used to filter these cards out of subsequent print jobs so the same card is not printed twice.",
+    "columns": [
+      {
+        "name": "card_no",
+        "type": "text",
+        "desc": ""
+      }
+    ]
+  },
+  "already_printed_card_no_34321992_8672488_09082026": {
+    "description": "A second, differently-batched reference list of already-printed card numbers (batch/run identifiers 34321992, 8672488, dated 09-08-2026). Serves the same de-duplication purpose as already_printed_card_no_290626 but for a separate print run.",
+    "columns": [
+      {
+        "name": "card_no",
+        "type": "text",
+        "desc": ""
+      }
+    ]
+  },
+  "card_print_data_madhya_pradesh_01aug2025": {
+    "description": "Beneficiary-level dataset (Madhya Pradesh, 01-Aug-2025 extract) used to generate physical Ayushman/PMJAY cards. Combines source (SECC/beneficiary master) demographic fields with KYC-verified fields, geography (state/district/block/village), and card production status.",
+    "columns": [
+      {
+        "name": "id_pk",
+        "type": "bigint",
+        "desc": "Surrogate primary key."
+      },
+      {
+        "name": "card_no",
+        "type": "text",
+        "desc": "Ayushman card number to be printed on the card."
+      },
+      {
+        "name": "source_name",
+        "type": "text",
+        "desc": "Beneficiary name as per the original source/master record."
+      },
+      {
+        "name": "kyc_name",
+        "type": "text",
+        "desc": "Beneficiary name as confirmed during e-KYC."
+      },
+      {
+        "name": "source_gender",
+        "type": "text",
+        "desc": "Gender as per source record."
+      },
+      {
+        "name": "kyc_gender",
+        "type": "text",
+        "desc": "Gender as confirmed during e-KYC."
+      },
+      {
+        "name": "source_dob",
+        "type": "text",
+        "desc": "Date of birth as per source record."
+      },
+      {
+        "name": "kyc_dob",
+        "type": "text",
+        "desc": "Date of birth as confirmed during e-KYC."
+      },
+      {
+        "name": "family_id",
+        "type": "text",
+        "desc": "PMJAY family identifier."
+      },
+      {
+        "name": "member_id",
+        "type": "text",
+        "desc": "PMJAY member identifier within the family."
+      },
+      {
+        "name": "source_type",
+        "type": "text",
+        "desc": "Origin/category of the source record (e.g. SECC, state database)."
+      },
+      {
+        "name": "father_name",
+        "type": "text",
+        "desc": "Father's name of the beneficiary."
+      },
+      {
+        "name": "state_cd",
+        "type": "text",
+        "desc": "State code (LGD/PMJAY code)."
+      },
+      {
+        "name": "state_name",
+        "type": "text",
+        "desc": "State name."
+      },
+      {
+        "name": "dist_cd",
+        "type": "text",
+        "desc": "District code."
+      },
+      {
+        "name": "dist_name",
+        "type": "text",
+        "desc": "District name."
+      },
+      {
+        "name": "block_id",
+        "type": "text",
+        "desc": "Block/tehsil identifier."
+      },
+      {
+        "name": "block_name",
+        "type": "text",
+        "desc": "Block/tehsil name."
+      },
+      {
+        "name": "village_id",
+        "type": "text",
+        "desc": "Village identifier."
+      },
+      {
+        "name": "village_name",
+        "type": "text",
+        "desc": "Village name."
+      },
+      {
+        "name": "pincode",
+        "type": "text",
+        "desc": "Postal PIN code."
+      },
+      {
+        "name": "rural_urban_flag",
+        "type": "text",
+        "desc": "Indicates whether the address is rural or urban."
+      },
+      {
+        "name": "abha_id",
+        "type": "text",
+        "desc": "Ayushman Bharat Health Account (ABHA) ID, if linked."
+      },
+      {
+        "name": "ben_ref_id",
+        "type": "text",
+        "desc": "Beneficiary reference ID used across PMJAY systems."
+      },
+      {
+        "name": "created_by",
+        "type": "text",
+        "desc": "User/system that created the record."
+      },
+      {
+        "name": "created_dt",
+        "type": "timestamptz",
+        "desc": "Timestamp the record was created."
+      },
+      {
+        "name": "approve_date",
+        "type": "timestamptz",
+        "desc": "Timestamp the card/record was approved."
+      },
+      {
+        "name": "card_status",
+        "type": "text",
+        "desc": "Current status of the card (e.g. approved, printed, pending)."
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "desc": "Full postal address of the beneficiary."
+      },
+      {
+        "name": "photo",
+        "type": "text",
+        "desc": "Reference/path to the beneficiary's photograph used on the card."
+      }
+    ]
+  },
+  "card_print_data_madhya_pradesh_vvs_29may2025_f": {
+    "description": "Same structure as card_print_data_madhya_pradesh_01aug2025, but sourced from the 'VVS' (verification/validation-specific, or a vendor-specific feed) extract dated 29-May-2025 ('_f' = final). Used as an alternate or supplementary card-print batch for Madhya Pradesh.",
+    "columns": [
+      {
+        "name": "id_pk",
+        "type": "bigint",
+        "desc": ""
+      },
+      {
+        "name": "card_no",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "source_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "kyc_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "source_gender",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "kyc_gender",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "source_dob",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "kyc_dob",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "family_id",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "member_id",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "source_type",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "father_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "state_cd",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "state_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "dist_cd",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "dist_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "block_id",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "block_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "village_id",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "village_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "pincode",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "rural_urban_flag",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "abha_id",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "ben_ref_id",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "created_by",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "created_dt",
+        "type": "timestamptz",
+        "desc": ""
+      },
+      {
+        "name": "approve_date",
+        "type": "timestamptz",
+        "desc": ""
+      },
+      {
+        "name": "card_status",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "photo",
+        "type": "text",
+        "desc": ""
+      }
+    ]
+  },
+  "card_print_data_temp_t_bis_ekyc_dtl_mp_20260703_with_village_name": {
+    "description": "Temporary working table (03-Jul-2026 extract) built from BIS e-KYC details for Madhya Pradesh, enriched with village name, used to stage card-print data before it is finalized/loaded into the main card_print_data table. Adds ben_mobile_no over the standard card_print_data layout.",
+    "columns": [
+      {
+        "name": "id_pk",
+        "type": "bigint",
+        "desc": ""
+      },
+      {
+        "name": "card_no",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "source_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "kyc_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "source_gender",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "kyc_gender",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "source_dob",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "kyc_dob",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "family_id",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "member_id",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "source_type",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "ben_mobile_no",
+        "type": "text",
+        "desc": "Beneficiary's mobile number, captured for this extract."
+      },
+      {
+        "name": "father_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "state_cd",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "state_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "dist_cd",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "dist_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "block_id",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "block_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "village_id",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "village_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "pincode",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "rural_urban_flag",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "abha_id",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "ben_ref_id",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "created_by",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "created_dt",
+        "type": "timestamptz",
+        "desc": ""
+      },
+      {
+        "name": "approve_date",
+        "type": "timestamptz",
+        "desc": ""
+      },
+      {
+        "name": "card_status",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "photo",
+        "type": "text",
+        "desc": ""
+      }
+    ]
+  },
+  "left_over_cards_for_print_of_mp_with_village_name_09aug2026_final": {
+    "description": "Final list (09-Aug-2026) of Madhya Pradesh beneficiaries whose Ayushman cards are still pending/left over from earlier print runs, enriched with village name. Same layout as the card_print_data tables; used to drive a cleanup/completion print batch. Adds ben_mobile_no.",
+    "columns": [
+      {
+        "name": "id_pk",
+        "type": "bigint",
+        "desc": ""
+      },
+      {
+        "name": "card_no",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "source_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "kyc_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "source_gender",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "kyc_gender",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "source_dob",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "kyc_dob",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "family_id",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "member_id",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "source_type",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "ben_mobile_no",
+        "type": "text",
+        "desc": "Beneficiary's mobile number, captured for this extract."
+      },
+      {
+        "name": "father_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "state_cd",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "state_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "dist_cd",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "dist_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "block_id",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "block_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "village_id",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "village_name",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "pincode",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "rural_urban_flag",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "abha_id",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "ben_ref_id",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "created_by",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "created_dt",
+        "type": "timestamptz",
+        "desc": ""
+      },
+      {
+        "name": "approve_date",
+        "type": "timestamptz",
+        "desc": ""
+      },
+      {
+        "name": "card_status",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "desc": ""
+      },
+      {
+        "name": "photo",
+        "type": "text",
+        "desc": ""
+      }
+    ]
+  },
+  "pvtg_by_district_7march_v3": {
+    "description": "District-wise list (07-Mar extract, v3) of Particularly Vulnerable Tribal Group (PVTG) beneficiaries, including verification status and any flags/reasons for record deletion, used for review/cleanup of PVTG beneficiary data.",
+    "columns": [
+      {
+        "name": "familyid",
+        "type": "text",
+        "desc": "PMJAY family identifier."
+      },
+      {
+        "name": "memberid",
+        "type": "text",
+        "desc": "PMJAY member identifier."
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "desc": "Beneficiary name."
+      },
+      {
+        "name": "villege_name",
+        "type": "text",
+        "desc": "Village name (source column name is misspelled in the source system)."
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "desc": "Beneficiary address."
+      },
+      {
+        "name": "card_no",
+        "type": "text",
+        "desc": "Ayushman card number."
+      },
+      {
+        "name": "creationdate",
+        "type": "text",
+        "desc": "Date the record was created."
+      },
+      {
+        "name": "to_be_deleted",
+        "type": "text",
+        "desc": "Flag indicating the record is marked for deletion."
+      },
+      {
+        "name": "dlt_reason",
+        "type": "text",
+        "desc": "Reason for the deletion flag."
+      },
+      {
+        "name": "verification_status",
+        "type": "text",
+        "desc": "Current verification status of the record."
+      },
+      {
+        "name": "sha_final_remark",
+        "type": "text",
+        "desc": "Final remark recorded by the State Health Agency (SHA)."
+      },
+      {
+        "name": "sha_final_action",
+        "type": "text",
+        "desc": "Final action taken by the SHA."
+      }
+    ]
+  },
+  "t_beneficiary_ekyc_dtls_17july2025_old": {
+    "description": "Older (17-Jul-2025) snapshot of beneficiary e-KYC details: identity (Aadhaar), demographics, family address, and linked card/print status. Superseded by newer e-KYC extracts but retained for reference/audit.",
+    "columns": [
+      {
+        "name": "id_pk",
+        "type": "bigint",
+        "desc": "Primary key."
+      },
+      {
+        "name": "family_id",
+        "type": "text",
+        "desc": "PMJAY family identifier."
+      },
+      {
+        "name": "member_id",
+        "type": "text",
+        "desc": "PMJAY member identifier."
+      },
+      {
+        "name": "aadhaar_no",
+        "type": "text",
+        "desc": "Beneficiary's Aadhaar number (masked/hashed in most PMJAY systems)."
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "desc": "e-KYC status."
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "desc": "Beneficiary name."
+      },
+      {
+        "name": "yearofbirth",
+        "type": "text",
+        "desc": "Year of birth."
+      },
+      {
+        "name": "gender",
+        "type": "text",
+        "desc": "Gender."
+      },
+      {
+        "name": "photo",
+        "type": "text",
+        "desc": "Reference/path to the beneficiary photograph."
+      },
+      {
+        "name": "fathername",
+        "type": "text",
+        "desc": "Father's name."
+      },
+      {
+        "name": "spouse",
+        "type": "text",
+        "desc": "Spouse's name."
+      },
+      {
+        "name": "mothername",
+        "type": "text",
+        "desc": "Mother's name."
+      },
+      {
+        "name": "addressline1",
+        "type": "text",
+        "desc": "Address line 1."
+      },
+      {
+        "name": "addressline2",
+        "type": "text",
+        "desc": "Address line 2."
+      },
+      {
+        "name": "city",
+        "type": "text",
+        "desc": "City/town."
+      },
+      {
+        "name": "district",
+        "type": "text",
+        "desc": "District."
+      },
+      {
+        "name": "state",
+        "type": "text",
+        "desc": "State."
+      },
+      {
+        "name": "pincode",
+        "type": "text",
+        "desc": "Postal PIN code."
+      },
+      {
+        "name": "json_obj_ben_ekyc_dtl",
+        "type": "text",
+        "desc": "Raw JSON object holding the full e-KYC detail payload."
+      },
+      {
+        "name": "source_type",
+        "type": "text",
+        "desc": "Origin/category of the source record."
+      },
+      {
+        "name": "plain_aadhaar",
+        "type": "text",
+        "desc": "Unmasked Aadhaar value (sensitive; access should be restricted)."
+      },
+      {
+        "name": "card_no",
+        "type": "text",
+        "desc": "Ayushman card number."
+      },
+      {
+        "name": "card_status",
+        "type": "text",
+        "desc": "Status of the associated card."
+      },
+      {
+        "name": "mobile_no",
+        "type": "text",
+        "desc": "Beneficiary's mobile number."
+      },
+      {
+        "name": "district_lgd",
+        "type": "text",
+        "desc": "District code per the Local Government Directory (LGD) standard."
+      }
+    ]
+  },
+  "t_bis_beneficiary_disabled_19aug2025": {
+    "description": "Audit/log table (19-Aug-2025) of BIS beneficiary records that have been disabled/deactivated, capturing who disabled the record, the SHA user and role involved, and the reason for disabling.",
+    "columns": [
+      {
+        "name": "state_cd",
+        "type": "text",
+        "desc": "State code."
+      },
+      {
+        "name": "card_no",
+        "type": "text",
+        "desc": "Ayushman card number."
+      },
+      {
+        "name": "card_status",
+        "type": "text",
+        "desc": "Status of the card at the time of disabling."
+      },
+      {
+        "name": "family_id",
+        "type": "text",
+        "desc": "PMJAY family identifier."
+      },
+      {
+        "name": "member_id",
+        "type": "text",
+        "desc": "PMJAY member identifier."
+      },
+      {
+        "name": "source_type",
+        "type": "text",
+        "desc": "Origin/category of the source record."
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "desc": "Beneficiary name."
+      },
+      {
+        "name": "created_by",
+        "type": "text",
+        "desc": "User/system that created the record."
+      },
+      {
+        "name": "created_dt",
+        "type": "timestamptz",
+        "desc": "Creation timestamp."
+      },
+      {
+        "name": "updated_by",
+        "type": "text",
+        "desc": "User/system that last updated the record."
+      },
+      {
+        "name": "updated_dt",
+        "type": "timestamptz",
+        "desc": "Last-update timestamp."
+      },
+      {
+        "name": "date_of_birth",
+        "type": "text",
+        "desc": "Beneficiary date of birth."
+      },
+      {
+        "name": "acted_workflow_user",
+        "type": "text",
+        "desc": "User who actioned the disabling workflow step."
+      },
+      {
+        "name": "sha_user",
+        "type": "text",
+        "desc": "State Health Agency user associated with the action."
+      },
+      {
+        "name": "user_id",
+        "type": "text",
+        "desc": "Identifier of the acting user."
+      },
+      {
+        "name": "sha_name",
+        "type": "text",
+        "desc": "Name of the SHA user."
+      },
+      {
+        "name": "email_id",
+        "type": "text",
+        "desc": "Email address of the acting user."
+      },
+      {
+        "name": "mobile_number",
+        "type": "bigint",
+        "desc": "Mobile number of the acting user."
+      },
+      {
+        "name": "entity_name",
+        "type": "text",
+        "desc": "Entity (e.g. hospital/agency) associated with the action."
+      },
+      {
+        "name": "role_name",
+        "type": "text",
+        "desc": "Role of the acting user."
+      },
+      {
+        "name": "disabled_date",
+        "type": "timestamptz",
+        "desc": "Date/time the beneficiary record was disabled."
+      },
+      {
+        "name": "reason_desc",
+        "type": "text",
+        "desc": "Description of the reason for disabling."
+      },
+      {
+        "name": "reason_id",
+        "type": "text",
+        "desc": "Coded reason identifier for disabling."
+      }
+    ]
+  },
+  "m_status_bis": {
+    "description": "Master/lookup table of workflow statuses used within the BIS (Beneficiary Identification System) module \u2014 maps numeric status codes to descriptions, the user role and action associated with each status, and the workflow they belong to.",
+    "columns": [
+      {
+        "name": "id_pk",
+        "type": "integer",
+        "desc": "Primary key."
+      },
+      {
+        "name": "status",
+        "type": "smallint",
+        "desc": "Numeric status code."
+      },
+      {
+        "name": "status_descrption",
+        "type": "text",
+        "desc": "Description of the status (source column name is misspelled in the source system)."
+      },
+      {
+        "name": "user_role",
+        "type": "text",
+        "desc": "Role permitted to act on this status."
+      },
+      {
+        "name": "action",
+        "type": "text",
+        "desc": "Action associated with this status transition."
+      },
+      {
+        "name": "workflow_id",
+        "type": "text",
+        "desc": "Workflow this status belongs to."
+      },
+      {
+        "name": "status_name",
+        "type": "text",
+        "desc": "Short display name for the status."
+      },
+      {
+        "name": "created_by",
+        "type": "text",
+        "desc": "User/system that created the record."
+      },
+      {
+        "name": "created_dt",
+        "type": "timestamptz",
+        "desc": "Creation timestamp."
+      },
+      {
+        "name": "updated_by",
+        "type": "text",
+        "desc": "User/system that last updated the record."
+      },
+      {
+        "name": "updated_dt",
+        "type": "timestamptz",
+        "desc": "Last-update timestamp."
+      }
+    ]
+  },
+  "m_status_tms": {
+    "description": "Master/lookup table of workflow statuses used within the TMS (Transaction/Treatment Management System) module, analogous to m_status_bis but for the TMS workflow, and additionally includes a search_status flag for filtering.",
+    "columns": [
+      {
+        "name": "id_pk",
+        "type": "integer",
+        "desc": "Primary key."
+      },
+      {
+        "name": "status_descrption",
+        "type": "text",
+        "desc": "Description of the status (source column name is misspelled in the source system)."
+      },
+      {
+        "name": "status",
+        "type": "smallint",
+        "desc": "Numeric status code."
+      },
+      {
+        "name": "created_by",
+        "type": "text",
+        "desc": "User/system that created the record."
+      },
+      {
+        "name": "created_dt",
+        "type": "timestamptz",
+        "desc": "Creation timestamp."
+      },
+      {
+        "name": "updated_by",
+        "type": "text",
+        "desc": "User/system that last updated the record."
+      },
+      {
+        "name": "updated_dt",
+        "type": "timestamptz",
+        "desc": "Last-update timestamp."
+      },
+      {
+        "name": "user_role",
+        "type": "text",
+        "desc": "Role permitted to act on this status."
+      },
+      {
+        "name": "action",
+        "type": "text",
+        "desc": "Action associated with this status transition."
+      },
+      {
+        "name": "workflow_id",
+        "type": "text",
+        "desc": "Workflow this status belongs to."
+      },
+      {
+        "name": "status_name",
+        "type": "text",
+        "desc": "Short display name for the status."
+      },
+      {
+        "name": "search_status",
+        "type": "smallint",
+        "desc": "Simplified status code used for search/filter screens."
+      }
+    ]
+  },
+  "t_hem_manpower": {
+    "description": "Registry of empanelled hospital manpower (doctors/medical and non-medical staff) under HEM (Hospital Empanelment Module) \u2014 qualifications, registration, facility association, employment details and document references, used for empanelment compliance tracking.",
+    "columns": [
+      {
+        "name": "manpower_id_pk",
+        "type": "bigint",
+        "desc": "Primary key."
+      },
+      {
+        "name": "med_exp_type",
+        "type": "text",
+        "desc": "Medical experience/specialty type."
+      },
+      {
+        "name": "exp_type",
+        "type": "text",
+        "desc": "Type of experience recorded."
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "desc": "Staff member's name."
+      },
+      {
+        "name": "reg_number",
+        "type": "text",
+        "desc": "Medical/professional council registration number."
+      },
+      {
+        "name": "mobile_num",
+        "type": "text",
+        "desc": "Mobile number."
+      },
+      {
+        "name": "emailid",
+        "type": "text",
+        "desc": "Email address."
+      },
+      {
+        "name": "experience",
+        "type": "text",
+        "desc": "Years/description of experience."
+      },
+      {
+        "name": "highest_qualification",
+        "type": "text",
+        "desc": "Highest educational qualification."
+      },
+      {
+        "name": "specialization",
+        "type": "text",
+        "desc": "Area of medical specialization."
+      },
+      {
+        "name": "university",
+        "type": "text",
+        "desc": "University/institution of qualification."
+      },
+      {
+        "name": "facility_opr_status",
+        "type": "text",
+        "desc": "Operational status of the associated facility."
+      },
+      {
+        "name": "json_obj_dtl",
+        "type": "text",
+        "desc": "Raw JSON object holding additional detail fields."
+      },
+      {
+        "name": "ownership_type",
+        "type": "text",
+        "desc": "Ownership type of the associated facility (govt/private)."
+      },
+      {
+        "name": "created_by",
+        "type": "text",
+        "desc": "User/system that created the record."
+      },
+      {
+        "name": "created_dt",
+        "type": "timestamptz",
+        "desc": "Creation timestamp."
+      },
+      {
+        "name": "updated_by",
+        "type": "text",
+        "desc": "User/system that last updated the record."
+      },
+      {
+        "name": "updated_dt",
+        "type": "timestamptz",
+        "desc": "Last-update timestamp."
+      },
+      {
+        "name": "active_status",
+        "type": "smallint",
+        "desc": "Whether the manpower record is currently active."
+      },
+      {
+        "name": "hosp_id_pk",
+        "type": "integer",
+        "desc": "Foreign key to the associated hospital/facility."
+      },
+      {
+        "name": "registration_certicate",
+        "type": "text",
+        "desc": "Reference/path to the registration certificate document."
+      },
+      {
+        "name": "declaration_certificate",
+        "type": "text",
+        "desc": "Reference/path to the declaration certificate document."
+      },
+      {
+        "name": "shift",
+        "type": "text",
+        "desc": "Duty shift of the staff member."
+      },
+      {
+        "name": "manpower_type",
+        "type": "text",
+        "desc": "Category of manpower (e.g. doctor, paramedic, admin)."
+      },
+      {
+        "name": "app_status",
+        "type": "integer",
+        "desc": "Application/approval status."
+      },
+      {
+        "name": "scheme_code",
+        "type": "text",
+        "desc": "Scheme code the manpower is empanelled under."
+      },
+      {
+        "name": "hprid",
+        "type": "text",
+        "desc": "Health Professional Registry ID (national HPR)."
+      },
+      {
+        "name": "hrsubtype",
+        "type": "integer",
+        "desc": "HR sub-type classification code."
+      },
+      {
+        "name": "data_source",
+        "type": "text",
+        "desc": "Source system the record originated from."
+      },
+      {
+        "name": "employment_type",
+        "type": "text",
+        "desc": "Type of employment (e.g. full-time, contractual)."
+      }
+    ]
+  },
+  "json_data": {
+    "description": "Financial/claims line-item data (likely unpacked from a JSON payload \u2014 hence the name) tied to a treatment registration: claimed vs. approved amounts, package/procedure costs, incentives, deductions (TDS, recovery fund), and net payable/wallet balances for a hospital claim.",
+    "columns": [
+      {
+        "name": "id",
+        "type": "bigint",
+        "desc": "Surrogate primary key."
+      },
+      {
+        "name": "registration_id",
+        "type": "integer",
+        "desc": "Links to the treatment/claim registration."
+      },
+      {
+        "name": "jsonb_value",
+        "type": "text",
+        "desc": "Raw JSON payload this row was derived/unpacked from."
+      },
+      {
+        "name": "patientnumber",
+        "type": "text",
+        "desc": "Patient identifier for the treatment episode."
+      },
+      {
+        "name": "householdid",
+        "type": "text",
+        "desc": "Household identifier of the beneficiary."
+      },
+      {
+        "name": "claimedamount",
+        "type": "numeric",
+        "desc": "Amount claimed by the hospital."
+      },
+      {
+        "name": "totalamount",
+        "type": "numeric",
+        "desc": "Total billed amount."
+      },
+      {
+        "name": "approvedamount",
+        "type": "numeric",
+        "desc": "Amount approved for payment."
+      },
+      {
+        "name": "procedurestrat",
+        "type": "text",
+        "desc": "Procedure stratification code."
+      },
+      {
+        "name": "procedurestratname",
+        "type": "text",
+        "desc": "Procedure stratification name/description."
+      },
+      {
+        "name": "stratificationcost",
+        "type": "numeric",
+        "desc": "Cost associated with the stratification tier."
+      },
+      {
+        "name": "sno",
+        "type": "text",
+        "desc": "Serial/line number within the claim."
+      },
+      {
+        "name": "itemsequence",
+        "type": "integer",
+        "desc": "Sequence number of the billed item."
+      },
+      {
+        "name": "itemid",
+        "type": "text",
+        "desc": "Item identifier."
+      },
+      {
+        "name": "packagecode",
+        "type": "text",
+        "desc": "PMJAY treatment package code."
+      },
+      {
+        "name": "packagetype",
+        "type": "text",
+        "desc": "Type of package (e.g. surgical, medical)."
+      },
+      {
+        "name": "packagecost",
+        "type": "numeric",
+        "desc": "Standard cost of the package."
+      },
+      {
+        "name": "procedurecost",
+        "type": "numeric",
+        "desc": "Cost of the specific procedure."
+      },
+      {
+        "name": "quantity",
+        "type": "numeric",
+        "desc": "Quantity billed."
+      },
+      {
+        "name": "approvedquantity",
+        "type": "numeric",
+        "desc": "Quantity approved."
+      },
+      {
+        "name": "percentageguidelines",
+        "type": "text",
+        "desc": "Guideline percentage applied (e.g. tariff cap)."
+      },
+      {
+        "name": "hospitalincentives",
+        "type": "text",
+        "desc": "Incentive amount payable to the hospital."
+      },
+      {
+        "name": "incentivecategory",
+        "type": "text",
+        "desc": "Category of incentive applied."
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "desc": "Line amount."
+      },
+      {
+        "name": "netamount",
+        "type": "numeric",
+        "desc": "Net amount after adjustments."
+      },
+      {
+        "name": "packagedesc",
+        "type": "text",
+        "desc": "Description of the package."
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "desc": "Status of the claim line item."
+      },
+      {
+        "name": "actionid",
+        "type": "text",
+        "desc": "Identifier of the workflow action taken."
+      },
+      {
+        "name": "actionname",
+        "type": "text",
+        "desc": "Name/description of the workflow action."
+      },
+      {
+        "name": "recoveryfunctionalityapplicable",
+        "type": "text",
+        "desc": "Whether recovery-fund logic applies to this claim."
+      },
+      {
+        "name": "recoverydetails",
+        "type": "text",
+        "desc": "Details of any recovery applied."
+      },
+      {
+        "name": "netpayable",
+        "type": "numeric",
+        "desc": "Final net payable amount to the hospital."
+      },
+      {
+        "name": "tdsdeduction",
+        "type": "numeric",
+        "desc": "Tax Deducted at Source amount."
+      },
+      {
+        "name": "rfdeduction",
+        "type": "numeric",
+        "desc": "Recovery Fund deduction amount."
+      },
+      {
+        "name": "gcamount",
+        "type": "numeric",
+        "desc": "Grievance/correction amount (GC)."
+      },
+      {
+        "name": "gcpayableamount",
+        "type": "numeric",
+        "desc": "Payable amount after GC adjustment."
+      },
+      {
+        "name": "gctdsdeduction",
+        "type": "numeric",
+        "desc": "TDS deduction on the GC amount."
+      },
+      {
+        "name": "gcrfdeduction",
+        "type": "numeric",
+        "desc": "Recovery Fund deduction on the GC amount."
+      },
+      {
+        "name": "exempttype",
+        "type": "text",
+        "desc": "Type of exemption applied, if any."
+      },
+      {
+        "name": "liabilitycode",
+        "type": "text",
+        "desc": "Code identifying the liability bucket."
+      },
+      {
+        "name": "walletcode",
+        "type": "text",
+        "desc": "Code identifying the hospital/scheme wallet used for payment."
+      },
+      {
+        "name": "balanceamount",
+        "type": "numeric",
+        "desc": "Remaining balance amount."
+      },
+      {
+        "name": "liability_amount",
+        "type": "numeric",
+        "desc": "Total liability amount."
+      },
+      {
+        "name": "liability_approvedamount",
+        "type": "numeric",
+        "desc": "Approved amount against the liability."
+      }
+    ]
+  },
+  "treatment_stratification_details": {
+    "description": "Line-level treatment/procedure stratification data tied to a patient registration \u2014 procedure identity, type, and the stratification tier and amount applied for cost/payment calculation.",
+    "columns": [
+      {
+        "name": "registration_id",
+        "type": "integer",
+        "desc": "Links to the treatment/claim registration."
+      },
+      {
+        "name": "patientnumber",
+        "type": "text",
+        "desc": "Patient identifier for the treatment episode."
+      },
+      {
+        "name": "householdid",
+        "type": "text",
+        "desc": "Household identifier of the beneficiary."
+      },
+      {
+        "name": "treatment_sno",
+        "type": "text",
+        "desc": "Serial number of the treatment line item."
+      },
+      {
+        "name": "treatment_itemsequence",
+        "type": "integer",
+        "desc": "Sequence number of the treatment item."
+      },
+      {
+        "name": "treatment_itemid",
+        "type": "text",
+        "desc": "Identifier of the treatment item."
+      },
+      {
+        "name": "type",
+        "type": "text",
+        "desc": "Type code of the treatment/procedure entry."
+      },
+      {
+        "name": "typedesc",
+        "type": "text",
+        "desc": "Description of the type."
+      },
+      {
+        "name": "dateonwhich",
+        "type": "timestamptz",
+        "desc": "Date the treatment/procedure occurred."
+      },
+      {
+        "name": "procedureid",
+        "type": "text",
+        "desc": "Identifier of the procedure."
+      },
+      {
+        "name": "procedurecode",
+        "type": "text",
+        "desc": "Standard procedure code."
+      },
+      {
+        "name": "procedurename",
+        "type": "text",
+        "desc": "Name of the procedure."
+      },
+      {
+        "name": "proceduretype",
+        "type": "text",
+        "desc": "Type/category of the procedure."
+      },
+      {
+        "name": "procedurecategoryflag",
+        "type": "text",
+        "desc": "Flag indicating the procedure category."
+      },
+      {
+        "name": "procedurestrat",
+        "type": "text",
+        "desc": "Stratification code applied to the procedure."
+      },
+      {
+        "name": "procedurestratname",
+        "type": "text",
+        "desc": "Name/description of the stratification tier."
+      },
+      {
+        "name": "stratamount",
+        "type": "numeric",
+        "desc": "Amount associated with the stratification tier."
+      }
+    ]
+  }
+}

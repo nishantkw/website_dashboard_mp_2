@@ -516,7 +516,7 @@
       "schema": "bis_raw",
       "table": "t_bis_beneficiary_dtls",
       "label": "BIS Beneficiary Details (bis_raw)",
-      "source": "Data dictionary — Redshift BIS",
+      "source": "Data dictionary \u2014 Redshift BIS",
       "module": "bis",
       "moduleLabel": "BIS Card Printing",
       "primaryKey": "id_pk",
@@ -1108,7 +1108,7 @@
       "schema": "dmart_mp",
       "table": "claim_paid_excel_t",
       "label": "Claims & Payments (claim_paid_excel_t)",
-      "source": "Data dictionary — Redshift TMS",
+      "source": "Data dictionary \u2014 Redshift TMS",
       "module": "claims",
       "moduleLabel": "Claims & Payments",
       "primaryKey": "registration_id",
@@ -3958,7 +3958,7 @@
       "schema": "dmart_mp",
       "table": "ump_role_dtl",
       "label": "Ump Role Dtl",
-      "source": "Data dictionary — UMP",
+      "source": "Data dictionary \u2014 UMP",
       "module": "ump",
       "moduleLabel": "UMP User Management",
       "primaryKey": "role_id",
@@ -4142,7 +4142,7 @@
       "schema": "ump_raw",
       "table": "ump_user_dtl",
       "label": "Ump User Dtl",
-      "source": "Data dictionary — UMP",
+      "source": "Data dictionary \u2014 UMP",
       "module": "ump",
       "moduleLabel": "UMP User Management",
       "primaryKey": "id_pk",
@@ -4985,6 +4985,1394 @@
         {
           "name": "service_request_type",
           "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.already_printed_card_no_290626",
+      "logicalName": "already_printed_card_no_290626",
+      "schema": "dmart_mp",
+      "table": "already_printed_card_no_290626",
+      "label": "Already Printed Cards (29-Jun batch)",
+      "source": "PMJAY_dmart_mp_Schema_Reference.docx",
+      "module": "bis",
+      "moduleLabel": "BIS Card Printing",
+      "primaryKey": "card_no",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "card_no",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.already_printed_card_no_34321992_8672488_09082026",
+      "logicalName": "already_printed_card_no_34321992_8672488_09082026",
+      "schema": "dmart_mp",
+      "table": "already_printed_card_no_34321992_8672488_09082026",
+      "label": "Already Printed Cards (09-Aug batch)",
+      "source": "PMJAY_dmart_mp_Schema_Reference.docx",
+      "module": "bis",
+      "moduleLabel": "BIS Card Printing",
+      "primaryKey": "card_no",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "card_no",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.card_print_data_madhya_pradesh_01aug2025",
+      "logicalName": "card_print_data_madhya_pradesh_01aug2025",
+      "schema": "dmart_mp",
+      "table": "card_print_data_madhya_pradesh_01aug2025",
+      "label": "Card Print Data MP (01-Aug-2025)",
+      "source": "PMJAY_dmart_mp_Schema_Reference.docx",
+      "module": "bis",
+      "moduleLabel": "BIS Card Printing",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "bigint"
+        },
+        {
+          "name": "card_no",
+          "type": "text"
+        },
+        {
+          "name": "source_name",
+          "type": "text"
+        },
+        {
+          "name": "kyc_name",
+          "type": "text"
+        },
+        {
+          "name": "source_gender",
+          "type": "text"
+        },
+        {
+          "name": "kyc_gender",
+          "type": "text"
+        },
+        {
+          "name": "source_dob",
+          "type": "text"
+        },
+        {
+          "name": "kyc_dob",
+          "type": "text"
+        },
+        {
+          "name": "family_id",
+          "type": "text"
+        },
+        {
+          "name": "member_id",
+          "type": "text"
+        },
+        {
+          "name": "source_type",
+          "type": "text"
+        },
+        {
+          "name": "father_name",
+          "type": "text"
+        },
+        {
+          "name": "state_cd",
+          "type": "text"
+        },
+        {
+          "name": "state_name",
+          "type": "text"
+        },
+        {
+          "name": "dist_cd",
+          "type": "text"
+        },
+        {
+          "name": "dist_name",
+          "type": "text"
+        },
+        {
+          "name": "block_id",
+          "type": "text"
+        },
+        {
+          "name": "block_name",
+          "type": "text"
+        },
+        {
+          "name": "village_id",
+          "type": "text"
+        },
+        {
+          "name": "village_name",
+          "type": "text"
+        },
+        {
+          "name": "pincode",
+          "type": "text"
+        },
+        {
+          "name": "rural_urban_flag",
+          "type": "text"
+        },
+        {
+          "name": "abha_id",
+          "type": "text"
+        },
+        {
+          "name": "ben_ref_id",
+          "type": "text"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "approve_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "card_status",
+          "type": "text"
+        },
+        {
+          "name": "address",
+          "type": "text"
+        },
+        {
+          "name": "photo",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.card_print_data_madhya_pradesh_vvs_29may2025_f",
+      "logicalName": "card_print_data_madhya_pradesh_vvs_29may2025_f",
+      "schema": "dmart_mp",
+      "table": "card_print_data_madhya_pradesh_vvs_29may2025_f",
+      "label": "Card Print Data MP VVS (29-May-2025)",
+      "source": "PMJAY_dmart_mp_Schema_Reference.docx",
+      "module": "bis",
+      "moduleLabel": "BIS Card Printing",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "bigint"
+        },
+        {
+          "name": "card_no",
+          "type": "text"
+        },
+        {
+          "name": "source_name",
+          "type": "text"
+        },
+        {
+          "name": "kyc_name",
+          "type": "text"
+        },
+        {
+          "name": "source_gender",
+          "type": "text"
+        },
+        {
+          "name": "kyc_gender",
+          "type": "text"
+        },
+        {
+          "name": "source_dob",
+          "type": "text"
+        },
+        {
+          "name": "kyc_dob",
+          "type": "text"
+        },
+        {
+          "name": "family_id",
+          "type": "text"
+        },
+        {
+          "name": "member_id",
+          "type": "text"
+        },
+        {
+          "name": "source_type",
+          "type": "text"
+        },
+        {
+          "name": "father_name",
+          "type": "text"
+        },
+        {
+          "name": "state_cd",
+          "type": "text"
+        },
+        {
+          "name": "state_name",
+          "type": "text"
+        },
+        {
+          "name": "dist_cd",
+          "type": "text"
+        },
+        {
+          "name": "dist_name",
+          "type": "text"
+        },
+        {
+          "name": "block_id",
+          "type": "text"
+        },
+        {
+          "name": "block_name",
+          "type": "text"
+        },
+        {
+          "name": "village_id",
+          "type": "text"
+        },
+        {
+          "name": "village_name",
+          "type": "text"
+        },
+        {
+          "name": "pincode",
+          "type": "text"
+        },
+        {
+          "name": "rural_urban_flag",
+          "type": "text"
+        },
+        {
+          "name": "abha_id",
+          "type": "text"
+        },
+        {
+          "name": "ben_ref_id",
+          "type": "text"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "approve_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "card_status",
+          "type": "text"
+        },
+        {
+          "name": "address",
+          "type": "text"
+        },
+        {
+          "name": "photo",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.card_print_data_temp_t_bis_ekyc_dtl_mp_20260703_with_village_na",
+      "logicalName": "card_print_data_temp_t_bis_ekyc_dtl_mp_20260703_with_village_na",
+      "schema": "dmart_mp",
+      "table": "card_print_data_temp_t_bis_ekyc_dtl_mp_20260703_with_village_na",
+      "label": "Card Print Temp e-KYC MP (03-Jul-2026)",
+      "source": "PMJAY_dmart_mp_Schema_Reference.docx",
+      "module": "bis",
+      "moduleLabel": "BIS Card Printing",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "bigint"
+        },
+        {
+          "name": "card_no",
+          "type": "text"
+        },
+        {
+          "name": "source_name",
+          "type": "text"
+        },
+        {
+          "name": "kyc_name",
+          "type": "text"
+        },
+        {
+          "name": "source_gender",
+          "type": "text"
+        },
+        {
+          "name": "kyc_gender",
+          "type": "text"
+        },
+        {
+          "name": "source_dob",
+          "type": "text"
+        },
+        {
+          "name": "kyc_dob",
+          "type": "text"
+        },
+        {
+          "name": "family_id",
+          "type": "text"
+        },
+        {
+          "name": "member_id",
+          "type": "text"
+        },
+        {
+          "name": "source_type",
+          "type": "text"
+        },
+        {
+          "name": "ben_mobile_no",
+          "type": "text"
+        },
+        {
+          "name": "father_name",
+          "type": "text"
+        },
+        {
+          "name": "state_cd",
+          "type": "text"
+        },
+        {
+          "name": "state_name",
+          "type": "text"
+        },
+        {
+          "name": "dist_cd",
+          "type": "text"
+        },
+        {
+          "name": "dist_name",
+          "type": "text"
+        },
+        {
+          "name": "block_id",
+          "type": "text"
+        },
+        {
+          "name": "block_name",
+          "type": "text"
+        },
+        {
+          "name": "village_id",
+          "type": "text"
+        },
+        {
+          "name": "village_name",
+          "type": "text"
+        },
+        {
+          "name": "pincode",
+          "type": "text"
+        },
+        {
+          "name": "rural_urban_flag",
+          "type": "text"
+        },
+        {
+          "name": "abha_id",
+          "type": "text"
+        },
+        {
+          "name": "ben_ref_id",
+          "type": "text"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "approve_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "card_status",
+          "type": "text"
+        },
+        {
+          "name": "address",
+          "type": "text"
+        },
+        {
+          "name": "photo",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.left_over_cards_for_print_of_mp_with_village_name_09aug2026_fin",
+      "logicalName": "left_over_cards_for_print_of_mp_with_village_name_09aug2026_fin",
+      "schema": "dmart_mp",
+      "table": "left_over_cards_for_print_of_mp_with_village_name_09aug2026_fin",
+      "label": "Leftover Cards for Print MP (09-Aug-2026)",
+      "source": "PMJAY_dmart_mp_Schema_Reference.docx",
+      "module": "bis",
+      "moduleLabel": "BIS Card Printing",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "bigint"
+        },
+        {
+          "name": "card_no",
+          "type": "text"
+        },
+        {
+          "name": "source_name",
+          "type": "text"
+        },
+        {
+          "name": "kyc_name",
+          "type": "text"
+        },
+        {
+          "name": "source_gender",
+          "type": "text"
+        },
+        {
+          "name": "kyc_gender",
+          "type": "text"
+        },
+        {
+          "name": "source_dob",
+          "type": "text"
+        },
+        {
+          "name": "kyc_dob",
+          "type": "text"
+        },
+        {
+          "name": "family_id",
+          "type": "text"
+        },
+        {
+          "name": "member_id",
+          "type": "text"
+        },
+        {
+          "name": "source_type",
+          "type": "text"
+        },
+        {
+          "name": "ben_mobile_no",
+          "type": "text"
+        },
+        {
+          "name": "father_name",
+          "type": "text"
+        },
+        {
+          "name": "state_cd",
+          "type": "text"
+        },
+        {
+          "name": "state_name",
+          "type": "text"
+        },
+        {
+          "name": "dist_cd",
+          "type": "text"
+        },
+        {
+          "name": "dist_name",
+          "type": "text"
+        },
+        {
+          "name": "block_id",
+          "type": "text"
+        },
+        {
+          "name": "block_name",
+          "type": "text"
+        },
+        {
+          "name": "village_id",
+          "type": "text"
+        },
+        {
+          "name": "village_name",
+          "type": "text"
+        },
+        {
+          "name": "pincode",
+          "type": "text"
+        },
+        {
+          "name": "rural_urban_flag",
+          "type": "text"
+        },
+        {
+          "name": "abha_id",
+          "type": "text"
+        },
+        {
+          "name": "ben_ref_id",
+          "type": "text"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "approve_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "card_status",
+          "type": "text"
+        },
+        {
+          "name": "address",
+          "type": "text"
+        },
+        {
+          "name": "photo",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.pvtg_by_district_7march_v3",
+      "logicalName": "pvtg_by_district_7march_v3",
+      "schema": "dmart_mp",
+      "table": "pvtg_by_district_7march_v3",
+      "label": "PVTG by District",
+      "source": "PMJAY_dmart_mp_Schema_Reference.docx",
+      "module": "beneficiaries",
+      "moduleLabel": "Beneficiaries",
+      "primaryKey": "card_no",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "familyid",
+          "type": "text"
+        },
+        {
+          "name": "memberid",
+          "type": "text"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "villege_name",
+          "type": "text"
+        },
+        {
+          "name": "address",
+          "type": "text"
+        },
+        {
+          "name": "card_no",
+          "type": "text"
+        },
+        {
+          "name": "creationdate",
+          "type": "text"
+        },
+        {
+          "name": "to_be_deleted",
+          "type": "text"
+        },
+        {
+          "name": "dlt_reason",
+          "type": "text"
+        },
+        {
+          "name": "verification_status",
+          "type": "text"
+        },
+        {
+          "name": "sha_final_remark",
+          "type": "text"
+        },
+        {
+          "name": "sha_final_action",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.t_beneficiary_ekyc_dtls_17july2025_old",
+      "logicalName": "t_beneficiary_ekyc_dtls_17july2025_old",
+      "schema": "dmart_mp",
+      "table": "t_beneficiary_ekyc_dtls_17july2025_old",
+      "label": "Beneficiary e-KYC Details (17-Jul-2025)",
+      "source": "PMJAY_dmart_mp_Schema_Reference.docx",
+      "module": "beneficiaries",
+      "moduleLabel": "Beneficiaries",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "bigint"
+        },
+        {
+          "name": "family_id",
+          "type": "text"
+        },
+        {
+          "name": "member_id",
+          "type": "text"
+        },
+        {
+          "name": "aadhaar_no",
+          "type": "text"
+        },
+        {
+          "name": "status",
+          "type": "text"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "yearofbirth",
+          "type": "text"
+        },
+        {
+          "name": "gender",
+          "type": "text"
+        },
+        {
+          "name": "photo",
+          "type": "text"
+        },
+        {
+          "name": "fathername",
+          "type": "text"
+        },
+        {
+          "name": "spouse",
+          "type": "text"
+        },
+        {
+          "name": "mothername",
+          "type": "text"
+        },
+        {
+          "name": "addressline1",
+          "type": "text"
+        },
+        {
+          "name": "addressline2",
+          "type": "text"
+        },
+        {
+          "name": "city",
+          "type": "text"
+        },
+        {
+          "name": "district",
+          "type": "text"
+        },
+        {
+          "name": "state",
+          "type": "text"
+        },
+        {
+          "name": "pincode",
+          "type": "text"
+        },
+        {
+          "name": "json_obj_ben_ekyc_dtl",
+          "type": "text"
+        },
+        {
+          "name": "source_type",
+          "type": "text"
+        },
+        {
+          "name": "plain_aadhaar",
+          "type": "text"
+        },
+        {
+          "name": "card_no",
+          "type": "text"
+        },
+        {
+          "name": "card_status",
+          "type": "text"
+        },
+        {
+          "name": "mobile_no",
+          "type": "text"
+        },
+        {
+          "name": "district_lgd",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.t_bis_beneficiary_disabled_19aug2025",
+      "logicalName": "t_bis_beneficiary_disabled_19aug2025",
+      "schema": "dmart_mp",
+      "table": "t_bis_beneficiary_disabled_19aug2025",
+      "label": "BIS Beneficiary Disabled (19-Aug-2025)",
+      "source": "PMJAY_dmart_mp_Schema_Reference.docx",
+      "module": "beneficiaries",
+      "moduleLabel": "Beneficiaries",
+      "primaryKey": "card_no",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "state_cd",
+          "type": "text"
+        },
+        {
+          "name": "card_no",
+          "type": "text"
+        },
+        {
+          "name": "card_status",
+          "type": "text"
+        },
+        {
+          "name": "family_id",
+          "type": "text"
+        },
+        {
+          "name": "member_id",
+          "type": "text"
+        },
+        {
+          "name": "source_type",
+          "type": "text"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_by",
+          "type": "text"
+        },
+        {
+          "name": "updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "date_of_birth",
+          "type": "text"
+        },
+        {
+          "name": "acted_workflow_user",
+          "type": "text"
+        },
+        {
+          "name": "sha_user",
+          "type": "text"
+        },
+        {
+          "name": "user_id",
+          "type": "text"
+        },
+        {
+          "name": "sha_name",
+          "type": "text"
+        },
+        {
+          "name": "email_id",
+          "type": "text"
+        },
+        {
+          "name": "mobile_number",
+          "type": "bigint"
+        },
+        {
+          "name": "entity_name",
+          "type": "text"
+        },
+        {
+          "name": "role_name",
+          "type": "text"
+        },
+        {
+          "name": "disabled_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "reason_desc",
+          "type": "text"
+        },
+        {
+          "name": "reason_id",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.m_status_bis",
+      "logicalName": "m_status_bis",
+      "schema": "dmart_mp",
+      "table": "m_status_bis",
+      "label": "BIS Status Master",
+      "source": "PMJAY_dmart_mp_Schema_Reference.docx",
+      "module": "workflow",
+      "moduleLabel": "Users & Workflow",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "integer"
+        },
+        {
+          "name": "status",
+          "type": "smallint"
+        },
+        {
+          "name": "status_descrption",
+          "type": "text"
+        },
+        {
+          "name": "user_role",
+          "type": "text"
+        },
+        {
+          "name": "action",
+          "type": "text"
+        },
+        {
+          "name": "workflow_id",
+          "type": "text"
+        },
+        {
+          "name": "status_name",
+          "type": "text"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_by",
+          "type": "text"
+        },
+        {
+          "name": "updated_dt",
+          "type": "timestamptz"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.m_status_tms",
+      "logicalName": "m_status_tms",
+      "schema": "dmart_mp",
+      "table": "m_status_tms",
+      "label": "TMS Status Master",
+      "source": "PMJAY_dmart_mp_Schema_Reference.docx",
+      "module": "workflow",
+      "moduleLabel": "Users & Workflow",
+      "primaryKey": "id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id_pk",
+          "type": "integer"
+        },
+        {
+          "name": "status_descrption",
+          "type": "text"
+        },
+        {
+          "name": "status",
+          "type": "smallint"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_by",
+          "type": "text"
+        },
+        {
+          "name": "updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "user_role",
+          "type": "text"
+        },
+        {
+          "name": "action",
+          "type": "text"
+        },
+        {
+          "name": "workflow_id",
+          "type": "text"
+        },
+        {
+          "name": "status_name",
+          "type": "text"
+        },
+        {
+          "name": "search_status",
+          "type": "smallint"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.t_hem_manpower",
+      "logicalName": "t_hem_manpower",
+      "schema": "dmart_mp",
+      "table": "t_hem_manpower",
+      "label": "HEM Hospital Manpower",
+      "source": "PMJAY_dmart_mp_Schema_Reference.docx",
+      "module": "hospitals",
+      "moduleLabel": "Hospitals & Empanelment",
+      "primaryKey": "manpower_id_pk",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "manpower_id_pk",
+          "type": "bigint"
+        },
+        {
+          "name": "med_exp_type",
+          "type": "text"
+        },
+        {
+          "name": "exp_type",
+          "type": "text"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "reg_number",
+          "type": "text"
+        },
+        {
+          "name": "mobile_num",
+          "type": "text"
+        },
+        {
+          "name": "emailid",
+          "type": "text"
+        },
+        {
+          "name": "experience",
+          "type": "text"
+        },
+        {
+          "name": "highest_qualification",
+          "type": "text"
+        },
+        {
+          "name": "specialization",
+          "type": "text"
+        },
+        {
+          "name": "university",
+          "type": "text"
+        },
+        {
+          "name": "facility_opr_status",
+          "type": "text"
+        },
+        {
+          "name": "json_obj_dtl",
+          "type": "text"
+        },
+        {
+          "name": "ownership_type",
+          "type": "text"
+        },
+        {
+          "name": "created_by",
+          "type": "text"
+        },
+        {
+          "name": "created_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_by",
+          "type": "text"
+        },
+        {
+          "name": "updated_dt",
+          "type": "timestamptz"
+        },
+        {
+          "name": "active_status",
+          "type": "smallint"
+        },
+        {
+          "name": "hosp_id_pk",
+          "type": "integer"
+        },
+        {
+          "name": "registration_certicate",
+          "type": "text"
+        },
+        {
+          "name": "declaration_certificate",
+          "type": "text"
+        },
+        {
+          "name": "shift",
+          "type": "text"
+        },
+        {
+          "name": "manpower_type",
+          "type": "text"
+        },
+        {
+          "name": "app_status",
+          "type": "integer"
+        },
+        {
+          "name": "scheme_code",
+          "type": "text"
+        },
+        {
+          "name": "hprid",
+          "type": "text"
+        },
+        {
+          "name": "hrsubtype",
+          "type": "integer"
+        },
+        {
+          "name": "data_source",
+          "type": "text"
+        },
+        {
+          "name": "employment_type",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.json_data",
+      "logicalName": "json_data",
+      "schema": "dmart_mp",
+      "table": "json_data",
+      "label": "Claim Line Items (json_data)",
+      "source": "PMJAY_dmart_mp_Schema_Reference.docx",
+      "module": "claims",
+      "moduleLabel": "Claims & Payments",
+      "primaryKey": "id",
+      "autoGeneratePk": true,
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint"
+        },
+        {
+          "name": "registration_id",
+          "type": "integer"
+        },
+        {
+          "name": "jsonb_value",
+          "type": "text"
+        },
+        {
+          "name": "patientnumber",
+          "type": "text"
+        },
+        {
+          "name": "householdid",
+          "type": "text"
+        },
+        {
+          "name": "claimedamount",
+          "type": "numeric"
+        },
+        {
+          "name": "totalamount",
+          "type": "numeric"
+        },
+        {
+          "name": "approvedamount",
+          "type": "numeric"
+        },
+        {
+          "name": "procedurestrat",
+          "type": "text"
+        },
+        {
+          "name": "procedurestratname",
+          "type": "text"
+        },
+        {
+          "name": "stratificationcost",
+          "type": "numeric"
+        },
+        {
+          "name": "sno",
+          "type": "text"
+        },
+        {
+          "name": "itemsequence",
+          "type": "integer"
+        },
+        {
+          "name": "itemid",
+          "type": "text"
+        },
+        {
+          "name": "packagecode",
+          "type": "text"
+        },
+        {
+          "name": "packagetype",
+          "type": "text"
+        },
+        {
+          "name": "packagecost",
+          "type": "numeric"
+        },
+        {
+          "name": "procedurecost",
+          "type": "numeric"
+        },
+        {
+          "name": "quantity",
+          "type": "numeric"
+        },
+        {
+          "name": "approvedquantity",
+          "type": "numeric"
+        },
+        {
+          "name": "percentageguidelines",
+          "type": "text"
+        },
+        {
+          "name": "hospitalincentives",
+          "type": "text"
+        },
+        {
+          "name": "incentivecategory",
+          "type": "text"
+        },
+        {
+          "name": "amount",
+          "type": "numeric"
+        },
+        {
+          "name": "netamount",
+          "type": "numeric"
+        },
+        {
+          "name": "packagedesc",
+          "type": "text"
+        },
+        {
+          "name": "status",
+          "type": "text"
+        },
+        {
+          "name": "actionid",
+          "type": "text"
+        },
+        {
+          "name": "actionname",
+          "type": "text"
+        },
+        {
+          "name": "recoveryfunctionalityapplicable",
+          "type": "text"
+        },
+        {
+          "name": "recoverydetails",
+          "type": "text"
+        },
+        {
+          "name": "netpayable",
+          "type": "numeric"
+        },
+        {
+          "name": "tdsdeduction",
+          "type": "numeric"
+        },
+        {
+          "name": "rfdeduction",
+          "type": "numeric"
+        },
+        {
+          "name": "gcamount",
+          "type": "numeric"
+        },
+        {
+          "name": "gcpayableamount",
+          "type": "numeric"
+        },
+        {
+          "name": "gctdsdeduction",
+          "type": "numeric"
+        },
+        {
+          "name": "gcrfdeduction",
+          "type": "numeric"
+        },
+        {
+          "name": "exempttype",
+          "type": "text"
+        },
+        {
+          "name": "liabilitycode",
+          "type": "text"
+        },
+        {
+          "name": "walletcode",
+          "type": "text"
+        },
+        {
+          "name": "balanceamount",
+          "type": "numeric"
+        },
+        {
+          "name": "liability_amount",
+          "type": "numeric"
+        },
+        {
+          "name": "liability_approvedamount",
+          "type": "numeric"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.treatment_stratification_details",
+      "logicalName": "treatment_stratification_details",
+      "schema": "dmart_mp",
+      "table": "treatment_stratification_details",
+      "label": "Treatment Stratification Details",
+      "source": "PMJAY_dmart_mp_Schema_Reference.docx",
+      "module": "patients",
+      "moduleLabel": "Patients & Treatment",
+      "primaryKey": "registration_id",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "registration_id",
+          "type": "integer"
+        },
+        {
+          "name": "patientnumber",
+          "type": "text"
+        },
+        {
+          "name": "householdid",
+          "type": "text"
+        },
+        {
+          "name": "treatment_sno",
+          "type": "text"
+        },
+        {
+          "name": "treatment_itemsequence",
+          "type": "integer"
+        },
+        {
+          "name": "treatment_itemid",
+          "type": "text"
+        },
+        {
+          "name": "type",
+          "type": "text"
+        },
+        {
+          "name": "typedesc",
+          "type": "text"
+        },
+        {
+          "name": "dateonwhich",
+          "type": "timestamptz"
+        },
+        {
+          "name": "procedureid",
+          "type": "text"
+        },
+        {
+          "name": "procedurecode",
+          "type": "text"
+        },
+        {
+          "name": "procedurename",
+          "type": "text"
+        },
+        {
+          "name": "proceduretype",
+          "type": "text"
+        },
+        {
+          "name": "procedurecategoryflag",
+          "type": "text"
+        },
+        {
+          "name": "procedurestrat",
+          "type": "text"
+        },
+        {
+          "name": "procedurestratname",
+          "type": "text"
+        },
+        {
+          "name": "stratamount",
+          "type": "numeric"
         }
       ]
     }

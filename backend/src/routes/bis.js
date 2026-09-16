@@ -217,4 +217,104 @@ router.get('/card-printing', async (req, res) => {
   }
 })
 
+/** Card print batch extracts from PMJAY_dmart_mp_Schema_Reference.docx */
+router.get('/card-print-data', async (req, res) => {
+  try {
+    const { loadTableSafe, countByField } = await import('../utils/loadTableSafe.js')
+    const [aug, vvs, temp, leftover] = await Promise.all([
+      loadTableSafe('dmart_mp', 'card_print_data_madhya_pradesh_01aug2025', {
+        orderBy: 'COALESCE(approve_date, created_dt) DESC NULLS LAST',
+        limit: 10000,
+      }),
+      loadTableSafe('dmart_mp', 'card_print_data_madhya_pradesh_vvs_29may2025_f', {
+        orderBy: 'COALESCE(approve_date, created_dt) DESC NULLS LAST',
+        limit: 10000,
+      }),
+      loadTableSafe('dmart_mp', 'card_print_data_temp_t_bis_ekyc_dtl_mp_20260703_with_village_na', {
+        orderBy: 'COALESCE(approve_date, created_dt) DESC NULLS LAST',
+        limit: 10000,
+      }),
+      loadTableSafe('dmart_mp', 'left_over_cards_for_print_of_mp_with_village_name_09aug2026_fin', {
+        orderBy: 'COALESCE(approve_date, created_dt) DESC NULLS LAST',
+        limit: 10000,
+      }),
+    ])
+
+    const primary = aug.table.length ? aug : vvs.table.length ? vvs : temp
+    const status = countByField(primary.table, 'card_status')
+    const district = countByField(primary.table, 'dist_name')
+    const urbanRural = countByField(primary.table, 'rural_urban_flag')
+
+    res.json({
+      db: aug.db || vvs.db || temp.db || leftover.db,
+      schema: primary.schema,
+      columns: primary.columns,
+      kpis: [
+        buildKpi({ label: 'Aug 2025 Batch', value: aug.table.length, color: 'blue', rows: aug.table }),
+        buildKpi({ label: 'VVS May 2025', value: vvs.table.length, color: 'indigo', rows: vvs.table }),
+        buildKpi({ label: 'Temp e-KYC Jul 2026', value: temp.table.length, color: 'violet', rows: temp.table }),
+        buildKpi({ label: 'Leftover Cards', value: leftover.table.length, color: 'orange', rows: leftover.table }),
+      ],
+      charts: {
+        status: hasKnown(status) ? status : [],
+        district: hasKnown(district) ? district : [],
+        urbanRural: hasKnown(urbanRural) ? urbanRural : [],
+      },
+      augTable: aug.table,
+      augColumns: aug.columns,
+      augSchema: aug.schema,
+      vvsTable: vvs.table,
+      vvsColumns: vvs.columns,
+      vvsSchema: vvs.schema,
+      tempTable: temp.table,
+      tempColumns: temp.columns,
+      tempSchema: temp.schema,
+      leftoverTable: leftover.table,
+      leftoverColumns: leftover.columns,
+      leftoverSchema: leftover.schema,
+      table: primary.table,
+    })
+  } catch (err) {
+    res.status(500).json({ error: clientError(err) })
+  }
+})
+
+/** Already-printed card de-duplication lists */
+router.get('/print-dedup', async (_req, res) => {
+  try {
+    const { loadTableSafe } = await import('../utils/loadTableSafe.js')
+    const [batchA, batchB] = await Promise.all([
+      loadTableSafe('dmart_mp', 'already_printed_card_no_290626', { orderBy: '1', limit: 50000 }),
+      loadTableSafe('dmart_mp', 'already_printed_card_no_34321992_8672488_09082026', {
+        orderBy: '1',
+        limit: 50000,
+      }),
+    ])
+    res.json({
+      db: batchA.db || batchB.db,
+      schema: batchA.schema || batchB.schema,
+      kpis: [
+        buildKpi({ label: 'Printed (29-Jun batch)', value: batchA.table.length, color: 'blue', rows: batchA.table }),
+        buildKpi({
+          label: 'Printed (09-Aug batch)',
+          value: batchB.table.length,
+          color: 'indigo',
+          rows: batchB.table,
+        }),
+      ],
+      charts: {},
+      batchATable: batchA.table,
+      batchAColumns: batchA.columns,
+      batchASchema: batchA.schema,
+      batchBTable: batchB.table,
+      batchBColumns: batchB.columns,
+      batchBSchema: batchB.schema,
+      table: batchA.table,
+      columns: batchA.columns,
+    })
+  } catch (err) {
+    res.status(500).json({ error: clientError(err) })
+  }
+})
+
 export default router

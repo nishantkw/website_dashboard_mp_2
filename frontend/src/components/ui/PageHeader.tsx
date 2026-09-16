@@ -1,5 +1,6 @@
 import { useLayoutEffect, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import clsx from 'clsx'
 import type { KPI } from '../../types'
 import KPICard from './KPICard'
 import ExportDropdown from './ExportDropdown'
@@ -72,6 +73,10 @@ interface KPIGridProps {
   selectedKey?: string | null
   /** Label used when capturing this grid as a picture for Excel. */
   exportLabel?: string
+  /** Single panel with no gaps between metrics. */
+  unified?: boolean
+  /** Drop outer card chrome when already inside a parent panel. */
+  flush?: boolean
 }
 
 const KPI_DOT_PALETTE = ['blue', 'green', 'emerald', 'orange', 'cyan', 'purple', 'indigo', 'violet', 'red'] as const
@@ -83,7 +88,48 @@ function withDistinctDotColor(kpi: KPI, index: number, kpis: KPI[]): KPI {
   return { ...kpi, color: KPI_DOT_PALETTE[index % KPI_DOT_PALETTE.length] }
 }
 
-export function KPIGrid({ kpis, onKpiClick, selectedKey, exportLabel = 'KPI Cards' }: KPIGridProps) {
+export function KPIGrid({
+  kpis,
+  onKpiClick,
+  selectedKey,
+  exportLabel = 'KPI Cards',
+  unified = false,
+  flush = false,
+}: KPIGridProps) {
+  if (unified) {
+    const cols =
+      kpis.length <= 2
+        ? 'grid-cols-1 sm:grid-cols-2'
+        : kpis.length <= 4
+          ? 'grid-cols-2 lg:grid-cols-4'
+          : 'grid-cols-2 md:grid-cols-3 xl:grid-cols-6'
+    const grid = (
+      <div className={clsx('grid divide-x divide-y divide-slate-100', cols)}>
+        {kpis.map((kpi, index) => (
+          <div key={kpi.key || kpi.label} className="min-w-0">
+            <KPICard
+              kpi={withDistinctDotColor(kpi, index, kpis)}
+              onClick={onKpiClick}
+              selected={Boolean(selectedKey) && selectedKey === (kpi.key || kpi.label)}
+              embedded
+            />
+          </div>
+        ))}
+      </div>
+    )
+    if (flush) {
+      return <div data-export-visual={exportLabel}>{grid}</div>
+    }
+    return (
+      <div
+        data-export-visual={exportLabel}
+        className="mb-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+      >
+        {grid}
+      </div>
+    )
+  }
+
   return (
     <div data-export-visual={exportLabel} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
       {kpis.map((kpi, index) => (

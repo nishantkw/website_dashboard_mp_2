@@ -54,6 +54,24 @@ export const pageFilterConfigs: Record<string, FilterField[]> = {
     { key: 'nabh', label: 'NABH Certification', type: 'select', options: NABH_OPTIONS, column: 'quality_certification' },
     { key: 'hospital_status', label: 'Empanelment Status', type: 'select', options: HOSPITAL_STATUS_OPTIONS, column: 'enrl_status' },
   ],
+  mp_hospitals_overview: [
+    { key: 'state_type', label: 'State Type', type: 'select', options: STATE_TYPE_OPTIONS, column: 'state_type' },
+    { key: 'division', label: 'Division', type: 'select', options: DIVISION_OPTIONS, column: 'division_name' },
+    { key: 'district', label: 'District', type: 'select', options: DISTRICT_OPTIONS, column: 'district_name' },
+    { key: 'hospital_type', label: 'Hospital Type', type: 'select', options: HOSPITAL_TYPE_OPTIONS, column: 'hospital_type' },
+  ],
+  mp_hospitals_deempanel: [
+    { key: 'state_type', label: 'State Type', type: 'select', options: STATE_TYPE_OPTIONS, column: 'state_type' },
+    { key: 'division', label: 'Division', type: 'select', options: DIVISION_OPTIONS, column: 'division_name' },
+    { key: 'district', label: 'District', type: 'select', options: DISTRICT_OPTIONS, column: 'district_name' },
+    { key: 'date_from', label: 'Action From', type: 'date', column: 'deempanel_date' },
+    { key: 'date_to', label: 'Action To', type: 'date', column: 'deempanel_date' },
+  ],
+  mp_hospitals_hem: [
+    { key: 'hospital_type', label: 'Hospital Type', type: 'select', options: HOSPITAL_TYPE_OPTIONS, column: 'hosp_type_cd' },
+    { key: 'hospital_status', label: 'Currently Serving', type: 'select', options: USER_STATUS_OPTIONS, column: 'active_status' },
+  ],
+  mp_hospitals_lookup: [],
   mp_patients: [
     { key: 'division', label: 'Division', type: 'select', options: DIVISION_OPTIONS, column: 'division_name' },
     { key: 'district', label: 'District', type: 'select', options: DISTRICT_OPTIONS, column: 'district_name' },

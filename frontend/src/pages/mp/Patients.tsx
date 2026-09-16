@@ -79,9 +79,11 @@ const EMPTY = {
   table: [] as Record<string, string | number>[],
   treatmentTable: [] as Record<string, string | number>[],
   morthTable: [] as Record<string, string | number>[],
+  stratTable: [] as Record<string, string | number>[],
   columns: [] as string[],
   treatmentColumns: [] as string[],
   morthColumns: [] as string[],
+  stratColumns: [] as string[],
   morthKpis: [] as KPI[],
 }
 
@@ -109,9 +111,11 @@ export default function Patients() {
   const tableRows = (data.table ?? []) as Record<string, string | number>[]
   const treatmentRows = (data.treatmentTable ?? []) as Record<string, string | number>[]
   const morthRows = (data.morthTable ?? []) as Record<string, string | number>[]
+  const stratRows = (data.stratTable ?? []) as Record<string, string | number>[]
   const filtered = moduleFilters.filterRows(tableRows)
   const treatmentFiltered = moduleFilters.filterRows(treatmentRows)
   const morthFilteredRows = moduleFilters.filterRows(morthRows)
+  const stratFiltered = moduleFilters.filterRows(stratRows)
   const columns = useMemo(
     () =>
       schemaTableColumns({
@@ -142,6 +146,26 @@ export default function Patients() {
         preferredFirst: morthPreferred.map((c) => c.key),
       }),
     [source, data.morthColumns, morthRows]
+  )
+  const stratColumns = useMemo(
+    () =>
+      schemaTableColumns({
+        source,
+        schemaKeys: data.stratColumns,
+        rows: stratRows,
+        preferredFirst: [
+          'registration_id',
+          'patientnumber',
+          'procedurename',
+          'procedurecode',
+          'procedurestrat',
+          'procedurestratname',
+          'stratamount',
+          'typedesc',
+          'dateonwhich',
+        ],
+      }),
+    [source, data.stratColumns, stratRows]
   )
 
   const { openFromChart, openFromKpi, openDetail, Modal } = useDrillDown({
@@ -378,6 +402,30 @@ export default function Patients() {
           }
         />
       </div>
+
+      {stratFiltered.length > 0 && (
+        <div className="mt-5">
+          <div className="mb-4 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
+            <p className="text-sm font-semibold text-[#1a5c38]">
+              Treatment stratification — {data.stratSchema || 'dmart_mp.treatment_stratification_details'}
+            </p>
+            <p className="text-xs text-slate-500">Procedure stratification tiers and amounts by registration</p>
+          </div>
+          <DataTable
+            columns={stratColumns}
+            data={stratFiltered}
+            title={`Treatment Stratification (${stratFiltered.length})`}
+            onRowClick={(row) =>
+              openDetail({
+                title: String(row.procedurename || row.registration_id || 'Stratification'),
+                subtitle: data.stratSchema || 'stratification',
+                data: row,
+                columns: stratColumns,
+              })
+            }
+          />
+        </div>
+      )}
     </div>
   )
 }

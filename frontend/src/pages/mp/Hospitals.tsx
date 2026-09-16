@@ -5,10 +5,10 @@ import { InteractiveBarChart, InteractiveLineChart, InteractivePieChart } from '
 import { useMemo, useState, useEffect, useCallback } from 'react'
 import { useDrillDown } from '../../hooks/useDrillDown'
 import { useModuleFilters } from '../../hooks/useModuleFilters'
-import { getModuleFilters } from '../../data/moduleFilterConfig'
+import { getModuleFilters, type ModuleFilterKey } from '../../data/moduleFilterConfig'
 import ModuleFilterBar from '../../components/layout/ModuleFilterBar'
 import { useApiResource } from '../../hooks/useApiResource'
-import { fetchHospitals, fetchHospitalsExport, fetchOverviewHospitals } from '../../api/endpoints'
+import { fetchHospitalsSection, fetchHospitalsExport, fetchOverviewHospitals } from '../../api/endpoints'
 import DataSourceBadge from '../../components/ui/DataSourceBadge'
 import BackendOfflineNotice from '../../components/ui/BackendOfflineNotice'
 import { schemaTableColumns } from '../../utils/schemaColumns'
@@ -17,6 +17,19 @@ import type { FilterField, FilterValues, KPI, TableColumn } from '../../types'
 import type { ExportSheet } from '../../utils/exportUtils'
 import { applyPageFilters } from '../../utils/applyPageFilters'
 import { isHospitalEmpanelled, isHospitalServingClaims } from '../../components/ui/HospitalStatusCells'
+
+export type HospitalSection = 'overview' | 'master' | 'deempanel' | 'hem' | 'lookup'
+
+const SECTION_META: Record<
+  HospitalSection,
+  { title: string; filterKey: ModuleFilterKey; needsPaging?: boolean }
+> = {
+  overview: { title: 'Hospitals', filterKey: 'mp_hospitals', needsPaging: true },
+  master: { title: 'Hospitals', filterKey: 'mp_hospitals', needsPaging: true },
+  deempanel: { title: 'De-empanelment', filterKey: 'mp_hospitals_deempanel' },
+  hem: { title: 'HEM Hospitals', filterKey: 'mp_hospitals_hem' },
+  lookup: { title: 'Hospital Lookup', filterKey: 'mp_hospitals_lookup' },
+}
 
 const KPI_EXPORT_COLUMNS = [
   { key: 'card', label: 'Card' },
@@ -37,6 +50,7 @@ function kpisToExportRows(list: KPI[]) {
     changeLabel: k.changeLabel ?? '',
   }))
 }
+
 const TYPE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']
 const STATUS_COLORS = ['#10b981', '#ef4444', '#f59e0b', '#6366f1', '#06b6d4', '#8b5cf6', '#94a3b8']
 const LOOKUP_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444', '#94a3b8']
@@ -78,27 +92,33 @@ const deempanelPreferred: TableColumn[] = [
   { key: 'end_date', label: 'End Date' },
   { key: 'due_date', label: 'Due Date' },
   { key: 'deempanel_scheme', label: 'Scheme' },
-  { key: 'remarks', label: 'Remarks' },
-  { key: 'order_id', label: 'Order ID' },
-  { key: 'created_by', label: 'Created By' },
+  { key: 'reasons', label: 'Reasons' },
+  { key: 'district_name', label: 'District' },
 ]
 
-function isEmpaneledHospitalRow(row: Record<string, string | number>) {
-  return isHospitalEmpanelled(row)
-}
+const hemPreferred: TableColumn[] = [
+  { key: 'hosp_id', label: 'Hospital ID' },
+  { key: 'facility_id', label: 'Facility ID' },
+  { key: 'hosp_name', label: 'Name' },
+  { key: 'hosp_type_cd', label: 'Type' },
+  { key: 'hosp_city', label: 'City' },
+  { key: 'state_cd', label: 'State' },
+  { key: 'active_status', label: 'Currently Serving' },
+  { key: 'enrl_status', label: 'Enroll Status' },
+  { key: 'hosp_spec_type', label: 'Specialty' },
+  { key: 'hfr_hosp_id', label: 'HFR ID' },
+  { key: 'nodal_officer_name', label: 'Nodal Officer' },
+  { key: 'empaneled_date', label: 'Empaneled On' },
+  { key: 'certificate_expiry_date', label: 'Certificate Expiry' },
+  { key: 'bed_size', label: 'Beds' },
+]
 
 function isActiveHospitalRow(row: Record<string, string | number>) {
   return isHospitalServingClaims(row)
 }
-
-function isGovHospitalRow(row: Record<string, string | number>) {
-  return /gov|^g$/i.test(String(row.hospital_type ?? '').trim())
+function isEmpaneledHospitalRow(row: Record<string, string | number>) {
+  return isHospitalEmpanelled(row)
 }
-
-function isPrivHospitalRow(row: Record<string, string | number>) {
-  return /priv|^p$/i.test(String(row.hospital_type ?? '').trim())
-}
-
 function isDeempanelledHospitalRow(row: Record<string, string | number>) {
   const desc = String(row.hosp_status_desc ?? '').trim()
   if (desc) return /de[- ]?empane|disempanel/i.test(desc)
@@ -106,6 +126,12 @@ function isDeempanelledHospitalRow(row: Record<string, string | number>) {
   if (!s) return false
   if (/de[- ]?empane|disempanel/i.test(s)) return true
   return s === '0'
+}
+function isGovHospitalRow(row: Record<string, string | number>) {
+  return /gov|^g$/i.test(String(row.hospital_type ?? '').trim())
+}
+function isPrivHospitalRow(row: Record<string, string | number>) {
+  return /priv|^p$/i.test(String(row.hospital_type ?? '').trim())
 }
 
 function filterRowsForHospitalMasterKpi<T extends Record<string, string | number>>(rows: T[], label: string): T[] {
@@ -131,7 +157,6 @@ function isDeempanelDeEmpanelRow(row: Record<string, string | number>) {
 }
 
 function filterRowsForDeempanelKpi<T extends Record<string, string | number>>(rows: T[], label: string): T[] | null {
-  // Only section KPIs like "Deempanel De-Empanelled" — not the main hospital "De-empanelled" card.
   if (!/^deempanel\s+/i.test(label)) return null
   const key = label.replace(/^deempanel\s+/i, '').trim().toLowerCase()
   if (key === 'de-empanelled' || /de[- ]?empanel/.test(key)) {
@@ -180,7 +205,6 @@ function rowHasKeys(row: Record<string, string | number>, keys: string[]) {
   return keys.some((k) => Object.prototype.hasOwnProperty.call(row, k))
 }
 
-/** Apply only filters whose columns exist on this secondary table (lookup / HEM / etc.). */
 function filterSecondaryHospitalTable<T extends Record<string, string | number>>(
   rows: T[],
   fields: FilterField[],
@@ -208,23 +232,6 @@ function filterSecondaryHospitalTable<T extends Record<string, string | number>>
   return applyPageFilters(rows, applicable, filters, search)
 }
 
-const hemPreferred: TableColumn[] = [
-  { key: 'hosp_id', label: 'Hospital ID' },
-  { key: 'facility_id', label: 'Facility ID' },
-  { key: 'hosp_name', label: 'Name' },
-  { key: 'hosp_type_cd', label: 'Type' },
-  { key: 'hosp_city', label: 'City' },
-  { key: 'state_cd', label: 'State' },
-  { key: 'active_status', label: 'Currently Serving' },
-  { key: 'enrl_status', label: 'Enroll Status' },
-  { key: 'hosp_spec_type', label: 'Specialty' },
-  { key: 'hfr_hosp_id', label: 'HFR ID' },
-  { key: 'nodal_officer_name', label: 'Nodal Officer' },
-  { key: 'empaneled_date', label: 'Empaneled On' },
-  { key: 'certificate_expiry_date', label: 'Certificate Expiry' },
-  { key: 'bed_size', label: 'Beds' },
-]
-
 const EMPTY = {
   kpis: [] as KPI[],
   charts: {} as Record<string, never>,
@@ -240,27 +247,30 @@ const EMPTY = {
   hemKpis: [] as KPI[],
 }
 
-export default function Hospitals() {
-  const filterFields = useMemo(() => getModuleFilters('mp_hospitals'), [])
-  const moduleFilters = useModuleFilters('mp_hospitals', filterFields)
+export default function Hospitals({ section = 'master' }: { section?: HospitalSection }) {
+  const meta = SECTION_META[section]
+  const filterFields = useMemo(() => getModuleFilters(meta.filterKey), [meta.filterKey])
+  const moduleFilters = useModuleFilters(meta.filterKey, filterFields)
   const [page, setPage] = useState(1)
 
   useEffect(() => {
     setPage(1)
-  }, [moduleFilters.queryString])
+  }, [moduleFilters.queryString, section])
 
   const hospitalsQs = useMemo(() => {
     const params = new URLSearchParams(moduleFilters.queryString.replace(/^\?/, ''))
-    params.set('limit', String(TABLE_PAGE_SIZE))
-    params.set('offset', String((page - 1) * TABLE_PAGE_SIZE))
+    if (meta.needsPaging) {
+      params.set('limit', String(TABLE_PAGE_SIZE))
+      params.set('offset', String((page - 1) * TABLE_PAGE_SIZE))
+    }
     const s = params.toString()
     return s ? `?${s}` : ''
-  }, [moduleFilters.queryString, page])
+  }, [moduleFilters.queryString, page, meta.needsPaging])
 
   const { data, source, db, loading, error } = useApiResource(
-    () => fetchHospitals(hospitalsQs),
+    () => fetchHospitalsSection(section, hospitalsQs),
     EMPTY,
-    [hospitalsQs]
+    [hospitalsQs, section]
   )
   const live = source === 'api'
   const kpis = data.kpis ?? []
@@ -288,25 +298,29 @@ export default function Hospitals() {
   const lookupRows = (data.lookupTable ?? []) as Record<string, string | number>[]
   const deempanelRows = (data.deempanelTable ?? []) as Record<string, string | number>[]
   const hemRows = (data.hemTable ?? []) as Record<string, string | number>[]
-  const filtered = moduleFilters.filterRows(tableRows)
-  // Lookup is reference data (m_lookup) — hospital geo filters do not apply.
+
+  const filtered = useMemo(
+    () => (live ? tableRows : moduleFilters.filterRows(tableRows)),
+    [live, tableRows, moduleFilters.filterRows]
+  )
   const lookupFiltered = useMemo(
     () => filterSecondaryHospitalTable(lookupRows, filterFields, moduleFilters.filters, moduleFilters.search),
     [lookupRows, filterFields, moduleFilters.filters, moduleFilters.search]
   )
-  // Live API already scopes deempanel to filtered hospitals (+ geo enrichment).
-  // Re-applying hospital page filters used to wipe rows (no district/state on raw deempanel).
   const deempanelFiltered = useMemo(() => {
     if (live) {
       const q = moduleFilters.search.trim().toLowerCase()
-      if (!q) return deempanelRows
-      return deempanelRows.filter((row) =>
+      let rows = deempanelRows
+      if (moduleFilters.filters.date_from || moduleFilters.filters.date_to) {
+        rows = applyPageFilters(rows, filterFields.filter((f) => f.key === 'date_from' || f.key === 'date_to'), moduleFilters.filters)
+      }
+      if (!q) return rows
+      return rows.filter((row) =>
         Object.values(row).some((v) => String(v ?? '').toLowerCase().includes(q))
       )
     }
     return filterSecondaryHospitalTable(deempanelRows, filterFields, moduleFilters.filters, moduleFilters.search)
   }, [live, deempanelRows, filterFields, moduleFilters.filters, moduleFilters.search])
-  // HEM has its own schema; only apply filters that map to HEM columns.
   const hemFiltered = useMemo(
     () => filterSecondaryHospitalTable(hemRows, filterFields, moduleFilters.filters, moduleFilters.search),
     [hemRows, filterFields, moduleFilters.filters, moduleFilters.search]
@@ -317,6 +331,7 @@ export default function Hospitals() {
     if (!res.ok) return []
     return (res.data.table ?? []) as Record<string, string | number>[]
   }, [moduleFilters.queryString])
+
   const columns = useMemo(
     () =>
       schemaTableColumns({
@@ -361,11 +376,11 @@ export default function Hospitals() {
     [source, data.hemColumns, hemRows]
   )
 
-  const { openFromChart, openFromKpi, openDetail, Modal } = useDrillDown({
+  const { openDetail, openFromChart, openFromKpi, Modal } = useDrillDown({
     live,
     tableRows: filtered,
     columns,
-    datasetTitle: 'Hospital Records',
+    datasetTitle: meta.title,
     resolveContext: (chartTitle) => {
       if (/lookup/i.test(chartTitle)) {
         return { rows: lookupFiltered, columns: lookupColumns, datasetTitle: 'Hospital Lookup' }
@@ -378,35 +393,36 @@ export default function Hospitals() {
       }
       return { rows: filtered, columns, datasetTitle: 'Hospital Records' }
     },
-    fetchDrillDown: live
-      ? async (payload, chartTitle) => {
-          if (/lookup|deempanel|\bhem\b/i.test(chartTitle)) return null
-          if (/hospital type/i.test(chartTitle)) {
-            const params = new URLSearchParams(moduleFilters.queryString.replace(/^\?/, ''))
-            const typeName = String(payload.name ?? '').trim()
-            const isOthers = /^others$/i.test(typeName)
-            if (typeName && !isOthers) params.set('hospital_type', typeName)
-            params.set('detail', '1')
-            const res = await fetchOverviewHospitals(`?${params.toString()}`, 120000)
+    fetchDrillDown:
+      live && (section === 'overview' || section === 'master')
+        ? async (payload, chartTitle) => {
+            if (/lookup|deempanel|\bhem\b/i.test(chartTitle)) return null
+            if (/hospital types|type distribution/i.test(chartTitle)) {
+              const typeName = String(payload.name ?? '').trim()
+              const isOthers = /^others$/i.test(typeName)
+              const params = new URLSearchParams(moduleFilters.queryString.replace(/^\?/, ''))
+              if (typeName && !isOthers) params.set('hospital_type', typeName)
+              params.set('limit', '500')
+              params.set('offset', '0')
+              const res = await fetchOverviewHospitals(`?${params.toString()}`, 120000)
+              if (!res.ok) return null
+              return {
+                rows: (res.data.table ?? []) as Record<string, string | number>[],
+                columns,
+                datasetTitle: typeName ? `Hospitals — ${typeName}` : 'Hospital Records',
+                alreadyFiltered: !isOthers,
+              }
+            }
+            const res = await fetchHospitalsExport(moduleFilters.queryString)
             if (!res.ok) return null
             const rows = (res.data.table ?? []) as Record<string, string | number>[]
-            return {
-              rows,
-              columns,
-              datasetTitle: typeName ? `Hospitals — ${typeName}` : 'Hospital Records',
-              alreadyFiltered: !isOthers,
-            }
+            return { rows, columns, datasetTitle: 'Hospital Records' }
           }
-          const res = await fetchHospitalsExport(moduleFilters.queryString)
-          if (!res.ok) return null
-          const rows = (res.data.table ?? []) as Record<string, string | number>[]
-          return { rows, columns, datasetTitle: 'Hospital Records' }
-        }
-      : undefined,
+        : undefined,
   })
 
   const handleKpi = async (kpi: KPI) => {
-    if (/lookup/i.test(kpi.label)) {
+    if (/lookup/i.test(kpi.label) || section === 'lookup') {
       openDetail({
         title: kpi.label,
         subtitle: `${lookupFiltered.length} record${lookupFiltered.length === 1 ? '' : 's'}`,
@@ -418,11 +434,12 @@ export default function Hospitals() {
       return
     }
     const hemKpiRows = filterRowsForHemKpi(hemFiltered, kpi.label)
-    if (hemKpiRows) {
+    if (hemKpiRows || section === 'hem') {
+      const rows = hemKpiRows ?? hemFiltered
       openDetail({
         title: kpi.label,
-        subtitle: `${hemKpiRows.length} record${hemKpiRows.length === 1 ? '' : 's'}`,
-        records: hemKpiRows,
+        subtitle: `${rows.length} record${rows.length === 1 ? '' : 's'}`,
+        records: rows,
         columns: hemColumns,
         datasetTitle: 'HEM Hospitals',
         source: live ? 'api' : 'demo',
@@ -430,11 +447,12 @@ export default function Hospitals() {
       return
     }
     const deempanelKpiRows = filterRowsForDeempanelKpi(deempanelFiltered, kpi.label)
-    if (deempanelKpiRows) {
+    if (deempanelKpiRows || section === 'deempanel') {
+      const rows = deempanelKpiRows ?? deempanelFiltered
       openDetail({
         title: kpi.label,
-        subtitle: `${deempanelKpiRows.length} record${deempanelKpiRows.length === 1 ? '' : 's'}`,
-        records: deempanelKpiRows,
+        subtitle: `${rows.length} record${rows.length === 1 ? '' : 's'}`,
+        records: rows,
         columns: deempanelColumns,
         datasetTitle: 'De-empanelment Details',
         source: live ? 'api' : 'demo',
@@ -442,7 +460,7 @@ export default function Hospitals() {
       return
     }
 
-    if (live) {
+    if (live && (section === 'overview' || section === 'master')) {
       openDetail({
         title: kpi.label,
         subtitle: 'Loading hospital records…',
@@ -480,31 +498,28 @@ export default function Hospitals() {
     openFromKpi(kpi.label, kpi.value, { change: kpi.change ?? 0 })
   }
 
-  const hasCharts =
-    typeData.length > 0 ||
-    districtData.length > 0 ||
-    divisionData.length > 0 ||
-    enrollmentData.length > 0 ||
-    activeStatusData.length > 0 ||
-    empanelmentTrend.length > 0
-
   const exportSheets = useMemo((): ExportSheet[] => {
     const sheets: ExportSheet[] = []
-    if (kpis.length) {
+    if (section === 'hem') {
+      const hemAll = [...kpis, ...hemKpis]
+      if (hemAll.length) {
+        sheets.push({ name: 'HEM KPI Cards', rows: kpisToExportRows(hemAll), columns: KPI_EXPORT_COLUMNS })
+      }
+    } else if (kpis.length) {
       sheets.push({ name: 'KPI Cards', rows: kpisToExportRows(kpis), columns: KPI_EXPORT_COLUMNS })
     }
-    if (hemKpis.length) {
+    if (section !== 'hem' && hemKpis.length) {
       sheets.push({ name: 'HEM KPI Cards', rows: kpisToExportRows(hemKpis), columns: KPI_EXPORT_COLUMNS })
     }
     if (deempanelKpis.length) {
       sheets.push({ name: 'Deempanel KPI Cards', rows: kpisToExportRows(deempanelKpis), columns: KPI_EXPORT_COLUMNS })
     }
-    const charts: [string, Record<string, string | number>[]][] = [
-      ['Hospital Type Distribution', typeData],
+    const chartSheets: Array<[string, typeof typeData]> = [
+      ['Hospital Types', typeData],
       ['Empanelment Status', enrollmentData],
       ['District-wise Hospitals', districtData],
       ['Division-wise Hospitals', divisionData],
-      ['Active vs Inactive', activeStatusData],
+      ['Active Status', activeStatusData],
       ['Empanelment Trend', empanelmentTrend],
       ['HEM Ownership', hemOwnership],
       ['HEM Active Status', hemActive],
@@ -513,11 +528,12 @@ export default function Hospitals() {
       ['Lookup Categories', lookupCategory],
       ['Lookup Status', lookupStatus],
     ]
-    for (const [name, rows] of charts) {
+    for (const [name, rows] of chartSheets) {
       if (rows.length) sheets.push({ name, rows, columns: CHART_EXPORT_COLUMNS })
     }
     return sheets
   }, [
+    section,
     kpis,
     hemKpis,
     deempanelKpis,
@@ -535,32 +551,44 @@ export default function Hospitals() {
     lookupStatus,
   ])
 
+  const showMasterCharts = section === 'overview' || section === 'master'
+  const showMasterTable = section === 'overview' || section === 'master'
+  const showFilterBar = filterFields.length > 0 || meta.filterKey === 'mp_hospitals_lookup'
+
   return (
     <div>
       <Modal />
       <PageHeader
-        title="Hospitals & Empanelment"
+        title={meta.title}
         badge={<DataSourceBadge source={source} db={db} loading={loading} />}
         exportSheets={exportSheets}
       />
       <BackendOfflineNotice error={error} loading={loading} />
 
-      <ModuleFilterBar
-        title={moduleFilters.meta.title}
-        subtitle={moduleFilters.meta.subtitle}
-        searchPlaceholder={moduleFilters.meta.searchPlaceholder}
-        fields={moduleFilters.resolvedFields}
-        values={moduleFilters.filters}
-        onChange={moduleFilters.setFilter}
-        search={moduleFilters.search}
-        onSearchChange={moduleFilters.setSearch}
-        onClear={moduleFilters.clearFilters}
-        activeCount={moduleFilters.activeCount}
-      />
+      {showFilterBar && (
+        <ModuleFilterBar
+          title={moduleFilters.meta.title}
+          subtitle={moduleFilters.meta.subtitle}
+          searchPlaceholder={moduleFilters.meta.searchPlaceholder}
+          fields={moduleFilters.resolvedFields}
+          values={moduleFilters.filters}
+          onChange={moduleFilters.setFilter}
+          search={moduleFilters.search}
+          onSearchChange={moduleFilters.setSearch}
+          onClear={moduleFilters.clearFilters}
+          activeCount={moduleFilters.activeCount}
+        />
+      )}
 
-      {kpis.length > 0 && <KPIGrid kpis={kpis} onKpiClick={handleKpi} exportLabel="KPI Cards" />}
+      {(section === 'master' || section === 'overview') && kpis.length > 0 && (
+        <KPIGrid kpis={kpis} onKpiClick={handleKpi} exportLabel="KPI Cards" />
+      )}
 
-      {hasCharts && (
+      {section === 'lookup' && kpis.length > 0 && (
+        <KPIGrid kpis={kpis} onKpiClick={handleKpi} exportLabel="Lookup KPI Cards" />
+      )}
+
+      {showMasterCharts && (
         <>
           <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
             {typeData.length > 0 && (
@@ -574,7 +602,6 @@ export default function Hospitals() {
               </ChartCard>
             )}
           </div>
-
           <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
             {districtData.length > 0 && (
               <ChartCard title="District-wise Hospitals" subtitle="Top 10 districts + Others" exportData={districtData}>
@@ -603,7 +630,6 @@ export default function Hospitals() {
               </ChartCard>
             )}
           </div>
-
           <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
             {activeStatusData.length > 0 && (
               <ChartCard title="Active vs Inactive" exportData={activeStatusData}>
@@ -634,61 +660,57 @@ export default function Hospitals() {
         </>
       )}
 
-      <DataTable
-        columns={columns}
-        data={filtered}
-        title={`Hospital Records (${tableTotal.toLocaleString()} unique)`}
-        serverPagination={
-          live
-            ? {
-                totalRows: tableTotal,
-                page,
-                pageSize: TABLE_PAGE_SIZE,
-                onPageChange: setPage,
-              }
-            : undefined
-        }
-        fetchExportData={live ? fetchHospitalExport : undefined}
-        onRowClick={(row) =>
-          openDetail({
-            title: String(row.hospital_name || row.hosp_name || row.name || 'Hospital'),
-            subtitle: 'Schema record',
-            data: row,
-          })
-        }
-      />
+      {showMasterTable && (
+        <DataTable
+          columns={columns}
+          data={filtered}
+          title={`Hospital Records (${tableTotal.toLocaleString()} unique)`}
+          serverPagination={
+            live
+              ? {
+                  totalRows: tableTotal,
+                  page,
+                  pageSize: TABLE_PAGE_SIZE,
+                  onPageChange: setPage,
+                }
+              : undefined
+          }
+          fetchExportData={live ? fetchHospitalExport : undefined}
+          onRowClick={(row) =>
+            openDetail({
+              title: String(row.hospital_name || row.hosp_name || row.name || 'Hospital'),
+              subtitle: 'Schema record',
+              data: row,
+            })
+          }
+        />
+      )}
 
-      {hemRows.length > 0 && (
+      {section === 'hem' && (
         <>
-          <div className="mb-4 mt-5 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
+          <div className="mb-4 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
             <p className="text-sm font-semibold text-[#1a5c38]">HEM hospital — dmart_mp.t_hem_hospital</p>
             <p className="text-xs text-slate-500">
               Hospital Empanelment Module registry (ownership, HFR ID, nodal officer, certificate)
             </p>
           </div>
-          {hemKpis.length > 0 && <KPIGrid kpis={hemKpis} onKpiClick={handleKpi} exportLabel="HEM KPI Cards" />}
+          {(kpis.length > 0 || hemKpis.length > 0) && (
+            <KPIGrid
+              kpis={[...kpis, ...hemKpis]}
+              onKpiClick={handleKpi}
+              exportLabel="HEM KPI Cards"
+            />
+          )}
           {(hemOwnership.length > 0 || hemActive.length > 0) && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
               {hemOwnership.length > 0 && (
                 <ChartCard title="HEM Ownership" subtitle="hosp_type_cd" exportData={hemOwnership}>
-                  <InteractivePieChart
-                    data={hemOwnership}
-                    colors={TYPE_COLORS}
-                    innerRadius={55}
-                    chartTitle="HEM Ownership"
-                    onItemClick={openFromChart}
-                  />
+                  <InteractivePieChart data={hemOwnership} colors={TYPE_COLORS} innerRadius={55} chartTitle="HEM Ownership" onItemClick={openFromChart} />
                 </ChartCard>
               )}
               {hemActive.length > 0 && (
                 <ChartCard title="HEM Active Status" subtitle="active_status" exportData={hemActive}>
-                  <InteractivePieChart
-                    data={hemActive}
-                    colors={STATUS_COLORS}
-                    innerRadius={55}
-                    chartTitle="HEM Active Status"
-                    onItemClick={openFromChart}
-                  />
+                  <InteractivePieChart data={hemActive} colors={STATUS_COLORS} innerRadius={55} chartTitle="HEM Active Status" onItemClick={openFromChart} />
                 </ChartCard>
               )}
             </div>
@@ -711,13 +733,11 @@ export default function Hospitals() {
         </>
       )}
 
-      {deempanelRows.length > 0 && (
+      {section === 'deempanel' && (
         <>
-          <div className="mb-4 mt-5 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
+          <div className="mb-4 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
             <p className="text-sm font-semibold text-[#1a5c38]">De-empanelment — dmart_mp.t_deempanelment_details</p>
-            <p className="text-xs text-slate-500">
-              Hospital de-empanelment, stop-payment and revoke actions (one row per hospital)
-            </p>
+            <p className="text-xs text-slate-500">Hospital de-empanelment, stop-payment and revoke actions</p>
           </div>
           {deempanelKpis.length > 0 && (
             <KPIGrid kpis={deempanelKpis} onKpiClick={handleKpi} exportLabel="Deempanel KPI Cards" />
@@ -726,24 +746,18 @@ export default function Hospitals() {
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
               {deempanelType.length > 0 && (
                 <ChartCard title="De-empanelment Action Type" subtitle="type" exportData={deempanelType}>
-                  <InteractivePieChart
-                    data={deempanelType}
-                    colors={DEEMPANEL_COLORS}
-                    innerRadius={55}
-                    chartTitle="Deempanel Type"
-                    onItemClick={openFromChart}
-                  />
+                  <InteractivePieChart data={deempanelType} colors={DEEMPANEL_COLORS} innerRadius={55} chartTitle="De-empanelment Action Type" onItemClick={openFromChart} />
                 </ChartCard>
               )}
               {deempanelTrend.length > 0 && (
                 <ChartCard title="De-empanelment Trend" subtitle="Actions by start date" exportData={deempanelTrend}>
                   <InteractiveLineChart
                     data={deempanelTrend}
-                    chartTitle="Deempanel Trend"
+                    chartTitle="De-empanelment Trend"
                     height={260}
                     integerAxis
                     onItemClick={openFromChart}
-                    lines={[{ dataKey: 'value', stroke: '#dc2626', name: 'Actions' }]}
+                    lines={[{ dataKey: 'value', stroke: '#ef4444', name: 'Actions' }]}
                   />
                 </ChartCard>
               )}
@@ -752,7 +766,7 @@ export default function Hospitals() {
           <DataTable
             columns={deempanelColumns}
             data={deempanelFiltered}
-            title={`De-empanelment Details — dmart_mp.t_deempanelment_details (${deempanelFiltered.length}${
+            title={`De-empanelment Details (${deempanelFiltered.length}${
               deempanelColumns.length ? ` · ${deempanelColumns.length} schema cols` : ''
             })`}
             onRowClick={(row) =>
@@ -767,46 +781,30 @@ export default function Hospitals() {
         </>
       )}
 
-      {lookupRows.length > 0 && (
+      {section === 'lookup' && (
         <>
-          <div className="mb-4 mt-5 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
+          <div className="mb-4 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
             <p className="text-sm font-semibold text-[#1a5c38]">Hospital lookup — dmart_mp.m_lookup</p>
-            <p className="text-xs text-slate-500">
-              Reference codes for facility type, specialty, empanelment status and related hospital master fields
-            </p>
+            <p className="text-xs text-slate-500">Reference codes used for hospital type and related mappings</p>
           </div>
-          <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {lookupCategory.length > 0 && (
-              <ChartCard title="Lookup Categories" subtitle="lookup_cd" exportData={lookupCategory}>
-                <InteractiveBarChart
-                  data={lookupCategory}
-                  chartTitle="Lookup Categories"
-                  layout="vertical"
-                  height={barHeight(lookupCategory.length)}
-                  integerAxis
-                  onItemClick={openFromChart}
-                  bars={[{ dataKey: 'value', fill: '#2563eb', name: 'Values' }]}
-                />
-              </ChartCard>
-            )}
-            {lookupStatus.length > 0 && (
-              <ChartCard title="Lookup Status" subtitle="active_yn" exportData={lookupStatus}>
-                <InteractivePieChart
-                  data={lookupStatus}
-                  colors={LOOKUP_COLORS}
-                  innerRadius={55}
-                  chartTitle="Lookup Status"
-                  onItemClick={openFromChart}
-                />
-              </ChartCard>
-            )}
-          </div>
+          {(lookupCategory.length > 0 || lookupStatus.length > 0) && (
+            <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {lookupCategory.length > 0 && (
+                <ChartCard title="Lookup Categories" subtitle="lookup_cd" exportData={lookupCategory}>
+                  <InteractivePieChart data={lookupCategory} colors={LOOKUP_COLORS} innerRadius={55} chartTitle="Lookup Categories" onItemClick={openFromChart} />
+                </ChartCard>
+              )}
+              {lookupStatus.length > 0 && (
+                <ChartCard title="Lookup Status" subtitle="active_yn" exportData={lookupStatus}>
+                  <InteractivePieChart data={lookupStatus} colors={STATUS_COLORS} innerRadius={55} chartTitle="Lookup Status" onItemClick={openFromChart} />
+                </ChartCard>
+              )}
+            </div>
+          )}
           <DataTable
             columns={lookupColumns}
             data={lookupFiltered}
-            title={`Hospital Lookup — dmart_mp.m_lookup (${lookupFiltered.length}${
-              lookupColumns.length ? ` · ${lookupColumns.length} schema cols` : ''
-            })`}
+            title={`Lookup Values (${lookupFiltered.length}${lookupColumns.length ? ` · ${lookupColumns.length} schema cols` : ''})`}
             onRowClick={(row) =>
               openDetail({
                 title: String(row.lookup_value || row.lookup_cd || 'Lookup'),

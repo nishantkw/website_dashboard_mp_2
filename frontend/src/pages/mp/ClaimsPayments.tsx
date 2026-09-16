@@ -60,9 +60,12 @@ const EMPTY = {
   charts: {} as Record<string, never>,
   table: [] as Record<string, string | number>[],
   paymentTable: [] as Record<string, string | number>[],
+  jsonDataTable: [] as Record<string, string | number>[],
   columns: [] as string[],
   paymentColumns: [] as string[],
+  jsonDataColumns: [] as string[],
   paymentKpis: [] as KPI[],
+  jsonDataKpis: [] as KPI[],
   masterKpis: [] as { key: string; label: string; count: number; initiatedCr: number; approvedCr: number }[],
   stateHospitalSummary: [] as Record<string, string | number>[],
 }
@@ -102,6 +105,7 @@ export default function ClaimsPayments() {
   const paymentBank = data.charts?.paymentBank ?? []
   const paymentTrend = data.charts?.paymentTrend ?? []
   const paymentKpis = data.paymentKpis ?? []
+  const jsonDataKpis = data.jsonDataKpis ?? []
 
   const districtChartHeight = Math.min(420, Math.max(260, districtData.length * 36 + 72))
   const divisionChartHeight = Math.min(380, Math.max(240, divisionData.length * 40 + 72))
@@ -136,6 +140,7 @@ export default function ClaimsPayments() {
     [source, data.columns, tableRows]
   )
   const paymentRows = (data.paymentTable ?? []) as Record<string, string | number>[]
+  const jsonDataRows = (data.jsonDataTable ?? []) as Record<string, string | number>[]
   const paymentColumns = useMemo(
     () =>
       schemaTableColumns({
@@ -145,6 +150,26 @@ export default function ClaimsPayments() {
         preferredFirst: paymentPreferred.map((c) => c.key),
       }),
     [source, data.paymentColumns, paymentRows]
+  )
+  const jsonDataColumns = useMemo(
+    () =>
+      schemaTableColumns({
+        source,
+        schemaKeys: data.jsonDataColumns,
+        rows: jsonDataRows,
+        preferredFirst: [
+          'id',
+          'registration_id',
+          'patientnumber',
+          'packagecode',
+          'packagedesc',
+          'claimedamount',
+          'approvedamount',
+          'netpayable',
+          'status',
+        ],
+      }),
+    [source, data.jsonDataColumns, jsonDataRows]
   )
 
   const { openFromChart, openFromKpi, openDetail, closeDetail, Modal } = useDrillDown({
@@ -518,6 +543,45 @@ export default function ClaimsPayments() {
                 subtitle: 'dmart_mp.payment_dtls',
                 data: row,
                 columns: paymentColumns,
+              })
+            }
+          />
+        </>
+      )}
+
+      {jsonDataRows.length > 0 && (
+        <>
+          <div className="mb-4 mt-5 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
+            <p className="text-sm font-semibold text-[#1a5c38]">
+              Claim line items — {data.jsonDataSchema || 'dmart_mp.json_data'}
+            </p>
+            <p className="text-xs text-slate-500">
+              Package/procedure line amounts (claimed vs approved, TDS/RF, net payable)
+            </p>
+          </div>
+          {jsonDataKpis.length > 0 && (
+            <KPIGrid
+              kpis={jsonDataKpis}
+              onKpiClick={(kpi) =>
+                openDetail({
+                  title: kpi.label,
+                  subtitle: `${jsonDataRows.length} line item${jsonDataRows.length === 1 ? '' : 's'}`,
+                  records: jsonDataRows,
+                  columns: jsonDataColumns,
+                })
+              }
+            />
+          )}
+          <DataTable
+            columns={jsonDataColumns}
+            data={jsonDataRows}
+            title={`Claim Line Items — json_data (${jsonDataRows.length})`}
+            onRowClick={(row) =>
+              openDetail({
+                title: String(row.packagecode || row.registration_id || row.id || 'Line item'),
+                subtitle: data.jsonDataSchema || 'json_data',
+                data: row,
+                columns: jsonDataColumns,
               })
             }
           />

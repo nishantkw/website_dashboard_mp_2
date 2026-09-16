@@ -25,6 +25,20 @@ const TABLE_KEYS = {
   tms_recovery: [['case_id', 'hosp_disp_code', 'created_dt'], ['case_id']],
   icd_data_doctor_details: [['case_id', 'code']],
   treatment_dtls: [['caseid', 'procedure_code'], ['registration_id', 'procedure_code']],
+  already_printed_card_no_290626: [['card_no']],
+  already_printed_card_no_34321992_8672488_09082026: [['card_no']],
+  card_print_data_madhya_pradesh_01aug2025: [['card_no'], ['member_id'], ['id_pk']],
+  card_print_data_madhya_pradesh_vvs_29may2025_f: [['card_no'], ['member_id'], ['id_pk']],
+  card_print_data_temp_t_bis_ekyc_dtl_mp_20260703_with_village_na: [['card_no'], ['member_id'], ['id_pk']],
+  left_over_cards_for_print_of_mp_with_village_name_09aug2026_fin: [['card_no'], ['member_id'], ['id_pk']],
+  pvtg_by_district_7march_v3: [['card_no'], ['memberid', 'familyid']],
+  t_beneficiary_ekyc_dtls_17july2025_old: [['id_pk'], ['member_id'], ['card_no']],
+  t_bis_beneficiary_disabled_19aug2025: [['card_no'], ['member_id']],
+  m_status_bis: [['id_pk'], ['status']],
+  m_status_tms: [['id_pk'], ['status']],
+  t_hem_manpower: [['manpower_id_pk'], ['reg_number', 'hosp_id_pk']],
+  json_data: [['id'], ['registration_id', 'itemsequence']],
+  treatment_stratification_details: [['registration_id', 'treatment_sno'], ['registration_id', 'procedurecode']],
 }
 
 const GENERIC_KEYS = [
