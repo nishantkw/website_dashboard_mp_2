@@ -79,13 +79,21 @@ const EMPTY = {
   disabledTable: [] as Record<string, string | number>[],
   bisTable: [] as Record<string, string | number>[],
   histTable: [] as Record<string, string | number>[],
+  ekycTable: [] as Record<string, string | number>[],
+  pvtgTable: [] as Record<string, string | number>[],
+  disabledSnapTable: [] as Record<string, string | number>[],
   histSchema: '',
   columns: [] as string[],
   sourceColumns: [] as string[],
   disabledColumns: [] as string[],
   histColumns: [] as string[],
+  ekycColumns: [] as string[],
+  pvtgColumns: [] as string[],
+  disabledSnapColumns: [] as string[],
   disabledKpis: [] as KPI[],
   histKpis: [] as KPI[],
+  ekycKpis: [] as KPI[],
+  pvtgKpis: [] as KPI[],
   bisKpis: [] as KPI[],
   bisColumns: [] as string[],
 }
@@ -138,12 +146,20 @@ export default function Beneficiaries() {
   const disabledRows = (data.disabledTable ?? []) as Record<string, string | number>[]
   const bisRows = (data.bisTable ?? []) as Record<string, string | number>[]
   const histRows = (data.histTable ?? []) as Record<string, string | number>[]
+  const ekycRows = (data.ekycTable ?? []) as Record<string, string | number>[]
+  const pvtgRows = (data.pvtgTable ?? []) as Record<string, string | number>[]
+  const disabledSnapRows = (data.disabledSnapTable ?? []) as Record<string, string | number>[]
   const histKpis = data.histKpis ?? []
+  const ekycKpis = data.ekycKpis ?? []
+  const pvtgKpis = data.pvtgKpis ?? []
   const filtered = benFilters.filterRows(tableRows)
   const sourceFiltered = benFilters.filterRows(sourceRows)
   const disabledFiltered = benFilters.filterRows(disabledRows)
   const bisFiltered = benFilters.filterRows(bisRows)
   const histFiltered = benFilters.filterRows(histRows)
+  const ekycFiltered = benFilters.filterRows(ekycRows)
+  const pvtgFiltered = benFilters.filterRows(pvtgRows)
+  const disabledSnapFiltered = benFilters.filterRows(disabledSnapRows)
   const columns = useMemo(
     () =>
       schemaTableColumns({
@@ -194,6 +210,55 @@ export default function Beneficiaries() {
         preferredFirst: preferredColumns.map((c) => c.key),
       }),
     [source, data.histColumns, histRows]
+  )
+  const ekycColumns = useMemo(
+    () =>
+      schemaTableColumns({
+        source,
+        schemaKeys: data.ekycColumns,
+        rows: ekycRows,
+        preferredFirst: [
+          'id_pk',
+          'name',
+          'family_id',
+          'member_id',
+          'card_no',
+          'status',
+          'district',
+          'mobile_no',
+          'card_status',
+        ],
+      }),
+    [source, data.ekycColumns, ekycRows]
+  )
+  const pvtgColumns = useMemo(
+    () =>
+      schemaTableColumns({
+        source,
+        schemaKeys: data.pvtgColumns,
+        rows: pvtgRows,
+        preferredFirst: [
+          'name',
+          'card_no',
+          'familyid',
+          'memberid',
+          'villege_name',
+          'verification_status',
+          'sha_final_action',
+          'dlt_reason',
+        ],
+      }),
+    [source, data.pvtgColumns, pvtgRows]
+  )
+  const disabledSnapColumns = useMemo(
+    () =>
+      schemaTableColumns({
+        source,
+        schemaKeys: data.disabledSnapColumns,
+        rows: disabledSnapRows,
+        preferredFirst: disabledPreferred.map((c) => c.key),
+      }),
+    [source, data.disabledSnapColumns, disabledSnapRows]
   )
 
   const { openFromChart, openFromKpi, openDetail, Modal } = useDrillDown({
@@ -756,6 +821,80 @@ export default function Beneficiaries() {
                 subtitle: 'bis_raw.t_bis_beneficiary_dtls',
                 data: row,
                 columns: bisColumns,
+              })
+            }
+          />
+        </>
+      )}
+
+      {ekycFiltered.length > 0 && (
+        <>
+          <div className="mb-4 mt-5 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
+            <p className="text-sm font-semibold text-[#1a5c38]">
+              Beneficiary e-KYC — {data.ekycSchema || 'dmart_mp.t_beneficiary_ekyc_dtls_17july2025_old'}
+            </p>
+            <p className="text-xs text-slate-500">Older e-KYC snapshot (identity, address, card status)</p>
+          </div>
+          {ekycKpis.length > 0 && <KPIGrid kpis={ekycKpis} onKpiClick={handleKpi} />}
+          <DataTable
+            columns={ekycColumns}
+            data={ekycFiltered}
+            title={`e-KYC Details (${ekycFiltered.length})`}
+            onRowClick={(row) =>
+              openDetail({
+                title: String(row.name || row.card_no || row.id_pk || 'e-KYC'),
+                subtitle: data.ekycSchema || 'e-KYC',
+                data: row,
+                columns: ekycColumns,
+              })
+            }
+          />
+        </>
+      )}
+
+      {pvtgFiltered.length > 0 && (
+        <>
+          <div className="mb-4 mt-5 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
+            <p className="text-sm font-semibold text-[#1a5c38]">
+              PVTG by District — {data.pvtgSchema || 'dmart_mp.pvtg_by_district_7march_v3'}
+            </p>
+            <p className="text-xs text-slate-500">Particularly Vulnerable Tribal Group beneficiaries and SHA actions</p>
+          </div>
+          {pvtgKpis.length > 0 && <KPIGrid kpis={pvtgKpis} onKpiClick={handleKpi} />}
+          <DataTable
+            columns={pvtgColumns}
+            data={pvtgFiltered}
+            title={`PVTG Records (${pvtgFiltered.length})`}
+            onRowClick={(row) =>
+              openDetail({
+                title: String(row.name || row.card_no || 'PVTG'),
+                subtitle: data.pvtgSchema || 'PVTG',
+                data: row,
+                columns: pvtgColumns,
+              })
+            }
+          />
+        </>
+      )}
+
+      {disabledSnapFiltered.length > 0 && (
+        <>
+          <div className="mb-4 mt-5 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
+            <p className="text-sm font-semibold text-[#1a5c38]">
+              Disabled snapshot (19-Aug-2025) —{' '}
+              {data.disabledSnapSchema || 'dmart_mp.t_bis_beneficiary_disabled_19aug2025'}
+            </p>
+          </div>
+          <DataTable
+            columns={disabledSnapColumns}
+            data={disabledSnapFiltered}
+            title={`Disabled Snapshot (${disabledSnapFiltered.length})`}
+            onRowClick={(row) =>
+              openDetail({
+                title: String(row.name || row.card_no || 'Disabled'),
+                subtitle: data.disabledSnapSchema || 'disabled snapshot',
+                data: row,
+                columns: disabledSnapColumns,
               })
             }
           />

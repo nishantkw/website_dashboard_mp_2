@@ -19,9 +19,11 @@ interface KPICardProps {
   kpi: KPI
   onClick?: (kpi: KPI) => void
   selected?: boolean
+  /** Flat cell inside a unified KPI panel (no separate card chrome). */
+  embedded?: boolean
 }
 
-export default function KPICard({ kpi, onClick, selected = false }: KPICardProps) {
+export default function KPICard({ kpi, onClick, selected = false, embedded = false }: KPICardProps) {
   const navigate = useNavigate()
   const change = kpi.change
   const hasChange = typeof change === 'number' && !Number.isNaN(change)
@@ -43,10 +45,14 @@ export default function KPICard({ kpi, onClick, selected = false }: KPICardProps
       onClick={handleClick}
       aria-pressed={selected}
       className={clsx(
-        'w-full cursor-pointer rounded-xl border p-5 text-left group relative transition-all',
-        selected
-          ? 'scale-[1.01] border-[#2d8a4e] bg-white shadow-lg ring-2 ring-[#2d8a4e]/25'
-          : 'border-gray-100 bg-white shadow-sm hover:scale-[1.02] hover:border-[#2d8a4e]/40 hover:shadow-lg active:scale-[0.99]'
+        'w-full cursor-pointer p-5 text-left group relative transition-colors',
+        embedded
+          ? selected
+            ? 'bg-[#f4fbf6] ring-inset ring-2 ring-[#2d8a4e]/30'
+            : 'bg-white hover:bg-slate-50'
+          : selected
+            ? 'scale-[1.01] rounded-xl border border-[#2d8a4e] bg-white shadow-lg ring-2 ring-[#2d8a4e]/25'
+            : 'rounded-xl border border-gray-100 bg-white shadow-sm hover:scale-[1.02] hover:border-[#2d8a4e]/40 hover:shadow-lg active:scale-[0.99]'
       )}
     >
       <div className="flex items-start justify-between">

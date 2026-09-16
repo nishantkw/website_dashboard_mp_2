@@ -1,7 +1,15 @@
 import type { FilterField } from '../types'
 import { pageFilterConfigs } from './pageFilters'
 
-export type ModuleFilterKey = 'mp_hospitals' | 'mp_patients' | 'mp_lms' | 'mp_workflow'
+export type ModuleFilterKey =
+  | 'mp_hospitals'
+  | 'mp_hospitals_overview'
+  | 'mp_hospitals_deempanel'
+  | 'mp_hospitals_hem'
+  | 'mp_hospitals_lookup'
+  | 'mp_patients'
+  | 'mp_lms'
+  | 'mp_workflow'
 
 export const MODULE_FILTER_META: Record<
   ModuleFilterKey,
@@ -12,6 +20,30 @@ export const MODULE_FILTER_META: Record<
     subtitle: 'State type (MP / Portability), division, district, type, NABH and empanelment status',
     searchPlaceholder: 'Hospital / Facility ID...',
     searchColumns: ['hosp_id', 'facility_id', 'hosp_name', 'hospital_name', 'district_name', 'hospital_type'],
+  },
+  mp_hospitals_overview: {
+    title: 'Overview Filters',
+    subtitle: 'State type, division, district and hospital type for KPI / chart scope',
+    searchPlaceholder: 'Hospital / Facility ID...',
+    searchColumns: ['hosp_id', 'facility_id', 'hosp_name', 'hospital_name', 'district_name', 'hospital_type'],
+  },
+  mp_hospitals_deempanel: {
+    title: 'De-empanelment Filters',
+    subtitle: 'Scope by hospital geography and action date',
+    searchPlaceholder: 'Hospital ID / Name / Action type...',
+    searchColumns: ['hosp_id', 'hospital_name', 'type', 'reasons', 'status', 'stop_payment'],
+  },
+  mp_hospitals_hem: {
+    title: 'HEM Filters',
+    subtitle: 'Ownership type and currently serving status',
+    searchPlaceholder: 'Hospital / Facility / HFR ID...',
+    searchColumns: ['hosp_id', 'facility_id', 'hosp_name', 'hospital_name', 'hfr_hosp_id', 'nodal_officer_name'],
+  },
+  mp_hospitals_lookup: {
+    title: 'Lookup Search',
+    subtitle: 'Reference codes and values (no geography filters)',
+    searchPlaceholder: 'Lookup code / value...',
+    searchColumns: ['lookup_cd', 'lookup_value', 'type', 'created_by'],
   },
   mp_patients: {
     title: 'Patient Filters',

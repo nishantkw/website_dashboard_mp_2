@@ -9,7 +9,7 @@ export interface DashboardSearchItem {
 }
 
 /** Flatten sidebar nav into searchable destinations (leaves + top-level pages). */
-export function flattenNavigation(items: NavItem[]): DashboardSearchItem[] {
+export function flattenNavigation(items: NavItem[], parentLabel?: string): DashboardSearchItem[] {
   const out: DashboardSearchItem[] = []
   for (const item of items) {
     if (item.path) {
@@ -17,20 +17,12 @@ export function flattenNavigation(items: NavItem[]): DashboardSearchItem[] {
         id: item.id,
         label: item.label,
         path: item.path,
+        group: parentLabel,
         icon: item.icon,
       })
     }
-    if (item.children) {
-      for (const child of item.children) {
-        if (!child.path) continue
-        out.push({
-          id: child.id,
-          label: child.label,
-          path: child.path,
-          group: item.label,
-          icon: item.icon,
-        })
-      }
+    if (item.children?.length) {
+      out.push(...flattenNavigation(item.children, item.label))
     }
   }
   return out
@@ -49,6 +41,8 @@ export const navigation: NavItem[] = [
     icon: 'CreditCard',
     children: [
       { id: 'bis-card', label: 'Card Printing Status', path: '/dashboard/bis/card-printing' },
+      { id: 'bis-card-batches', label: 'Card Print Batches', path: '/dashboard/bis/card-print-data' },
+      { id: 'bis-print-dedup', label: 'Already Printed Cards', path: '/dashboard/bis/print-dedup' },
     ],
   },
 
@@ -60,8 +54,18 @@ export const navigation: NavItem[] = [
       { id: 'mp-claims', label: 'Claim Status Dashboard', path: '/dashboard/mp/claims-payments', end: true },
       { id: 'mp-claims-master', label: 'Master Report TMS', path: '/dashboard/mp/claims-payments/master-report' },
       { id: 'mp-beneficiaries', label: 'Beneficiaries', path: '/dashboard/mp/beneficiaries' },
-      { id: 'mp-hospitals', label: 'Hospitals', path: '/dashboard/mp/hospitals' },
-      { id: 'mp-patients', label: 'Patients & Treatment', path: '/dashboard/mp/patients' },
+      {
+        id: 'mp-hospitals-patients',
+        label: 'Hospitals & Patients',
+        children: [
+          { id: 'mp-hospitals', label: 'Hospitals', path: '/dashboard/mp/hospitals', end: true },
+          { id: 'mp-hospitals-deempanel', label: 'De-empanelment', path: '/dashboard/mp/hospitals/deempanel' },
+          { id: 'mp-hospitals-hem', label: 'HEM Hospitals', path: '/dashboard/mp/hospitals/hem' },
+          { id: 'mp-hospitals-manpower', label: 'HEM Manpower', path: '/dashboard/mp/hospitals/manpower' },
+          { id: 'mp-hospitals-lookup', label: 'Hospital Lookup', path: '/dashboard/mp/hospitals/lookup' },
+          { id: 'mp-patients', label: 'Patients & Treatment', path: '/dashboard/mp/patients' },
+        ],
+      },
       { id: 'mp-fraud', label: 'Fraud and Audit', path: '/dashboard/mp/fraud-audit' },
       { id: 'mp-users', label: 'Users & Workflow', path: '/dashboard/mp/users-workflow' },
       { id: 'mp-lms', label: 'LMS Training', path: '/dashboard/mp/lms-training' },

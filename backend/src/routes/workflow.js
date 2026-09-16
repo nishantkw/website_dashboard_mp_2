@@ -31,13 +31,23 @@ router.get('/', async (req, res) => {
       })
     )
 
+    const { loadTableSafe } = await import('../utils/loadTableSafe.js')
+    const [statusBis, statusTms] = await Promise.all([
+      loadTableSafe('dmart_mp', 'm_status_bis', { orderBy: 'id_pk', limit: 5000 }),
+      loadTableSafe('dmart_mp', 'm_status_tms', { orderBy: 'id_pk', limit: 5000 }),
+    ])
+
     res.json({
-      db: data.db,
+      db: data.db || statusBis.db || statusTms.db,
       schema: data.schema,
       proSchema: proTable.length ? 'dmart_mp.pro_workflow_users_t' : '',
+      statusBisSchema: statusBis.schema,
+      statusTmsSchema: statusTms.schema,
       columns,
       auditColumns,
       proColumns,
+      statusBisColumns: statusBis.columns,
+      statusTmsColumns: statusTms.columns,
       kpis: [
         buildKpi({
           label: 'Workflow Users',
@@ -82,6 +92,8 @@ router.get('/', async (req, res) => {
       table: data.table,
       audit: data.audit,
       proTable,
+      statusBisTable: statusBis.table,
+      statusTmsTable: statusTms.table,
     })
   } catch (err) {
     res.status(500).json({ error: clientError(err) })

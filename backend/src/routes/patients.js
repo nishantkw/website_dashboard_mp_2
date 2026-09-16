@@ -85,6 +85,14 @@ async function loadMorthRows() {
   }
 }
 
+async function loadStratificationRows() {
+  const { loadTableSafe } = await import('../utils/loadTableSafe.js')
+  return loadTableSafe('dmart_mp', 'treatment_stratification_details', {
+    orderBy: 'registration_id DESC',
+    limit: 10000,
+  })
+}
+
 router.get('/', async (req, res) => {
   try {
     const { clause, params } = buildPatientWhere(req.query)
@@ -108,6 +116,8 @@ router.get('/', async (req, res) => {
     if (!db) db = treatment.db
     const morth = await loadMorthRows()
     if (!db) db = morth.db
+    const strat = await loadStratificationRows()
+    if (!db) db = strat.db
 
     const patientKpi = buildKpi({ label: 'Patient Records', value: table.length, color: 'blue', rows: table })
     const treatmentDated = treatment.table.map((r) => ({
@@ -130,9 +140,11 @@ router.get('/', async (req, res) => {
       schema: `${SCHEMA}.${TABLE}`,
       treatmentSchema: 'dmart_mp.treatment_dtls',
       morthSchema: morth.columns.length || morth.table.length ? 'dmart_mp.t_morth_patient_details' : '',
+      stratSchema: strat.schema,
       columns,
       treatmentColumns: treatment.columns,
       morthColumns: morth.columns,
+      stratColumns: strat.columns,
       kpis: [
         patientKpi,
         ...treatmentKpis,
@@ -147,12 +159,23 @@ router.get('/', async (req, res) => {
               }),
             ]
           : []),
+        ...(strat.table.length
+          ? [
+              buildKpi({
+                label: 'Stratification Lines',
+                value: strat.table.length,
+                color: 'violet',
+                rows: strat.table,
+              }),
+            ]
+          : []),
       ],
       charts: { ...buildTreatmentCharts(treatment.table), ...buildMorthCharts(morth.table) },
       table,
       treatmentTable: treatment.table,
       morthTable: morth.table,
       morthKpis,
+      stratTable: strat.table,
     })
   } catch (err) {
     res.status(500).json({ error: clientError(err) })

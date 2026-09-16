@@ -97,6 +97,8 @@ export default function UsersWorkflow() {
   const tableRows = (data.table ?? []) as Record<string, string | number>[]
   const auditRows = (data.audit ?? []) as Record<string, string | number>[]
   const proRows = (data.proTable ?? []) as Record<string, string | number>[]
+  const statusBisRows = (data.statusBisTable ?? []) as Record<string, string | number>[]
+  const statusTmsRows = (data.statusTmsTable ?? []) as Record<string, string | number>[]
   const filtered = moduleFilters.filterRows(tableRows)
   const auditFiltered = moduleFilters.filterRows(auditRows)
   const proFiltered = moduleFilters.filterRows(proRows)
@@ -131,6 +133,35 @@ export default function UsersWorkflow() {
         preferredFirst: proPreferredColumns.map((c) => c.key),
       }),
     [source, data.proColumns, proRows]
+  )
+  const statusBisColumns = useMemo(
+    () =>
+      schemaTableColumns({
+        source,
+        schemaKeys: data.statusBisColumns,
+        rows: statusBisRows,
+        preferredFirst: ['id_pk', 'status', 'status_name', 'status_descrption', 'user_role', 'action', 'workflow_id'],
+      }),
+    [source, data.statusBisColumns, statusBisRows]
+  )
+  const statusTmsColumns = useMemo(
+    () =>
+      schemaTableColumns({
+        source,
+        schemaKeys: data.statusTmsColumns,
+        rows: statusTmsRows,
+        preferredFirst: [
+          'id_pk',
+          'status',
+          'status_name',
+          'status_descrption',
+          'user_role',
+          'action',
+          'workflow_id',
+          'search_status',
+        ],
+      }),
+    [source, data.statusTmsColumns, statusTmsRows]
   )
 
   const { openFromChart, openDetail, Modal } = useDrillDown({
@@ -476,6 +507,52 @@ export default function UsersWorkflow() {
             }
           />
         </>
+      )}
+
+      {statusBisRows.length > 0 && (
+        <div className="mt-5">
+          <div className="mb-4 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
+            <p className="text-sm font-semibold text-[#1a5c38]">
+              BIS status master — {data.statusBisSchema || 'dmart_mp.m_status_bis'}
+            </p>
+          </div>
+          <DataTable
+            columns={statusBisColumns}
+            data={statusBisRows}
+            title={`BIS Status Master (${statusBisRows.length})`}
+            onRowClick={(row) =>
+              openDetail({
+                title: String(row.status_name || row.status_descrption || row.status || 'Status'),
+                subtitle: data.statusBisSchema || 'm_status_bis',
+                data: row,
+                columns: statusBisColumns,
+              })
+            }
+          />
+        </div>
+      )}
+
+      {statusTmsRows.length > 0 && (
+        <div className="mt-5">
+          <div className="mb-4 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
+            <p className="text-sm font-semibold text-[#1a5c38]">
+              TMS status master — {data.statusTmsSchema || 'dmart_mp.m_status_tms'}
+            </p>
+          </div>
+          <DataTable
+            columns={statusTmsColumns}
+            data={statusTmsRows}
+            title={`TMS Status Master (${statusTmsRows.length})`}
+            onRowClick={(row) =>
+              openDetail({
+                title: String(row.status_name || row.status_descrption || row.status || 'Status'),
+                subtitle: data.statusTmsSchema || 'm_status_tms',
+                data: row,
+                columns: statusTmsColumns,
+              })
+            }
+          />
+        </div>
       )}
     </div>
   )
