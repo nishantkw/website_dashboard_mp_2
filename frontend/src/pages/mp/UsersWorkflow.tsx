@@ -1,5 +1,5 @@
 import ChartCard from '../../components/ui/ChartCard'
-import DataTable from '../../components/ui/DataTable'
+import DashboardReportsBanner from '../../components/ui/DashboardReportsBanner'
 import { PageHeader, KPIGrid } from '../../components/ui/PageHeader'
 import { InteractiveBarChart, InteractiveLineChart, InteractivePieChart } from '../../components/charts/InteractiveCharts'
 import { useMemo } from 'react'
@@ -12,6 +12,8 @@ import { fetchWorkflow } from '../../api/endpoints'
 import DataSourceBadge from '../../components/ui/DataSourceBadge'
 import BackendOfflineNotice from '../../components/ui/BackendOfflineNotice'
 import { schemaTableColumns } from '../../utils/schemaColumns'
+import DashboardSectionHeader from '../../components/ui/DashboardSectionHeader'
+import { pageHeaderDescription } from '../../utils/displayLabels'
 import type { KPI, TableColumn } from '../../types'
 
 const ROLE_COLORS = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#06b6d4', '#f97316']
@@ -169,6 +171,7 @@ export default function UsersWorkflow() {
     tableRows: filtered,
     columns: tableColumns,
     datasetTitle: 'Workflow User Records',
+    pageFilters: moduleFilters.filters,
     resolveContext: (chartTitle) => {
       if (/pro workflow/i.test(chartTitle)) {
         return { rows: proFiltered, columns: proColumns, datasetTitle: 'Pro Workflow Users' }
@@ -231,7 +234,10 @@ export default function UsersWorkflow() {
         title="Users & Workflow"
         description={
           live
-            ? `${data.schema ?? 'dmart_mp.workflow_users_t'} — unique users and roles from imported workflow data`
+            ? pageHeaderDescription(
+                data.schema ?? 'dmart_mp.workflow_users_t',
+                'Unique users and roles from imported workflow data'
+              )
             : 'Connect the backend to load workflow records'
         }
         badge={<DataSourceBadge source={source} db={db} loading={loading} />}
@@ -249,6 +255,11 @@ export default function UsersWorkflow() {
         onSearchChange={moduleFilters.setSearch}
         onClear={moduleFilters.clearFilters}
         activeCount={moduleFilters.activeCount}
+      />
+
+      <DashboardReportsBanner
+        reportPath="/dashboard/mp/reports/users"
+        buttonLabel="Open Users & Workflow Report →"
       />
 
       {kpis.length > 0 && <KPIGrid kpis={kpis} onKpiClick={handleKpi} />}
@@ -385,45 +396,13 @@ export default function UsersWorkflow() {
         </>
       )}
 
-      <DataTable
-        columns={tableColumns}
-        data={filtered}
-        title={`Workflow Users (${filtered.length}${tableColumns.length ? ` · ${tableColumns.length} schema cols` : ''})`}
-        onRowClick={(row) =>
-          openDetail({
-            title: String(row.workflow_user || row.registration_id || 'User'),
-            subtitle: 'Unique workflow user',
-            data: row,
-          })
-        }
-      />
-
-      {auditRows.length > 0 && (
-        <div className="mt-4">
-          <DataTable
-            columns={auditColumns}
-            data={auditFiltered}
-            title={`Audit Events (${auditFiltered.length}${auditColumns.length ? ` · ${auditColumns.length} schema cols` : ''})`}
-            onRowClick={(row) =>
-              openDetail({
-                title: String(row.acted_workflow_user || row.work_id_pk || row.id_pk || 'Audit'),
-                subtitle: String(row.previous_workflow_role || row.workflow_process_code || 'Audit event'),
-                data: row,
-                columns: auditColumns,
-              })
-            }
-          />
-        </div>
-      )}
-
       {proRows.length > 0 && (
         <>
-          <div className="mb-4 mt-5 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
-            <p className="text-sm font-semibold text-[#1a5c38]">Pro workflow users — dmart_mp.pro_workflow_users_t</p>
-            <p className="text-xs text-slate-500">
-              Processed workflow assignments with initiated/approved amounts, TAT and service request type
-            </p>
-          </div>
+          <DashboardSectionHeader
+            title={data.proSchema ?? 'dmart_mp.pro_workflow_users_t'}
+            fallbackTitle="Pro Workflow Users"
+            subtitle="Processed workflow assignments with initiated/approved amounts, TAT and service request type"
+          />
           {proKpis.length > 0 && <KPIGrid kpis={proKpis} onKpiClick={handleKpi} />}
           {(proProcess.length > 0 || proRole.length > 0 || proService.length > 0 || proHospitalType.length > 0 || proStatus.length > 0) && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -491,66 +470,25 @@ export default function UsersWorkflow() {
               )}
             </div>
           )}
-          <DataTable
-            columns={proColumns}
-            data={proFiltered}
-            title={`Pro Workflow Users — dmart_mp.pro_workflow_users_t (${proFiltered.length}${
-              proColumns.length ? ` · ${proColumns.length} schema cols` : ''
-            })`}
-            onRowClick={(row) =>
-              openDetail({
-                title: String(row.workflow_user || row.user_name || row.registration_id || 'Pro user'),
-                subtitle: 'dmart_mp.pro_workflow_users_t',
-                data: row,
-                columns: proColumns,
-              })
-            }
-          />
         </>
       )}
 
       {statusBisRows.length > 0 && (
         <div className="mt-5">
-          <div className="mb-4 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
-            <p className="text-sm font-semibold text-[#1a5c38]">
-              BIS status master — {data.statusBisSchema || 'dmart_mp.m_status_bis'}
-            </p>
-          </div>
-          <DataTable
-            columns={statusBisColumns}
-            data={statusBisRows}
-            title={`BIS Status Master (${statusBisRows.length})`}
-            onRowClick={(row) =>
-              openDetail({
-                title: String(row.status_name || row.status_descrption || row.status || 'Status'),
-                subtitle: data.statusBisSchema || 'm_status_bis',
-                data: row,
-                columns: statusBisColumns,
-              })
-            }
+          <DashboardSectionHeader
+            title={data.statusBisSchema ?? 'dmart_mp.m_status_bis'}
+            fallbackTitle="BIS Status Master"
+            className="mb-4 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3"
           />
         </div>
       )}
 
       {statusTmsRows.length > 0 && (
         <div className="mt-5">
-          <div className="mb-4 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
-            <p className="text-sm font-semibold text-[#1a5c38]">
-              TMS status master — {data.statusTmsSchema || 'dmart_mp.m_status_tms'}
-            </p>
-          </div>
-          <DataTable
-            columns={statusTmsColumns}
-            data={statusTmsRows}
-            title={`TMS Status Master (${statusTmsRows.length})`}
-            onRowClick={(row) =>
-              openDetail({
-                title: String(row.status_name || row.status_descrption || row.status || 'Status'),
-                subtitle: data.statusTmsSchema || 'm_status_tms',
-                data: row,
-                columns: statusTmsColumns,
-              })
-            }
+          <DashboardSectionHeader
+            title={data.statusTmsSchema ?? 'dmart_mp.m_status_tms'}
+            fallbackTitle="TMS Status Master"
+            className="mb-4 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3"
           />
         </div>
       )}

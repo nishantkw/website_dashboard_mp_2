@@ -4,13 +4,13 @@ import { RotateCcw, Search } from 'lucide-react'
 import CompactFilterLayout from './CompactFilterLayout'
 import {
   DIVISION_OPTIONS, getDistrictsForDivision, STATE_TYPE_OPTIONS,
-  CLAIM_STATUS_OPTIONS, CARD_STATUS_OPTIONS, USER_STATUS_OPTIONS,
-  HOSPITAL_STATUS_OPTIONS, PATIENT_STATUS_OPTIONS, INVESTIGATION_STATUS_OPTIONS,
-  TRAINING_STATUS_OPTIONS, ENROLLMENT_STATUS_OPTIONS,
-  GENDER_OPTIONS, URBAN_RURAL_OPTIONS, HOSPITAL_TYPE_OPTIONS,
-  CASE_TYPE_OPTIONS, ROLE_OPTIONS, DEPARTMENT_OPTIONS, EKYC_OPTIONS,
-  FRAUD_TYPE_OPTIONS, COURSE_OPTIONS, NABH_OPTIONS,
+  CARD_STATUS_OPTIONS, USER_STATUS_OPTIONS,
+  HOSPITAL_STATUS_OPTIONS, PATIENT_STATUS_OPTIONS,
+  TRAINING_STATUS_OPTIONS,
+  URBAN_RURAL_OPTIONS, HOSPITAL_TYPE_OPTIONS,
+  ROLE_OPTIONS, NABH_OPTIONS,
 } from '../../data/filterOptions'
+import { getApplicableGlobalFilterKeys } from '../../data/globalFilterScope'
 import { useGlobalFilters } from '../../context/FilterContext'
 import DateRangeFilter from '../ui/DateRangeFilter'
 import {
@@ -28,7 +28,6 @@ interface FilterSelectProps {
   value: string
   options: { value: string; label: string }[]
   onChange: (value: string) => void
-  /** Fill available row width instead of a fixed shrink-0 size — for filter bars with few fields, so the card doesn't look sparse. */
   grow?: boolean
   disabled?: boolean
 }
@@ -60,8 +59,23 @@ function isOverviewPath(pathname: string) {
 export default function GlobalFilterBar() {
   const location = useLocation()
   const overviewOnly = isOverviewPath(location.pathname)
-  const { globalFilters, setGlobalFilter, clearGlobalFilters, activeGlobalCount, search, setSearch } = useGlobalFilters()
+  const allowed = useMemo(
+    () => new Set(getApplicableGlobalFilterKeys(location.pathname)),
+    [location.pathname]
+  )
+  const show = (key: string) => allowed.has(key)
+
+  const { globalFilters, setGlobalFilter, clearGlobalFilters, search, setSearch } = useGlobalFilters()
   const [localSearch, setLocalSearch] = useState(search)
+
+  const activeCount = useMemo(() => {
+    let n = 0
+    for (const key of allowed) {
+      if (globalFilters[key]) n += 1
+    }
+    if (!overviewOnly && search) n += 1
+    return n
+  }, [allowed, globalFilters, overviewOnly, search])
 
   const dynamicDistrictOptions = useMemo(
     () => getDistrictsForDivision(globalFilters.division),
@@ -79,10 +93,12 @@ export default function GlobalFilterBar() {
     return () => window.clearTimeout(timer)
   }, [localSearch, search, setSearch])
 
+  const grow = overviewOnly || allowed.size <= 5
+
   return (
     <CompactFilterLayout
       title="Filters"
-      activeCount={activeGlobalCount}
+      activeCount={activeCount}
       sticky={false}
       renderSearch={() =>
         overviewOnly ? null : (
@@ -104,64 +120,82 @@ export default function GlobalFilterBar() {
           onClick={clearGlobalFilters}
           title="Reset all filters"
           aria-label="Clear filters"
-          className={compactClearClass(activeGlobalCount > 0)}
+          className={compactClearClass(activeCount > 0)}
         >
           <RotateCcw className="h-3 w-3" />
           <span className={compactClearLabelClass}>Clear</span>
         </button>
       )}
     >
-      <FilterSelect label="State" value={globalFilters.state_type ?? ''} options={STATE_TYPE_OPTIONS} onChange={(v) => setGlobalFilter('state_type', v)} grow={overviewOnly} />
-      <FilterSelect
-        label="Division"
-        value={globalFilters.division}
-        options={DIVISION_OPTIONS}
-        onChange={(v) => setGlobalFilter('division', v)}
-        grow={overviewOnly}
-        disabled={globalFilters.state_type === 'Portability'}
-      />
-      <FilterSelect
-        label="District"
-        value={globalFilters.district}
-        options={dynamicDistrictOptions}
-        onChange={(v) => setGlobalFilter('district', v)}
-        grow={overviewOnly}
-        disabled={globalFilters.state_type === 'Portability'}
-      />
-
-      {!overviewOnly && (
-        <>
-          <FilterSelect label="Claim Status" value={globalFilters.claim_status} options={CLAIM_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('claim_status', v)} />
-          <FilterSelect label="Card Status" value={globalFilters.card_status} options={CARD_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('card_status', v)} />
-          <FilterSelect label="User Status" value={globalFilters.user_status} options={USER_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('user_status', v)} />
-          <FilterSelect label="Hospital Status" value={globalFilters.hospital_status} options={HOSPITAL_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('hospital_status', v)} />
-          <FilterSelect label="Patient Status" value={globalFilters.patient_status} options={PATIENT_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('patient_status', v)} />
-          <FilterSelect label="Investigation" value={globalFilters.investigation_status} options={INVESTIGATION_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('investigation_status', v)} />
-          <FilterSelect label="Training Status" value={globalFilters.training_status} options={TRAINING_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('training_status', v)} />
-          <FilterSelect label="Enrollment" value={globalFilters.enrollment_status} options={ENROLLMENT_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('enrollment_status', v)} />
-          <FilterSelect label="Gender" value={globalFilters.gender} options={GENDER_OPTIONS} onChange={(v) => setGlobalFilter('gender', v)} />
-          <FilterSelect label="Urban/Rural" value={globalFilters.urban_rural} options={URBAN_RURAL_OPTIONS} onChange={(v) => setGlobalFilter('urban_rural', v)} />
-          <FilterSelect label="Hospital Type" value={globalFilters.hospital_type} options={HOSPITAL_TYPE_OPTIONS} onChange={(v) => setGlobalFilter('hospital_type', v)} />
-          <FilterSelect label="Case Type" value={globalFilters.case_type} options={CASE_TYPE_OPTIONS} onChange={(v) => setGlobalFilter('case_type', v)} />
-          <FilterSelect label="Role" value={globalFilters.role} options={ROLE_OPTIONS} onChange={(v) => setGlobalFilter('role', v)} />
-          <FilterSelect label="Department" value={globalFilters.department} options={DEPARTMENT_OPTIONS} onChange={(v) => setGlobalFilter('department', v)} />
-          <FilterSelect label="eKYC" value={globalFilters.ekyc} options={EKYC_OPTIONS} onChange={(v) => setGlobalFilter('ekyc', v)} />
-          <FilterSelect label="Fraud Type" value={globalFilters.fraud_type} options={FRAUD_TYPE_OPTIONS} onChange={(v) => setGlobalFilter('fraud_type', v)} />
-          <FilterSelect label="Course" value={globalFilters.course} options={COURSE_OPTIONS} onChange={(v) => setGlobalFilter('course', v)} />
-          <FilterSelect label="NABH" value={globalFilters.nabh} options={NABH_OPTIONS} onChange={(v) => setGlobalFilter('nabh', v)} />
-        </>
+      {show('state_type') && (
+        <FilterSelect
+          label="State"
+          value={globalFilters.state_type ?? ''}
+          options={STATE_TYPE_OPTIONS}
+          onChange={(v) => setGlobalFilter('state_type', v)}
+          grow={grow}
+        />
+      )}
+      {show('division') && (
+        <FilterSelect
+          label="Division"
+          value={globalFilters.division}
+          options={DIVISION_OPTIONS}
+          onChange={(v) => setGlobalFilter('division', v)}
+          grow={grow}
+          disabled={globalFilters.state_type === 'Portability'}
+        />
+      )}
+      {show('district') && (
+        <FilterSelect
+          label="District"
+          value={globalFilters.district}
+          options={dynamicDistrictOptions}
+          onChange={(v) => setGlobalFilter('district', v)}
+          grow={grow}
+          disabled={globalFilters.state_type === 'Portability'}
+        />
+      )}
+      {show('card_status') && (
+        <FilterSelect label="Card Status" value={globalFilters.card_status} options={CARD_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('card_status', v)} />
+      )}
+      {show('user_status') && (
+        <FilterSelect label="User Status" value={globalFilters.user_status} options={USER_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('user_status', v)} />
+      )}
+      {show('hospital_status') && (
+        <FilterSelect label="Hospital Status" value={globalFilters.hospital_status} options={HOSPITAL_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('hospital_status', v)} />
+      )}
+      {show('patient_status') && (
+        <FilterSelect label="Patient Status" value={globalFilters.patient_status} options={PATIENT_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('patient_status', v)} />
+      )}
+      {show('training_status') && (
+        <FilterSelect label="Training Status" value={globalFilters.training_status} options={TRAINING_STATUS_OPTIONS} onChange={(v) => setGlobalFilter('training_status', v)} />
+      )}
+      {show('urban_rural') && (
+        <FilterSelect label="Urban/Rural" value={globalFilters.urban_rural} options={URBAN_RURAL_OPTIONS} onChange={(v) => setGlobalFilter('urban_rural', v)} />
+      )}
+      {show('hospital_type') && (
+        <FilterSelect label="Hospital Type" value={globalFilters.hospital_type} options={HOSPITAL_TYPE_OPTIONS} onChange={(v) => setGlobalFilter('hospital_type', v)} />
+      )}
+      {show('role') && (
+        <FilterSelect label="Role" value={globalFilters.role} options={ROLE_OPTIONS} onChange={(v) => setGlobalFilter('role', v)} />
+      )}
+      {show('nabh') && (
+        <FilterSelect label="NABH" value={globalFilters.nabh} options={NABH_OPTIONS} onChange={(v) => setGlobalFilter('nabh', v)} />
       )}
 
-      <DateRangeFilter
-        variant="labeled"
-        dateFrom={globalFilters.date_from}
-        dateTo={globalFilters.date_to}
-        onChange={(from, to) => {
-          setGlobalFilter('date_from', from)
-          setGlobalFilter('date_to', to)
-        }}
-        grow={overviewOnly}
-      />
+      {(show('date_from') || show('date_to')) && (
+        <DateRangeFilter
+          variant="labeled"
+          dateFrom={globalFilters.date_from}
+          dateTo={globalFilters.date_to}
+          onChange={(from, to) => {
+            setGlobalFilter('date_from', from)
+            setGlobalFilter('date_to', to)
+          }}
+          grow={grow}
+        />
+      )}
     </CompactFilterLayout>
   )
 }

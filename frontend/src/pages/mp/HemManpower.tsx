@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import DataTable from '../../components/ui/DataTable'
+import DashboardReportsBanner from '../../components/ui/DashboardReportsBanner'
 import { PageHeader, KPIGrid } from '../../components/ui/PageHeader'
 import ChartCard from '../../components/ui/ChartCard'
 import { InteractiveBarChart, InteractivePieChart } from '../../components/charts/InteractiveCharts'
@@ -8,6 +8,7 @@ import { useApiResource } from '../../hooks/useApiResource'
 import { fetchHospitalsSection } from '../../api/endpoints'
 import DataSourceBadge from '../../components/ui/DataSourceBadge'
 import BackendOfflineNotice from '../../components/ui/BackendOfflineNotice'
+import { pageHeaderDescription } from '../../utils/displayLabels'
 import { schemaTableColumns } from '../../utils/schemaColumns'
 import type { KPI, TableColumn } from '../../types'
 
@@ -79,12 +80,21 @@ export default function HemManpower() {
         title="HEM Manpower"
         description={
           live
-            ? `${data.manpowerSchema || 'dmart_mp.t_hem_manpower'} — hospital doctors and staff registry`
+            ? pageHeaderDescription(
+                data.manpowerSchema ?? 'dmart_mp.t_hem_manpower',
+                'Hospital doctors and staff registry with specialization and registration details'
+              )
             : 'Connect the backend to load HEM manpower'
         }
         badge={<DataSourceBadge source={source} db={db} loading={loading} />}
       />
       <BackendOfflineNotice error={error} loading={loading} />
+
+      <DashboardReportsBanner
+        reportPath="/dashboard/mp/reports/hospitals"
+        buttonLabel="Open HEM Manpower in Hospitals Report →"
+      />
+
       {kpis.length > 0 && <KPIGrid kpis={kpis} onKpiClick={(kpi) => openFromKpi(kpi.label, kpi.value)} />}
 
       {(typeData.length > 0 || activeData.length > 0 || specData.length > 0) && (
@@ -106,7 +116,7 @@ export default function HemManpower() {
                 data={activeData}
                 colors={COLORS}
                 innerRadius={55}
-                chartTitle="Active Status"
+                chartTitle="Manpower Active Status"
                 onItemClick={openFromChart}
               />
             </ChartCard>
@@ -115,7 +125,7 @@ export default function HemManpower() {
             <ChartCard title="Specialization" exportData={specData}>
               <InteractiveBarChart
                 data={specData}
-                chartTitle="Specialization"
+                chartTitle="Manpower Specialization"
                 layout="vertical"
                 height={Math.min(420, Math.max(240, specData.length * 32 + 72))}
                 integerAxis
@@ -128,21 +138,6 @@ export default function HemManpower() {
         </div>
       )}
 
-      <DataTable
-        columns={columns}
-        data={rows}
-        title={`HEM Manpower — dmart_mp.t_hem_manpower (${rows.length}${
-          columns.length ? ` · ${columns.length} schema cols` : ''
-        })`}
-        onRowClick={(row) =>
-          openDetail({
-            title: String(row.name || row.manpower_id_pk || 'Staff'),
-            subtitle: String(row.specialization || row.manpower_type || 'dmart_mp.t_hem_manpower'),
-            data: row,
-            columns,
-          })
-        }
-      />
     </div>
   )
 }

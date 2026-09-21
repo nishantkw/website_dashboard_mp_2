@@ -37,7 +37,7 @@ export function useClaimsFilters(fields: FilterField[]) {
         }
       } else if (key === 'district' && value) {
         const div = getDivisionForDistrict(value)
-        if (div && !prev.division) updated.division = div
+        if (div) updated.division = div
       }
       return updated
     })

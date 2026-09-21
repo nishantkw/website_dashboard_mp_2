@@ -7,6 +7,7 @@ import CardPrinting from './pages/bis/CardPrinting'
 import CardPrintData from './pages/bis/CardPrintData'
 import PrintDedup from './pages/bis/PrintDedup'
 import ClaimsPayments from './pages/mp/ClaimsPayments'
+import ClaimPaymentDetails from './pages/mp/ClaimPaymentDetails'
 import ClaimMasterReport from './pages/mp/ClaimMasterReport'
 import Beneficiaries from './pages/mp/Beneficiaries'
 import Hospitals from './pages/mp/Hospitals'
@@ -42,6 +43,7 @@ export default function App() {
                 <Route path="bis/card-print-data" element={<CardPrintData />} />
                 <Route path="bis/print-dedup" element={<PrintDedup />} />
                 <Route path="mp/claims-payments" element={<ClaimsPayments />} />
+                <Route path="mp/claim-payment-details" element={<ClaimPaymentDetails />} />
                 <Route path="mp/claims-payments/master-report" element={<ClaimMasterReport />} />
                 <Route path="mp/beneficiaries" element={<Beneficiaries />} />
                 <Route path="mp/hospitals" element={<Hospitals section="master" />} />

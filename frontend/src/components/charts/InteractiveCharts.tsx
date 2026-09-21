@@ -170,6 +170,14 @@ function truncateCategory(value: unknown, maxChars: number): string {
   return `${s.slice(0, Math.max(1, maxChars - 1)).trimEnd()}…`
 }
 
+/** Active=green, Inactive=red regardless of series order. */
+function statusAwareColor(label: unknown, fallback: string): string {
+  const name = String(label ?? '').trim().toLowerCase()
+  if (/^active$/.test(name)) return '#10b981'
+  if (/^(inactive|de-?active)$/.test(name)) return '#ef4444'
+  return fallback
+}
+
 export function InteractiveBarChart({
   data,
   bars,
@@ -344,9 +352,11 @@ export function InteractiveBarChart({
                 )}
               />
             )}
-            {cellColors && barIdx === 0 && data.map((_, i) => (
-              <Cell key={i} fill={cellColors[i % cellColors.length]} style={CLICK_STYLE} />
-            ))}
+            {cellColors && barIdx === 0 && data.map((row, i) => {
+              const label = row[xKey] ?? row.name
+              const fill = statusAwareColor(label, cellColors[i % cellColors.length])
+              return <Cell key={i} fill={fill} style={CLICK_STYLE} />
+            })}
           </Bar>
         ))}
       </BarChart>
@@ -362,6 +372,8 @@ interface InteractivePieChartProps {
   onItemClick?: (payload: ChartClickPayload, chartTitle: string) => void
   chartTitle?: string
   showLabels?: boolean
+  /** Donut center total. Hide when slices overlap (e.g. claim lifecycle KPIs). */
+  showCenterTotal?: boolean
 }
 
 export function InteractivePieChart({
@@ -372,6 +384,7 @@ export function InteractivePieChart({
   onItemClick,
   chartTitle = 'Chart',
   showLabels = true,
+  showCenterTotal = true,
 }: InteractivePieChartProps) {
   const isDonut = Boolean(innerRadius)
   const slices = [...data].sort((a, b) => Number(b.value ?? 0) - Number(a.value ?? 0))
@@ -442,14 +455,18 @@ export function InteractivePieChart({
                 )
               }}
             >
-              {slices.map((_, i) => (
-                <Cell key={i} fill={colors[i % colors.length]} style={CLICK_STYLE} />
+              {slices.map((item, i) => (
+                <Cell
+                  key={i}
+                  fill={statusAwareColor(item.name, colors[i % colors.length])}
+                  style={CLICK_STYLE}
+                />
               ))}
             </Pie>
             <Tooltip formatter={(v) => Number(v).toLocaleString('en-IN')} />
           </PieChart>
         </ResponsiveContainer>
-        {isDonut && totalVal > 0 && (
+        {isDonut && showCenterTotal && totalVal > 0 && (
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-lg font-bold tabular-nums leading-none text-slate-900 sm:text-xl">
               {formatChartValue(totalVal)}
@@ -467,6 +484,7 @@ export function InteractivePieChart({
         {slices.map((item, i) => {
           const valNum = Number(item.value || 0)
           const pct = totalVal > 0 ? ((valNum / totalVal) * 100).toFixed(0) : '0'
+          const swatch = statusAwareColor(item.name, colors[i % colors.length])
           return (
             <button
               key={`${item.name}-${i}`}
@@ -474,7 +492,7 @@ export function InteractivePieChart({
               onClick={() => onItemClick?.({ name: item.name, value: item.value } as ChartClickPayload, chartTitle)}
               className="flex items-center gap-1.5 rounded-md px-2 py-1 text-left transition-colors hover:bg-slate-100"
             >
-              <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: colors[i % colors.length] }} />
+              <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: swatch }} />
               <span className="min-w-0 truncate font-semibold text-slate-700">{item.name}</span>
               <span className="ml-auto shrink-0 font-bold tabular-nums text-slate-900">{formatChartValue(valNum)}</span>
               <span className="shrink-0 text-[10px] font-medium text-slate-500">({pct}%)</span>

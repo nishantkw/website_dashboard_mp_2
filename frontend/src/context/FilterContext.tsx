@@ -61,9 +61,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
         }
       } else if (key === 'district' && value) {
         const parentDiv = getDivisionForDistrict(value)
-        if (parentDiv && !prev.division) {
-          updated.division = parentDiv
-        }
+        if (parentDiv) updated.division = parentDiv
       }
 
       return updated

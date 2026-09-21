@@ -2,7 +2,12 @@ import { useState, useCallback, useRef } from 'react'
 import DetailModal, { type DrillDownDetail } from '../components/ui/DetailModal'
 import { filterRowsForChartClick, type ChartClickPayload } from '../utils/chartDrillDown'
 import { filterRowsForClaimKpi } from '../utils/claimKpi'
-import { resolveDrillDownFilters } from '../utils/drillDownFilters'
+import {
+  mergeDrillDownFilters,
+  resolveDrillDownFilters,
+  type DrillDownAppliedFilters,
+} from '../utils/drillDownFilters'
+import { useGlobalFilters } from '../context/FilterContext'
 import type { TableColumn } from '../types'
 
 export interface DrillDownContext {
@@ -18,6 +23,8 @@ export interface UseDrillDownOptions {
   tableRows?: Record<string, string | number>[]
   columns?: TableColumn[]
   datasetTitle?: string
+  /** Page/module filter values (division, district, dates, …) carried into the modal. */
+  pageFilters?: Record<string, string | undefined> | (() => Record<string, string | undefined>)
   resolveContext?: (chartTitle: string) => DrillDownContext | null
   fetchDrillDown?: (
     payload: ChartClickPayload,
@@ -25,17 +32,36 @@ export interface UseDrillDownOptions {
   ) => Promise<DrillDownContext | null>
 }
 
+function resolvePageFilters(
+  pageFilters?: UseDrillDownOptions['pageFilters']
+): Record<string, string | undefined> {
+  if (!pageFilters) return {}
+  return typeof pageFilters === 'function' ? pageFilters() : pageFilters
+}
+
 export function useDrillDown(options: UseDrillDownOptions = {}) {
   const optionsRef = useRef(options)
   optionsRef.current = options
+  const { globalFilters } = useGlobalFilters()
+  const globalRef = useRef(globalFilters)
+  globalRef.current = globalFilters
 
   const [detail, setDetail] = useState<DrillDownDetail | null>(null)
+
+  const buildApplied = useCallback((fromClick: DrillDownAppliedFilters = {}): DrillDownAppliedFilters => {
+    return mergeDrillDownFilters(
+      fromClick,
+      resolvePageFilters(optionsRef.current.pageFilters),
+      globalRef.current
+    )
+  }, [])
 
   const openDetail = useCallback((d: DrillDownDetail) => {
     const live = optionsRef.current.live
     const source = d.source ?? (live ? 'api' : 'demo')
+    const appliedFilters = buildApplied(d.appliedFilters ?? {})
     if (d.loading || Array.isArray(d.records)) {
-      setDetail({ ...d, source })
+      setDetail({ ...d, source, appliedFilters })
       return
     }
 
@@ -49,6 +75,7 @@ export function useDrillDown(options: UseDrillDownOptions = {}) {
           columns: d.columns ?? columns,
           datasetTitle: d.datasetTitle ?? optionsRef.current.datasetTitle,
           source: 'api',
+          appliedFilters,
         })
         return
       }
@@ -59,18 +86,19 @@ export function useDrillDown(options: UseDrillDownOptions = {}) {
           columns: d.columns ?? columns,
           datasetTitle: d.datasetTitle ?? optionsRef.current.datasetTitle,
           source: 'api',
+          appliedFilters,
         })
         return
       }
     }
-    setDetail({ ...d, source })
-  }, [])
+    setDetail({ ...d, source, appliedFilters })
+  }, [buildApplied])
 
   const openFromChart = useCallback(
     async (payload: ChartClickPayload, chartTitle: string) => {
       const opts = optionsRef.current
       const name = String(payload.name ?? chartTitle)
-      const appliedFilters = resolveDrillDownFilters(name, chartTitle)
+      const appliedFilters = buildApplied(resolveDrillDownFilters(name, chartTitle))
 
       const useLiveTable = Boolean(opts.tableRows?.length || opts.resolveContext || opts.fetchDrillDown)
 
@@ -98,9 +126,35 @@ export function useDrillDown(options: UseDrillDownOptions = {}) {
             const fetched = await opts.fetchDrillDown(payload, chartTitle)
             if (fetched) {
               ctx = fetched
-              const records = ctx.alreadyFiltered
+              let records = ctx.alreadyFiltered
                 ? ctx.rows
                 : filterRowsForChartClick(ctx.rows, payload, chartTitle)
+
+              // Server slice filter returned nothing — fall back to client filter on
+              // local/export rows (common when API codes ≠ chart labels).
+              if (
+                ctx.alreadyFiltered &&
+                records.length === 0 &&
+                (opts.tableRows?.length || opts.resolveContext)
+              ) {
+                const local =
+                  opts.resolveContext?.(chartTitle) ??
+                  (opts.tableRows?.length
+                    ? {
+                        rows: opts.tableRows,
+                        columns: opts.columns ?? [],
+                        datasetTitle: opts.datasetTitle,
+                      }
+                    : null)
+                if (local?.rows?.length) {
+                  const retry = filterRowsForChartClick(local.rows, payload, chartTitle)
+                  if (retry.length) {
+                    records = retry
+                    ctx = { ...local, alreadyFiltered: false }
+                  }
+                }
+              }
+
               setDetail({
                 title: name,
                 subtitle: `${records.length.toLocaleString('en-IN')} record${records.length === 1 ? '' : 's'} · ${chartTitle}`,
@@ -160,23 +214,26 @@ export function useDrillDown(options: UseDrillDownOptions = {}) {
         appliedFilters,
       })
     },
-    []
+    [buildApplied]
   )
 
   const openFromKpi = useCallback(
     (label: string, value: string | number, extra?: Record<string, string | number>) => {
       const opts = optionsRef.current
+      // KPI labels are not chart categories — only inherit page/global geo & dates.
+      const appliedFilters = buildApplied({})
       if (opts.tableRows?.length) {
         const kpiKey = extra && typeof extra.kpiKey === 'string' ? extra.kpiKey : undefined
         const claimFiltered = filterRowsForClaimKpi(opts.tableRows, label, kpiKey)
         const records = claimFiltered ?? opts.tableRows
         setDetail({
           title: label,
-          subtitle: `${records.length} matching claim${records.length === 1 ? '' : 's'}`,
+          subtitle: `${records.length} matching record${records.length === 1 ? '' : 's'}`,
           records,
           columns: opts.columns ?? [],
-          datasetTitle: label,
+          datasetTitle: opts.datasetTitle ?? label,
           source: opts.live ? 'api' : 'demo',
+          appliedFilters,
         })
         return
       }
@@ -185,9 +242,10 @@ export function useDrillDown(options: UseDrillDownOptions = {}) {
         subtitle: 'KPI Details',
         data: { value, ...extra },
         source: 'demo',
+        appliedFilters,
       })
     },
-    []
+    [buildApplied]
   )
 
   const closeDetail = useCallback(() => setDetail(null), [])

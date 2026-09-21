@@ -26,7 +26,7 @@ export const REPORT_CATALOG: Omit<ReportDefinition, 'tables'>[] = [
   {
     id: 'claims',
     title: 'Master Report TMS — Claims & Payments',
-    description: 'FRS claim lifecycle KPIs, TMS Recovery, and payment details (dmart_mp.payment_dtls)',
+    description: 'FRS claim lifecycle KPIs, TMS Recovery, and payment details',
   },
   {
     id: 'beneficiaries',
@@ -41,23 +41,43 @@ export const REPORT_CATALOG: Omit<ReportDefinition, 'tables'>[] = [
   {
     id: 'patients',
     title: 'Patients & Treatment Report',
-    description: 'Patient master (t_patient_dtls), treatment details (treatment_dtls), and MORTH patients (t_morth_patient_details)',
+    description: 'Patient master, treatment details, MORTH patients, and treatment stratification',
   },
   {
     id: 'fraud-audit',
     title: 'Fraud and Audit Report',
     description:
-      'Schema tables only: t_suspicious_api_case_data, t_suspicious_api_case_dtls, hospital_master_with_quality_certification_final, workflow_users_t, t_workflow_transaction_audit',
+      'Fraud case records, trigger details, hospital master, workflow users, and workflow audit trail',
   },
   {
     id: 'users',
     title: 'Users & Workflow Report',
-    description: 'Workflow users, roles, audit events, and pro workflow users (dmart_mp.pro_workflow_users_t)',
+    description: 'Workflow users, roles, audit events, pro workflow users, and status masters',
   },
   {
     id: 'lms',
     title: 'LMS Training Report',
     description: 'AB-PMJAY and ABDM course completion by role and entity',
+  },
+  {
+    id: 'card-printing',
+    title: 'Card Printing Report',
+    description: 'Beneficiary card print status, district, and enrollment details',
+  },
+  {
+    id: 'card-print-data',
+    title: 'Card Print Batches Report',
+    description: 'Aug 2025, VVS, temp e-KYC, and leftover card print extracts',
+  },
+  {
+    id: 'print-dedup',
+    title: 'Already Printed Cards Report',
+    description: 'De-duplication card number lists by print batch',
+  },
+  {
+    id: 'ump-users',
+    title: 'UMP User Master Report',
+    description: 'User master records from the UMP module',
   },
 ]
 
@@ -100,7 +120,7 @@ const REPORT_TABLES: Record<string, ReportDefinition['tables']> = {
       data: EMPTY_ROWS,
     },
     {
-      title: 'Payment Details (dmart_mp.payment_dtls)',
+      title: 'Payment Details',
       columns: [
         { key: 'case_id', label: 'Case ID' },
         { key: 'payment_type', label: 'Payment Type' },
@@ -113,6 +133,17 @@ const REPORT_TABLES: Record<string, ReportDefinition['tables']> = {
         { key: 'reject_flag', label: 'Reject Flag' },
         { key: 'payer_id', label: 'Payer ID' },
         { key: 'state_code', label: 'State Code' },
+      ],
+      data: EMPTY_ROWS,
+    },
+    {
+      title: 'Claim Line Items',
+      columns: [
+        { key: 'registration_id', label: 'Registration ID' },
+        { key: 'packagecode', label: 'Package Code' },
+        { key: 'claimed_amount', label: 'Claimed Amount', align: 'right' },
+        { key: 'approved_amount', label: 'Approved Amount', align: 'right' },
+        { key: 'net_payable_amount', label: 'Net Payable', align: 'right' },
       ],
       data: EMPTY_ROWS,
     },
@@ -139,7 +170,7 @@ const REPORT_TABLES: Record<string, ReportDefinition['tables']> = {
       data: EMPTY_ROWS,
     },
     {
-      title: 'Source Family Data (dmart_mp.m_source_data)',
+      title: 'Source Family Data',
       columns: [
         { key: 'id_pk', label: 'ID' },
         { key: 'src_family_id', label: 'Source Family ID' },
@@ -158,7 +189,7 @@ const REPORT_TABLES: Record<string, ReportDefinition['tables']> = {
       data: EMPTY_ROWS,
     },
     {
-      title: 'Disabled Beneficiaries (dmart_mp.t_bis_beneficiary_disabled)',
+      title: 'Disabled Beneficiaries',
       columns: [
         { key: 'name', label: 'Name' },
         { key: 'card_no', label: 'Card No' },
@@ -174,7 +205,7 @@ const REPORT_TABLES: Record<string, ReportDefinition['tables']> = {
       data: EMPTY_ROWS,
     },
     {
-      title: 'BIS Raw Beneficiaries (bis_raw.t_bis_beneficiary_dtls)',
+      title: 'BIS Raw Beneficiaries',
       columns: [
         { key: 'id_pk', label: 'ID' },
         { key: 'ben_id', label: 'Ben ID' },
@@ -187,6 +218,48 @@ const REPORT_TABLES: Record<string, ReportDefinition['tables']> = {
         { key: 'enrl_status', label: 'Enroll Status' },
         { key: 'card_status', label: 'Card Status' },
         { key: 'card_no', label: 'Card No' },
+      ],
+      data: EMPTY_ROWS,
+    },
+    {
+      title: 'Beneficiary History',
+      columns: [
+        { key: 'ben_id', label: 'Ben ID' },
+        { key: 'name', label: 'Name' },
+        { key: 'family_id', label: 'Family ID' },
+        { key: 'enrl_status', label: 'Enroll Status' },
+        { key: 'card_status', label: 'Card Status' },
+        { key: 'active_status', label: 'Active Status' },
+      ],
+      data: EMPTY_ROWS,
+    },
+    {
+      title: 'e-KYC Details',
+      columns: [
+        { key: 'ben_id', label: 'Ben ID' },
+        { key: 'name', label: 'Name' },
+        { key: 'aadhar_status', label: 'Aadhaar Status' },
+        { key: 'abha_id', label: 'ABHA ID' },
+      ],
+      data: EMPTY_ROWS,
+    },
+    {
+      title: 'PVTG Records',
+      columns: [
+        { key: 'ben_id', label: 'Ben ID' },
+        { key: 'name', label: 'Name' },
+        { key: 'dist_name', label: 'District' },
+        { key: 'family_id', label: 'Family ID' },
+      ],
+      data: EMPTY_ROWS,
+    },
+    {
+      title: 'Disabled Snapshot',
+      columns: [
+        { key: 'name', label: 'Name' },
+        { key: 'card_no', label: 'Card No' },
+        { key: 'reason_desc', label: 'Disable Reason' },
+        { key: 'disabled_date', label: 'Disabled Date' },
       ],
       data: EMPTY_ROWS,
     },
@@ -213,7 +286,7 @@ const REPORT_TABLES: Record<string, ReportDefinition['tables']> = {
       data: EMPTY_ROWS,
     },
     {
-      title: 'De-empanelment Details (dmart_mp.t_deempanelment_details)',
+      title: 'De-empanelment Details',
       columns: [
         { key: 'hosp_id', label: 'Hospital ID' },
         { key: 'hospital_name', label: 'Hospital' },
@@ -229,7 +302,7 @@ const REPORT_TABLES: Record<string, ReportDefinition['tables']> = {
       data: EMPTY_ROWS,
     },
     {
-      title: 'HEM Hospital (dmart_mp.t_hem_hospital)',
+      title: 'HEM Hospital Registry',
       columns: [
         { key: 'hosp_id', label: 'Hospital ID' },
         { key: 'facility_id', label: 'Facility ID' },
@@ -247,7 +320,7 @@ const REPORT_TABLES: Record<string, ReportDefinition['tables']> = {
       data: EMPTY_ROWS,
     },
     {
-      title: 'Hospital Lookup (dmart_mp.m_lookup)',
+      title: 'Hospital Lookup Codes',
       columns: [
         { key: 'id_pk', label: 'ID' },
         { key: 'lookup_cd', label: 'Lookup Code' },
@@ -255,6 +328,21 @@ const REPORT_TABLES: Record<string, ReportDefinition['tables']> = {
         { key: 'active_yn', label: 'Active' },
         { key: 'created_by', label: 'Created By' },
         { key: 'created_dt', label: 'Created' },
+      ],
+      data: EMPTY_ROWS,
+    },
+    {
+      title: 'HEM Manpower',
+      columns: [
+        { key: 'manpower_id_pk', label: 'ID' },
+        { key: 'name', label: 'Name' },
+        { key: 'manpower_type', label: 'Type' },
+        { key: 'specialization', label: 'Specialization' },
+        { key: 'highest_qualification', label: 'Qualification' },
+        { key: 'reg_number', label: 'Reg. No.' },
+        { key: 'hosp_id_pk', label: 'Hospital ID' },
+        { key: 'employment_type', label: 'Employment' },
+        { key: 'active_status', label: 'Active' },
       ],
       data: EMPTY_ROWS,
     },
@@ -275,7 +363,7 @@ const REPORT_TABLES: Record<string, ReportDefinition['tables']> = {
       data: EMPTY_ROWS,
     },
     {
-      title: 'Treatment Details (dmart_mp.treatment_dtls)',
+      title: 'Treatment Details',
       columns: [
         { key: 'registration_id', label: 'Reg ID' },
         { key: 'caseid', label: 'Case ID' },
@@ -291,7 +379,7 @@ const REPORT_TABLES: Record<string, ReportDefinition['tables']> = {
       data: EMPTY_ROWS,
     },
     {
-      title: 'MORTH Patients (dmart_mp.t_morth_patient_details)',
+      title: 'MORTH Patients',
       columns: [
         { key: 'patient_registration_id', label: 'Reg ID' },
         { key: 'name', label: 'Name' },
@@ -303,6 +391,16 @@ const REPORT_TABLES: Record<string, ReportDefinition['tables']> = {
         { key: 'care_plan', label: 'Care Plan' },
         { key: 'patient_con_uncon', label: 'Conscious' },
         { key: 'govt_id_type', label: 'ID Type' },
+      ],
+      data: EMPTY_ROWS,
+    },
+    {
+      title: 'Treatment Stratification',
+      columns: [
+        { key: 'registration_id', label: 'Reg ID' },
+        { key: 'procedure_name', label: 'Procedure' },
+        { key: 'stratification_tier', label: 'Tier' },
+        { key: 'amount', label: 'Amount', align: 'right' },
       ],
       data: EMPTY_ROWS,
     },
@@ -330,7 +428,7 @@ const REPORT_TABLES: Record<string, ReportDefinition['tables']> = {
       data: EMPTY_ROWS,
     },
     {
-      title: 'Pro Workflow Users (dmart_mp.pro_workflow_users_t)',
+      title: 'Pro Workflow Users',
       columns: [
         { key: 'id_pk', label: 'ID' },
         { key: 'registration_id', label: 'Reg ID' },
@@ -344,6 +442,34 @@ const REPORT_TABLES: Record<string, ReportDefinition['tables']> = {
         { key: 'initiated_amount', label: 'Initiated', align: 'right' },
         { key: 'approved_amount', label: 'Approved', align: 'right' },
         { key: 'service_request_type', label: 'Service Request' },
+      ],
+      data: EMPTY_ROWS,
+    },
+    {
+      title: 'Workflow Audit',
+      columns: [
+        { key: 'acted_workflow_user', label: 'User' },
+        { key: 'previous_workflow_role', label: 'Previous Role' },
+        { key: 'workflow_process_code', label: 'Process' },
+        { key: 'created_dt', label: 'Created' },
+      ],
+      data: EMPTY_ROWS,
+    },
+    {
+      title: 'BIS Status Master',
+      columns: [
+        { key: 'status', label: 'Status Code' },
+        { key: 'status_name', label: 'Status Name' },
+        { key: 'status_descrption', label: 'Description' },
+      ],
+      data: EMPTY_ROWS,
+    },
+    {
+      title: 'TMS Status Master',
+      columns: [
+        { key: 'status', label: 'Status Code' },
+        { key: 'status_name', label: 'Status Name' },
+        { key: 'status_descrption', label: 'Description' },
       ],
       data: EMPTY_ROWS,
     },
@@ -362,6 +488,101 @@ const REPORT_TABLES: Record<string, ReportDefinition['tables']> = {
         { key: 'abdm_status', label: 'ABDM Status' },
         { key: 'ab_pmjay_completed', label: 'PMJAY Completed' },
         { key: 'abdm_completed', label: 'ABDM Completed' },
+      ],
+      data: EMPTY_ROWS,
+    },
+  ],
+  'card-printing': [
+    {
+      title: 'Card Printing Status',
+      columns: [
+        { key: 'card_no', label: 'Card No.' },
+        { key: 'ben_id', label: 'Ben ID' },
+        { key: 'family_id', label: 'Family ID' },
+        { key: 'card_name', label: 'Name' },
+        { key: 'district_name', label: 'District' },
+        { key: 'sub_district_name', label: 'Sub-District' },
+        { key: 'urban_or_rural', label: 'Urban / Rural' },
+        { key: 'card_gender', label: 'Gender' },
+        { key: 'abha_no', label: 'ABHA' },
+        { key: 'enroll_date', label: 'Enroll Date' },
+        { key: 'card_print_status', label: 'Status' },
+      ],
+      data: EMPTY_ROWS,
+    },
+  ],
+  'card-print-data': [
+    {
+      title: 'Aug 2025 Batch',
+      columns: [
+        { key: 'card_no', label: 'Card No.' },
+        { key: 'source_name', label: 'Source Name' },
+        { key: 'kyc_name', label: 'KYC Name' },
+        { key: 'family_id', label: 'Family ID' },
+        { key: 'dist_name', label: 'District' },
+        { key: 'card_status', label: 'Card Status' },
+      ],
+      data: EMPTY_ROWS,
+    },
+    {
+      title: 'VVS May 2025',
+      columns: [
+        { key: 'card_no', label: 'Card No.' },
+        { key: 'source_name', label: 'Source Name' },
+        { key: 'kyc_name', label: 'KYC Name' },
+        { key: 'family_id', label: 'Family ID' },
+        { key: 'dist_name', label: 'District' },
+        { key: 'card_status', label: 'Card Status' },
+      ],
+      data: EMPTY_ROWS,
+    },
+    {
+      title: 'Temp e-KYC Jul 2026',
+      columns: [
+        { key: 'card_no', label: 'Card No.' },
+        { key: 'source_name', label: 'Source Name' },
+        { key: 'kyc_name', label: 'KYC Name' },
+        { key: 'family_id', label: 'Family ID' },
+        { key: 'dist_name', label: 'District' },
+        { key: 'card_status', label: 'Card Status' },
+      ],
+      data: EMPTY_ROWS,
+    },
+    {
+      title: 'Leftover Cards (09-Aug-2026)',
+      columns: [
+        { key: 'card_no', label: 'Card No.' },
+        { key: 'source_name', label: 'Source Name' },
+        { key: 'kyc_name', label: 'KYC Name' },
+        { key: 'family_id', label: 'Family ID' },
+        { key: 'dist_name', label: 'District' },
+        { key: 'card_status', label: 'Card Status' },
+      ],
+      data: EMPTY_ROWS,
+    },
+  ],
+  'print-dedup': [
+    {
+      title: 'Already Printed (29-Jun)',
+      columns: [{ key: 'card_no', label: 'Card No.' }],
+      data: EMPTY_ROWS,
+    },
+    {
+      title: 'Already Printed (09-Aug)',
+      columns: [{ key: 'card_no', label: 'Card No.' }],
+      data: EMPTY_ROWS,
+    },
+  ],
+  'ump-users': [
+    {
+      title: 'User Records',
+      columns: [
+        { key: 'user_id', label: 'User ID' },
+        { key: 'email_id', label: 'Email' },
+        { key: 'user_name', label: 'Name' },
+        { key: 'user_state_code', label: 'State' },
+        { key: 'user_status', label: 'Status' },
+        { key: 'role_name', label: 'Role' },
       ],
       data: EMPTY_ROWS,
     },

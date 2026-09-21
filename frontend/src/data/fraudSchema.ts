@@ -209,11 +209,11 @@ export const WORKFLOW_AUDIT_COLUMNS = schemaColumns(WORKFLOW_AUDIT_COLUMN_KEYS, 
 ])
 
 export const FRAUD_SCHEMA_TABLES = {
-  case: 'dmart_mp.t_suspicious_api_case_data',
-  trigger: 'dmart_mp.t_suspicious_api_case_dtls',
-  hospital: 'dmart_mp.hospital_master_with_quality_certification_final',
-  workflowUsers: 'dmart_mp.workflow_users_t',
-  workflowAudit: 'dmart_mp.t_workflow_transaction_audit',
+  case: 'Fraud Case Records',
+  trigger: 'Fraud Trigger Details',
+  hospital: 'Hospital Master',
+  workflowUsers: 'Workflow Users',
+  workflowAudit: 'Workflow Audit',
 } as const
 
 /** Tables shown per FRS tab — each uses only Data dictionary / schema columns. */

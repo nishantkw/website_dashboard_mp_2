@@ -1,37 +1,12 @@
 import { useCallback, useMemo } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useGlobalFilters } from '../context/FilterContext'
 import type { FilterField } from '../types'
 import { FILTER_COLUMN_ALIASES, applyPageFilters } from '../utils/applyPageFilters'
+import { getApplicableGlobalFilterKeys } from '../data/globalFilterScope'
 
-const GLOBAL_FILTER_KEYS = [
-  'state_type',
-  'division',
-  'state',
-  'district',
-  'gender',
-  'ekyc',
-  'urban_rural',
-  'role',
-  'department',
-  'course',
-  'hospital_type',
-  'nabh',
-  'fraud_type',
-  'case_type',
-  'claim_status',
-  'card_status',
-  'user_status',
-  'hospital_status',
-  'patient_status',
-  'investigation_status',
-  'training_status',
-  'enrollment_status',
-  'date_from',
-  'date_to',
-] as const
-
-function globalFilterFields(): FilterField[] {
-  return GLOBAL_FILTER_KEYS.map((key) => ({
+function fieldsForKeys(keys: string[]): FilterField[] {
+  return keys.map((key) => ({
     key,
     label: key,
     type: key.includes('date') ? 'date' : 'select',
@@ -40,14 +15,30 @@ function globalFilterFields(): FilterField[] {
 }
 
 export function useGlobalFilterData() {
+  const location = useLocation()
   const { globalFilters, search } = useGlobalFilters()
-  const fields = useMemo(() => globalFilterFields(), [])
+
+  const applicableKeys = useMemo(
+    () => getApplicableGlobalFilterKeys(location.pathname),
+    [location.pathname]
+  )
+
+  const fields = useMemo(() => fieldsForKeys(applicableKeys), [applicableKeys])
+
+  const scopedFilters = useMemo(() => {
+    const next: Record<string, string> = {}
+    for (const key of applicableKeys) {
+      const val = globalFilters[key]
+      if (val) next[key] = val
+    }
+    return next
+  }, [applicableKeys, globalFilters])
 
   const filterData = useCallback(
     <T extends Record<string, string | number>>(data: T[]): T[] => {
-      return applyPageFilters(data, fields, globalFilters, search)
+      return applyPageFilters(data, fields, scopedFilters, search)
     },
-    [fields, globalFilters, search]
+    [fields, scopedFilters, search]
   )
 
   return { filterData, globalFilters, search }

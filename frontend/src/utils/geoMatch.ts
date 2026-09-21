@@ -1,4 +1,4 @@
-import { getDivisionForDistrict, MP_DIVISIONS } from '../data/filterOptions'
+import { getDivisionForDistrict, resolveDivisionForDistrict, MP_DIVISIONS } from '../data/filterOptions'
 
 /** Page-specific district columns — same filter name, different source fields. */
 export const CARD_PRINTING_DISTRICT_COLUMNS = [
@@ -68,8 +68,11 @@ export function rowMatchesDistrict(rowDistrict: string, filterDistrict: string) 
 
 export function rowMatchesDivision(rowDistrict: string, divisionName: string) {
   if (!divisionName) return true
+  if (/^unknown$/i.test(divisionName)) {
+    return resolveDivisionForDistrict(rowDistrict) === 'Unknown'
+  }
   const mapped = getDivisionForDistrict(rowDistrict)
-  if (mapped === divisionName) return true
-  const allowed = MP_DIVISIONS.find((d) => d.division === divisionName)?.districts ?? []
+  if (mapped && mapped.toLowerCase() === divisionName.toLowerCase()) return true
+  const allowed = MP_DIVISIONS.find((d) => d.division.toLowerCase() === divisionName.toLowerCase())?.districts ?? []
   return allowed.some((d) => districtsMatch(rowDistrict, d))
 }

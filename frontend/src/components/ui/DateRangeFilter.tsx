@@ -42,6 +42,8 @@ interface DateRangeFilterProps {
   className?: string
   /** Fill available row width instead of a fixed shrink-0 size — for filter bars with few fields, so the card doesn't look sparse. */
   grow?: boolean
+  /** When true, controls are shown but not editable (inherited from page filters). */
+  disabled?: boolean
 }
 
 export default function DateRangeFilter({
@@ -51,6 +53,7 @@ export default function DateRangeFilter({
   variant = 'compact',
   className = '',
   grow = false,
+  disabled = false,
 }: DateRangeFilterProps) {
   const [preset, setPreset] = useState<DatePreset>(() => (dateFrom || dateTo ? 'custom' : ''))
   // Tracks the last (dateFrom, dateTo) this component pushed via onChange, so the effect
@@ -67,19 +70,30 @@ export default function DateRangeFilter({
 
   const selectClass =
     variant === 'compact'
-      ? 'text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 outline-none focus:border-[#2d8a4e] min-w-[140px]'
+      ? `text-xs border rounded-lg px-2.5 py-1.5 outline-none min-w-[140px] ${
+          disabled
+            ? 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-600'
+            : 'border-slate-300 bg-white text-slate-700 focus:border-[#2d8a4e]'
+        }`
       : compactSelectClass(Boolean(preset), false, grow ? 'w-full min-w-0' : 'min-w-[132px]')
 
   const dateInputClass =
     variant === 'compact'
-      ? 'text-xs border border-slate-300 rounded-lg px-2 py-1.5 bg-white text-slate-700 outline-none focus:border-[#2d8a4e] w-[118px]'
+      ? `text-xs border rounded-lg px-2 py-1.5 outline-none w-[118px] ${
+          disabled
+            ? 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-600'
+            : 'border-slate-300 bg-white text-slate-700 focus:border-[#2d8a4e]'
+        }`
       : compactSelectClass(true, false, grow ? 'flex-1' : 'w-[110px]')
+
+  const showCustom = preset === 'custom' || (disabled && Boolean(dateFrom || dateTo))
 
   return (
     <div
       className={`flex shrink-0 flex-nowrap items-center gap-1.5 whitespace-nowrap max-lg:col-span-2 max-lg:min-w-0 max-lg:flex-wrap max-lg:whitespace-normal ${
         grow ? 'min-w-[140px] flex-1' : ''
       } ${className}`}
+      title={disabled ? 'Set from page filters' : undefined}
     >
       <div className={`flex shrink-0 items-center gap-1.5 ${grow ? 'min-w-0 flex-1' : ''}`}>
         {variant === 'labeled' && (
@@ -87,8 +101,10 @@ export default function DateRangeFilter({
         )}
 
         <select
-          value={preset}
+          value={showCustom && disabled ? 'custom' : preset}
+          disabled={disabled}
           onChange={(e) => {
+            if (disabled) return
             const next = e.target.value as DatePreset
             setPreset(next)
             if (next === '') {
@@ -104,7 +120,7 @@ export default function DateRangeFilter({
             onChange(from, to)
           }}
           className={selectClass}
-          title="Date Range"
+          title={disabled ? 'Set from page filters' : 'Date Range'}
         >
           <option value="">Any time</option>
           <option value="today">Today</option>
@@ -115,12 +131,14 @@ export default function DateRangeFilter({
         </select>
       </div>
 
-      {preset === 'custom' && (
+      {showCustom && (
         <div className="flex shrink-0 items-center gap-1.5">
           <input
             type="date"
             value={dateFrom}
+            disabled={disabled}
             onChange={(e) => {
+              if (disabled) return
               setPreset('custom')
               lastPushed.current = { from: e.target.value, to: dateTo }
               onChange(e.target.value, dateTo)
@@ -132,7 +150,9 @@ export default function DateRangeFilter({
           <input
             type="date"
             value={dateTo}
+            disabled={disabled}
             onChange={(e) => {
+              if (disabled) return
               setPreset('custom')
               lastPushed.current = { from: dateFrom, to: e.target.value }
               onChange(dateFrom, e.target.value)
@@ -151,6 +171,13 @@ const DOB_KEYS = /^(patient_dob|dob|date_of_birth|year_of_birth|card_yob|age)$/i
 /** Event dates only — same order as claims amount/volume trend charts. Never use DOB. */
 export function getRowDateValue(row: Record<string, string | number>): string | null {
   const dateKeys = [
+    // De-empanelment / action tables — prefer action dates over created_dt
+    'start_date',
+    'end_date',
+    'due_date',
+    'deempanel_date',
+    'enrol_date',
+    'enroll_date',
     'claim_init_date',
     'preauth_init_date',
     'claim_date',
@@ -161,8 +188,6 @@ export function getRowDateValue(row: Record<string, string | number>): string | 
     'payment_paid_dt',
     'admission_dt',
     'discharge_dt',
-    'enroll_date',
-    'enrol_date',
     'disabled_date',
     'issue_date',
     'settlement_date',
@@ -173,16 +198,27 @@ export function getRowDateValue(row: Record<string, string | number>): string | 
     'date',
     'submission_date',
   ]
+
+  const toIso = (value: unknown): string => {
+    const s = String(value ?? '').trim()
+    if (!s) return ''
+    const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/)
+    if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`
+    const dmy = s.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})/)
+    if (dmy) return `${dmy[3]}-${dmy[2].padStart(2, '0')}-${dmy[1].padStart(2, '0')}`
+    const d = new Date(s)
+    if (!Number.isNaN(d.getTime())) return d.toISOString().slice(0, 10)
+    return ''
+  }
+
   for (const key of dateKeys) {
-    const val = row[key]
-    if (val == null || val === '' || val === '-') continue
-    const str = String(val).slice(0, 10)
-    if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str
+    const str = toIso(row[key])
+    if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str
   }
   for (const [key, val] of Object.entries(row)) {
     if (DOB_KEYS.test(key) || /dob|birth|yob/i.test(key)) continue
-    const str = String(val ?? '').slice(0, 10)
-    if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str
+    const str = toIso(val)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str
   }
   return null
 }

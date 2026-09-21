@@ -106,7 +106,7 @@ function Flyout({
     <div
       className={clsx(
         'fixed z-[80] rounded-lg border border-slate-700 bg-slate-800 shadow-2xl',
-        children ? 'min-w-[12.5rem] py-1' : 'px-2.5 py-1.5'
+        children ? 'min-w-[15rem] max-w-[18rem] py-1' : 'px-2.5 py-1.5'
       )}
       style={{ top, left: rect.right + 10 }}
       onMouseEnter={onMouseEnter}
@@ -120,6 +120,70 @@ function Flyout({
       {children}
     </div>,
     document.body
+  )
+}
+
+function CompactLeafLink({ child, onNavigate }: { child: NavItem; onNavigate?: () => void }) {
+  if (!child.path) return null
+  return (
+    <NavLink
+      to={child.path}
+      end={child.end ?? false}
+      onClick={onNavigate}
+      className={({ isActive }) =>
+        clsx(
+          'mx-1 block rounded-md px-3 py-2 text-sm transition-colors',
+          isActive
+            ? 'bg-[#2d8a4e] font-medium text-white'
+            : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+        )
+      }
+    >
+      {child.label}
+    </NavLink>
+  )
+}
+
+function CompactFlyoutGroup({ item }: { item: NavItem }) {
+  const location = useLocation()
+  const isChildActive = hasActiveDescendant(item, location.pathname)
+  const [open, setOpen] = useState(isChildActive)
+
+  useEffect(() => {
+    if (isChildActive) setOpen(true)
+  }, [isChildActive])
+
+  if (!item.children?.length) {
+    return <CompactLeafLink child={item} />
+  }
+
+  return (
+    <div className="mx-1 my-0.5">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={clsx(
+          'flex w-full items-center justify-between gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+          isChildActive
+            ? 'bg-[#2d8a4e] text-white'
+            : 'text-slate-200 hover:bg-slate-700 hover:text-white'
+        )}
+      >
+        <span className="text-left leading-snug">{item.label}</span>
+        {open ? <ChevronDown className="h-3.5 w-3.5 shrink-0" /> : <ChevronRight className="h-3.5 w-3.5 shrink-0" />}
+      </button>
+      {open && (
+        <div className="mt-0.5 space-y-0.5 border-l border-slate-600 ml-2 pl-1">
+          {item.children.map((child) =>
+            child.children?.length ? (
+              <CompactFlyoutGroup key={child.id} item={child} />
+            ) : (
+              <CompactLeafLink key={child.id} child={child} />
+            )
+          )}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -148,11 +212,6 @@ function CompactNavItem({ item }: { item: NavItem }) {
     )
   }
 
-  const leafLinks = (item.children ?? []).flatMap(function flatten(child): NavItem[] {
-    if (child.children?.length) return child.children.flatMap(flatten)
-    return child.path ? [child] : []
-  })
-
   return (
     <div ref={wrapRef} className="flex justify-center" onMouseEnter={show} onMouseLeave={hide}>
       <button type="button" title={item.label} className={iconBtnClass(Boolean(isChildActive))}>
@@ -160,30 +219,20 @@ function CompactNavItem({ item }: { item: NavItem }) {
       </button>
       {open && rect && (
         <Flyout rect={rect} title={item.label} onMouseEnter={show} onMouseLeave={hide}>
-          {leafLinks.map((child) => (
-            <NavLink
-              key={child.id}
-              to={child.path!}
-              end={child.end}
-              className={({ isActive }) =>
-                clsx(
-                  'mx-1 block rounded-md px-3 py-2 text-sm transition-colors',
-                  isActive
-                    ? 'bg-[#2d8a4e] font-medium text-white'
-                    : 'text-slate-300 hover:bg-slate-700 hover:text-white'
-                )
-              }
-            >
-              {child.label}
-            </NavLink>
-          ))}
+          {(item.children ?? []).map((child) =>
+            child.children?.length ? (
+              <CompactFlyoutGroup key={child.id} item={child} />
+            ) : (
+              <CompactLeafLink key={child.id} child={child} />
+            )
+          )}
         </Flyout>
       )}
     </div>
   )
 }
 
-function NavChildLink({ child }: { child: NavItem }) {
+function NavChildLink({ child, nested = false }: { child: NavItem; nested?: boolean }) {
   if (child.children?.length) {
     return <NestedNavGroup item={child} />
   }
@@ -191,12 +240,15 @@ function NavChildLink({ child }: { child: NavItem }) {
   return (
     <NavLink
       to={child.path}
-      end={child.end}
+      end={child.end ?? false}
       className={({ isActive }) =>
         clsx(
-          'block px-3 py-2 rounded-lg text-sm transition-colors',
+          'block rounded-lg px-3 py-2 text-sm transition-colors',
+          nested && 'py-1.5',
           isActive
-            ? 'bg-[#2d8a4e] text-white font-medium'
+            ? nested
+              ? 'bg-slate-700 font-medium text-white'
+              : 'bg-[#2d8a4e] font-medium text-white'
             : 'text-slate-400 hover:bg-slate-700 hover:text-white'
         )
       }
@@ -216,24 +268,25 @@ function NestedNavGroup({ item }: { item: NavItem }) {
   }, [isChildActive])
 
   return (
-    <div>
+    <div className="rounded-lg">
       <button
         type="button"
         onClick={() => setOpen(!open)}
+        aria-expanded={open}
         className={clsx(
-          'flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+          'flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
           isChildActive
-            ? 'bg-slate-700/80 text-white'
-            : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+            ? 'bg-[#2d8a4e] text-white'
+            : 'text-slate-300 hover:bg-slate-700 hover:text-white'
         )}
       >
         <span className="text-left leading-snug">{item.label}</span>
-        {open ? <ChevronDown className="h-3.5 w-3.5 shrink-0" /> : <ChevronRight className="h-3.5 w-3.5 shrink-0" />}
+        {open ? <ChevronDown className="h-4 w-4 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
       </button>
       {open && item.children && (
-        <div className="ml-2 mt-0.5 space-y-0.5 border-l border-slate-600 pl-2">
+        <div className="ml-2 mt-1 space-y-0.5 border-l border-slate-600 py-0.5 pl-2">
           {item.children.map((child) => (
-            <NavChildLink key={child.id} child={child} />
+            <NavChildLink key={child.id} child={child} nested />
           ))}
         </div>
       )}

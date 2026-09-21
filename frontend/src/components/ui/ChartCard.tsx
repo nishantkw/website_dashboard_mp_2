@@ -9,6 +9,8 @@ interface ChartCardProps {
   children: ReactNode
   className?: string
   exportData?: Record<string, any>[]
+  /** Extra controls shown next to Export (e.g. Remove) — kept in the same header row to avoid overlap. */
+  actions?: ReactNode
 }
 
 const CHART_EXPORT_COLUMNS: ColumnDef[] = [
@@ -16,7 +18,7 @@ const CHART_EXPORT_COLUMNS: ColumnDef[] = [
   { key: 'value', label: 'Count' },
 ]
 
-export default function ChartCard({ title, subtitle, children, className = '', exportData }: ChartCardProps) {
+export default function ChartCard({ title, subtitle, children, className = '', exportData, actions }: ChartCardProps) {
   const dataToExport = exportData || [
     { Chart: title, Subtitle: subtitle || '', Status: 'Generated', Date: new Date().toLocaleDateString() },
   ]
@@ -46,7 +48,7 @@ export default function ChartCard({ title, subtitle, children, className = '', e
           className="min-w-0 flex-1"
         />
 
-        <div data-no-export="true">
+        <div data-no-export="true" className="flex shrink-0 flex-wrap items-center justify-end gap-2">
           <ExportDropdown
             title={title}
             subtitle={subtitle}
@@ -58,6 +60,7 @@ export default function ChartCard({ title, subtitle, children, className = '', e
             includeVisuals
             visualTitle={title}
           />
+          {actions}
         </div>
       </div>
       <div data-export-visual={title} className="flex min-h-0 flex-1 flex-col justify-center">

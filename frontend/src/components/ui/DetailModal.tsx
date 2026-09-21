@@ -2,7 +2,8 @@ import { useState, useMemo, useEffect } from 'react'
 import { X, Search, RotateCcw, Table as TableIcon, Filter, CheckCircle2, AlertCircle, XCircle, Loader2 } from 'lucide-react'
 import type { ConnectedDataset } from '../../data/connectedDemoData'
 import { useGlobalFilters } from '../../context/FilterContext'
-import { DIVISION_OPTIONS, getDistrictsForDivision, getDivisionForDistrict } from '../../data/filterOptions'
+import { DIVISION_OPTIONS, getDistrictsForDivision, getDivisionForDistrict, resolveDivisionForDistrict, canonicalMpDistrict } from '../../data/filterOptions'
+import { districtsMatch, rowMatchesDivision } from '../../utils/geoMatch'
 import ExportDropdown from './ExportDropdown'
 import ColumnSelector from './ColumnSelector'
 import TablePagination from './TablePagination'
@@ -10,7 +11,8 @@ import DateRangeFilter, { rowMatchesDateRange } from './DateRangeFilter'
 import { useTableControls } from '../../hooks/useTableControls'
 import type { TableColumn } from '../../types'
 import { preferPatientGeoOrder } from '../../utils/schemaColumns'
-import { formatCodedField, isCodedColumn } from '../../utils/beneficiaryCodes'
+import { formatCodedField, isCodedColumn, labelCardStatus, labelEnrlStatus, labelGender, labelAadhaarStatus, labelRelation, labelSourceType } from '../../utils/beneficiaryCodes'
+import { labelRuralUrban } from '../../utils/ruralUrban'
 import { HospitalColumnHeader, HospitalStatusCell, isHospitalStatusColumn } from './HospitalStatusCells'
 import MoneyColumnHeader from './MoneyColumnHeader'
 import { formatMoneyValue, formatRowMoney, isAmountColumn, type MoneyNotation } from '../../utils/moneyFormat'
@@ -24,7 +26,7 @@ export interface DrillDownDetail {
   datasetTitle?: string
   source?: 'api' | 'demo'
   loading?: boolean
-  /** Pre-select modal filters from chart/KPI click. */
+  /** Pre-select modal filters from chart/KPI click / page filters. */
   appliedFilters?: {
     division?: string
     district?: string
@@ -33,6 +35,13 @@ export interface DrillDownDetail {
     search?: string
     dateFrom?: string
     dateTo?: string
+    locked?: {
+      division?: boolean
+      district?: boolean
+      dateFrom?: boolean
+      dateTo?: boolean
+      status?: boolean
+    }
   }
 }
 
@@ -49,6 +58,8 @@ const DISTRICT_FIELDS = [
   'dist_name',
   'hosp_district_name',
   'sub_district_name',
+  'district_cd',
+  'subdistrict_town',
 ]
 
 const STATUS_FIELDS = [
@@ -56,11 +67,19 @@ const STATUS_FIELDS = [
   'case_status',
   'enrl_status',
   'card_print_status',
+  'card_status',
   'print_status',
   'ekyc',
   'active_status',
   'ab_pmjay_status',
   'abdm_status',
+  'investigation_status',
+  'hosp_status_desc',
+  'user_status',
+  'patient_status',
+  'deempanel_status',
+  'status_descrption',
+  'accreditation_status',
 ]
 
 function columnLabel(key: string): string {
@@ -101,13 +120,29 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
     if (!detail || detail.loading) return
 
     const applied = detail.appliedFilters
+    const rawDistrict = applied?.district?.trim() || ''
+    const district = (rawDistrict && (canonicalMpDistrict(rawDistrict) || rawDistrict)) || ''
+    // Prefer explicit division from filters; fall back to parent of district.
+    // patient_state is only used when no division/district parent is available (TMS geo).
+    const division =
+      applied?.division?.trim() ||
+      (district ? getDivisionForDistrict(district) : '') ||
+      applied?.patient_state?.trim() ||
+      ''
+
     setSearchTerm(applied?.search ?? '')
     setStatusFilter(applied?.status ?? 'ALL')
-    setDivisionFilter(applied?.patient_state || applied?.division || 'ALL')
-    setDistrictFilter(applied?.district ?? 'ALL')
+    setDivisionFilter(division || 'ALL')
+    setDistrictFilter(district || 'ALL')
     setDateFrom(applied?.dateFrom ?? '')
     setDateTo(applied?.dateTo ?? '')
   }, [detail?.title, detail?.subtitle, detail?.records, detail?.loading, detail?.appliedFilters])
+
+  const lockedFilters = detail?.appliedFilters?.locked ?? {}
+  const divisionLocked = Boolean(lockedFilters.division)
+  const districtLocked = Boolean(lockedFilters.district)
+  const statusLocked = Boolean(lockedFilters.status)
+  const datesLocked = Boolean(lockedFilters.dateFrom || lockedFilters.dateTo)
 
   const dataset: ConnectedDataset | null = useMemo(() => {
     if (!detail || detail.loading) return null
@@ -163,6 +198,52 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
     )
   }, [dataset])
 
+  /** Only show Division / District when the opened dataset actually has those fields (or district → division). */
+  const showDivisionFilter = useMemo(() => {
+    if (!dataset) return false
+    const keys = new Set(dataset.columns.map((c) => c.key))
+    if (DIVISION_FIELDS.some((k) => keys.has(k)) || PATIENT_STATE_FIELDS.some((k) => keys.has(k))) {
+      return true
+    }
+    // Hospital master has district_name but no division column — still allow division filter.
+    if (DISTRICT_FIELDS.some((k) => keys.has(k)) || PATIENT_DISTRICT_FIELDS.some((k) => keys.has(k))) {
+      return true
+    }
+    return dataset.records.some((r) =>
+      Boolean(rowField(r, [...DIVISION_FIELDS, ...PATIENT_STATE_FIELDS, ...DISTRICT_FIELDS, ...PATIENT_DISTRICT_FIELDS]))
+    )
+  }, [dataset])
+
+  const showDistrictFilter = useMemo(() => {
+    if (!dataset) return false
+    const keys = new Set(dataset.columns.map((c) => c.key))
+    if (DISTRICT_FIELDS.some((k) => keys.has(k)) || PATIENT_DISTRICT_FIELDS.some((k) => keys.has(k))) {
+      return true
+    }
+    return dataset.records.some((r) => Boolean(rowField(r, [...PATIENT_DISTRICT_FIELDS, ...DISTRICT_FIELDS])))
+  }, [dataset])
+
+  // Drop geo filters when the dataset has no division/district columns (e.g. payment_dtls).
+  useEffect(() => {
+    if (!dataset || detail?.loading) return
+    if (!showDivisionFilter && divisionFilter !== 'ALL') setDivisionFilter('ALL')
+    if (!showDistrictFilter && districtFilter !== 'ALL') setDistrictFilter('ALL')
+  }, [dataset, detail?.loading, showDivisionFilter, showDistrictFilter, divisionFilter, districtFilter])
+
+  const statusOptions = useMemo(() => {
+    if (!dataset?.records.length) return []
+    const names = new Set<string>()
+    const hasStatusColumn = dataset.columns.some((c) => STATUS_FIELDS.includes(c.key))
+    for (const rec of dataset.records) {
+      const status = rowField(rec, STATUS_FIELDS)
+      if (status) names.add(status)
+    }
+    if (!names.size && !hasStatusColumn) return []
+    return [...names].sort((a, b) => a.localeCompare(b))
+  }, [dataset])
+
+  const showStatusFilter = statusOptions.length > 0
+
   const patientStateOptions = useMemo(() => {
     if (!dataset) return []
     const names = new Set<string>()
@@ -171,11 +252,15 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
         rowField(rec, DIVISION_FIELDS) || getDivisionForDistrict(rowField(rec, PATIENT_DISTRICT_FIELDS) || rowField(rec, DISTRICT_FIELDS))
       if (mapped) names.add(mapped)
     }
+    if (divisionFilter !== 'ALL') names.add(divisionFilter)
     if (names.size) return [...names].sort((a, b) => a.localeCompare(b))
     return []
-  }, [dataset])
+  }, [dataset, divisionFilter])
 
   const dynamicDistricts = useMemo(() => {
+    const canon = (name: string) => canonicalMpDistrict(name) || name
+    let options: { value: string; label: string }[]
+
     if (usesPatientGeo && dataset) {
       const names = new Set<string>()
       for (const rec of dataset.records) {
@@ -186,76 +271,151 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
           if ((mapped || '').toLowerCase() !== divisionFilter.toLowerCase()) continue
         }
         const name = rowField(rec, PATIENT_DISTRICT_FIELDS) || rowField(rec, DISTRICT_FIELDS)
-        if (name) names.add(name)
+        if (name) names.add(canon(name))
       }
-      return [
-        { value: '', label: 'All Districts' },
+      options = [
+        { value: 'ALL', label: 'All Districts' },
         ...[...names].sort((a, b) => a.localeCompare(b)).map((d) => ({ value: d, label: d })),
       ]
+    } else {
+      options = getDistrictsForDivision(divisionFilter === 'ALL' ? '' : divisionFilter).map((d) => ({
+        value: d.value || 'ALL',
+        label: d.label,
+      }))
     }
-    return getDistrictsForDivision(divisionFilter === 'ALL' ? '' : divisionFilter)
-  }, [dataset, usesPatientGeo, divisionFilter])
+
+    // Keep the applied district visible even if casing/source list differs
+    if (
+      districtFilter !== 'ALL' &&
+      !options.some((o) => o.value.toLowerCase() === districtFilter.toLowerCase())
+    ) {
+      options = [...options, { value: districtFilter, label: districtFilter }]
+    }
+
+    return options
+  }, [dataset, usesPatientGeo, divisionFilter, districtFilter])
+
+  const districtSelectValue = useMemo(() => {
+    if (districtFilter === 'ALL') return 'ALL'
+    const hit = dynamicDistricts.find(
+      (o) => o.value.toLowerCase() === districtFilter.toLowerCase()
+    )
+    return hit?.value ?? districtFilter
+  }, [districtFilter, dynamicDistricts])
+
+  const divisionSelectValue = useMemo(() => {
+    if (divisionFilter === 'ALL') return 'ALL'
+    const opts = usesPatientGeo
+      ? patientStateOptions
+      : DIVISION_OPTIONS.filter((d) => d.value).map((d) => d.value)
+    const hit = opts.find((v) => v.toLowerCase() === divisionFilter.toLowerCase())
+    return hit ?? divisionFilter
+  }, [divisionFilter, usesPatientGeo, patientStateOptions])
 
   const handleDivisionChange = (divVal: string) => {
     setDivisionFilter(divVal)
-    if (usesPatientGeo) {
-      setDistrictFilter('ALL')
-      return
-    }
-    if (divVal !== 'ALL' && districtFilter !== 'ALL') {
+    if (divVal === 'ALL') return
+    if (districtFilter !== 'ALL') {
       const allowed = getDistrictsForDivision(divVal).map((d) => d.value)
-      if (!allowed.includes(districtFilter)) {
-        setDistrictFilter('ALL')
-      }
+      const stillValid = allowed.some((d) => d.toLowerCase() === districtFilter.toLowerCase())
+      if (!stillValid) setDistrictFilter('ALL')
     }
   }
 
   const handleDistrictChange = (distVal: string) => {
-    setDistrictFilter(distVal)
-    if (usesPatientGeo) return
-    if (distVal !== 'ALL' && divisionFilter === 'ALL') {
-      const parentDiv = getDivisionForDistrict(distVal)
-      if (parentDiv) {
-        setDivisionFilter(parentDiv)
-      }
+    if (distVal === 'ALL' || !distVal) {
+      setDistrictFilter('ALL')
+      return
     }
+    const canonical = canonicalMpDistrict(distVal) || distVal
+    setDistrictFilter(canonical)
+    const parentDiv = getDivisionForDistrict(canonical)
+    if (parentDiv) setDivisionFilter(parentDiv)
   }
 
   const filteredRecords = useMemo(() => {
     if (!dataset) return []
     return dataset.records.filter((rec) => {
-      const matchSearch = Object.values(rec).some((val) =>
-        String(val).toLowerCase().includes(searchTerm.toLowerCase().trim())
-      )
+      const q = searchTerm.toLowerCase().trim()
+      const matchSearch =
+        !q ||
+        Object.entries(rec).some(([key, val]) => {
+          const raw = String(val ?? '').toLowerCase()
+          if (raw.includes(q)) return true
+          // Also match against display labels so "Female" finds F, "Approved" finds A, etc.
+          const labelled = [
+            labelGender(val),
+            labelEnrlStatus(val),
+            labelCardStatus(val),
+            labelAadhaarStatus(val),
+            labelRelation(val),
+            labelSourceType(val),
+            labelRuralUrban(val),
+            isCodedColumn(key) ? formatCodedField(key, val) : '',
+          ]
+            .join(' ')
+            .toLowerCase()
+          return labelled.includes(q)
+        })
 
-      const recStatus = rowField(rec, STATUS_FIELDS).toLowerCase()
+      const rawStatus = rowField(rec, STATUS_FIELDS)
+      const wantStatus = statusFilter.toLowerCase()
+      const statusCandidates = [
+        rawStatus,
+        labelEnrlStatus(rec.enrl_status ?? rawStatus),
+        labelCardStatus(rec.card_status ?? rec.card_print_status ?? rawStatus),
+        labelAadhaarStatus(rec.aadhar_status ?? rec.aadhaar_status ?? rawStatus),
+        String(rec.case_status ?? ''),
+        String(rec.investigation_status ?? ''),
+        String(rec.status_descrption ?? rec.status_description ?? ''),
+      ]
+        .map((s) => String(s ?? '').trim().toLowerCase())
+        .filter(Boolean)
       const matchStatus =
-        statusFilter === 'ALL' || recStatus.includes(statusFilter.toLowerCase())
+        !showStatusFilter ||
+        statusFilter === 'ALL' ||
+        statusCandidates.some((s) => s === wantStatus || s.includes(wantStatus) || wantStatus.includes(s))
 
       const recDistrict = usesPatientGeo
         ? rowField(rec, PATIENT_DISTRICT_FIELDS) || rowField(rec, DISTRICT_FIELDS)
         : rowField(rec, DISTRICT_FIELDS)
       const recDivision =
         rowField(rec, DIVISION_FIELDS) ||
-        getDivisionForDistrict(recDistrict) ||
+        resolveDivisionForDistrict(recDistrict) ||
         (usesPatientGeo ? rowField(rec, PATIENT_STATE_FIELDS) : '')
 
       const matchDivision =
+        !showDivisionFilter ||
         divisionFilter === 'ALL' ||
-        !recDivision ||
-        recDivision.toLowerCase() === divisionFilter.toLowerCase()
+        (/^unknown$/i.test(divisionFilter)
+          ? resolveDivisionForDistrict(recDistrict) === 'Unknown'
+          : rowMatchesDivision(recDistrict, divisionFilter) ||
+            (!!recDivision && recDivision.toLowerCase() === divisionFilter.toLowerCase()))
 
       const matchDistrict =
+        !showDistrictFilter ||
         districtFilter === 'ALL' ||
-        !recDistrict ||
-        recDistrict.toLowerCase() === districtFilter.toLowerCase() ||
-        recDistrict.toLowerCase().includes(districtFilter.toLowerCase())
+        (/^unknown$/i.test(districtFilter)
+          ? !String(recDistrict ?? '').trim() || /^unknown$/i.test(String(recDistrict))
+          : !recDistrict || districtsMatch(recDistrict, districtFilter))
 
       const matchDate = rowMatchesDateRange(rec, dateFrom, dateTo)
 
       return matchSearch && matchStatus && matchDivision && matchDistrict && matchDate
     })
-  }, [dataset, searchTerm, statusFilter, divisionFilter, districtFilter, dateFrom, dateTo, usesPatientGeo])
+  }, [
+    dataset,
+    searchTerm,
+    statusFilter,
+    divisionFilter,
+    districtFilter,
+    dateFrom,
+    dateTo,
+    usesPatientGeo,
+    showStatusFilter,
+    showDivisionFilter,
+    showDistrictFilter,
+  ])
 
   const {
     visibleColumns,
@@ -390,48 +550,75 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
               <Filter className="w-3.5 h-3.5 text-[#2d8a4e]" />
               Filters:
             </div>
-            <select
-              value={divisionFilter}
-              onChange={(e) => handleDivisionChange(e.target.value)}
-              className="text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 outline-none focus:border-[#2d8a4e]"
-            >
-              <option value="ALL">All Divisions</option>
-              {(usesPatientGeo ? patientStateOptions.map((name) => ({ value: name, label: name })) : DIVISION_OPTIONS.filter((d) => d.value)).map((d) => (
-                <option key={d.value} value={d.value}>
-                  {d.label}
-                </option>
-              ))}
-            </select>
+            {showDivisionFilter && (
+              <select
+                value={divisionSelectValue}
+                onChange={(e) => handleDivisionChange(e.target.value)}
+                disabled={divisionLocked}
+                title={divisionLocked ? 'Set from page filters' : undefined}
+                className={
+                  divisionLocked
+                    ? 'cursor-not-allowed text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-slate-100 text-slate-600 outline-none'
+                    : 'text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 outline-none focus:border-[#2d8a4e]'
+                }
+              >
+                <option value="ALL">All Divisions</option>
+                {(usesPatientGeo ? patientStateOptions.map((name) => ({ value: name, label: name })) : DIVISION_OPTIONS.filter((d) => d.value)).map((d) => (
+                  <option key={d.value} value={d.value}>
+                    {d.label}
+                  </option>
+                ))}
+              </select>
+            )}
 
-            <select
-              value={districtFilter}
-              onChange={(e) => handleDistrictChange(e.target.value)}
-              className="text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 outline-none focus:border-[#2d8a4e]"
-            >
-              {dynamicDistricts.map((d) => (
-                <option key={d.value} value={d.value || 'ALL'}>
-                  {d.label}
-                </option>
-              ))}
-            </select>
+            {showDistrictFilter && (
+              <select
+                value={districtSelectValue}
+                onChange={(e) => handleDistrictChange(e.target.value)}
+                disabled={districtLocked}
+                title={districtLocked ? 'Set from page filters' : undefined}
+                className={
+                  districtLocked
+                    ? 'cursor-not-allowed text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-slate-100 text-slate-600 outline-none'
+                    : 'text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 outline-none focus:border-[#2d8a4e]'
+                }
+              >
+                {dynamicDistricts.map((d) => (
+                  <option key={d.value || 'ALL'} value={d.value || 'ALL'}>
+                    {d.label}
+                  </option>
+                ))}
+              </select>
+            )}
 
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 outline-none focus:border-[#2d8a4e]"
-            >
-              <option value="ALL">All Statuses</option>
-              <option value="Active">Active</option>
-              <option value="Paid">Paid / Settled</option>
-              <option value="Approved">Approved</option>
-              <option value="Pending">Pending</option>
-            </select>
+            {showStatusFilter && (
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                disabled={statusLocked}
+                title={statusLocked ? 'Set from page filters' : undefined}
+                className={
+                  statusLocked
+                    ? 'cursor-not-allowed text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-slate-100 text-slate-600 outline-none'
+                    : 'text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 outline-none focus:border-[#2d8a4e]'
+                }
+              >
+                <option value="ALL">All Statuses</option>
+                {statusOptions.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+            )}
 
             <DateRangeFilter
               variant="compact"
               dateFrom={dateFrom}
               dateTo={dateTo}
+              disabled={datesLocked}
               onChange={(from, to) => {
+                if (datesLocked) return
                 setDateFrom(from)
                 setDateTo(to)
               }}

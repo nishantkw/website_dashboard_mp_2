@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
-import DataTable from '../../components/ui/DataTable'
 import { PageHeader, KPIGrid } from '../../components/ui/PageHeader'
+import DashboardReportsBanner from '../../components/ui/DashboardReportsBanner'
 import ChartCard from '../../components/ui/ChartCard'
 import { InteractiveBarChart, InteractivePieChart } from '../../components/charts/InteractiveCharts'
 import { useDrillDown } from '../../hooks/useDrillDown'
@@ -38,42 +38,6 @@ const EMPTY = {
   vvsTable: [] as Record<string, string | number>[],
   tempTable: [] as Record<string, string | number>[],
   leftoverTable: [] as Record<string, string | number>[],
-}
-
-function sectionTable(
-  title: string,
-  schema: string | undefined,
-  rows: Record<string, string | number>[],
-  columns: ReturnType<typeof schemaTableColumns>,
-  openDetail: (opts: {
-    title: string
-    subtitle: string
-    data: Record<string, string | number>
-    columns: typeof columns
-  }) => void
-) {
-  if (!rows.length && !columns.length) return null
-  return (
-    <div className="mt-5">
-      <div className="mb-4 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
-        <p className="text-sm font-semibold text-[#1a5c38]">{title}</p>
-        <p className="text-xs text-slate-500">{schema || 'dmart_mp'}</p>
-      </div>
-      <DataTable
-        columns={columns}
-        data={rows}
-        title={`${title} (${rows.length}${columns.length ? ` · ${columns.length} cols` : ''})`}
-        onRowClick={(row) =>
-          openDetail({
-            title: String(row.card_no || row.kyc_name || row.source_name || 'Card'),
-            subtitle: schema || title,
-            data: row,
-            columns,
-          })
-        }
-      />
-    </div>
-  )
 }
 
 export default function CardPrintData() {
@@ -128,6 +92,12 @@ export default function CardPrintData() {
         badge={<DataSourceBadge source={source} db={db} loading={loading} />}
       />
       <BackendOfflineNotice error={error} loading={loading} />
+
+      <DashboardReportsBanner
+        reportPath="/dashboard/mp/reports/card-print-data"
+        buttonLabel="Open Card Print Batches Report →"
+      />
+
       {kpis.length > 0 && <KPIGrid kpis={kpis} onKpiClick={(kpi) => openFromKpi(kpi.label, kpi.value)} />}
 
       {(statusData.length > 0 || urbanRuralData.length > 0 || districtData.length > 0) && (
@@ -170,11 +140,6 @@ export default function CardPrintData() {
           )}
         </div>
       )}
-
-      {sectionTable('Aug 2025 Batch', data.augSchema, data.augTable ?? [], augCols, openDetail)}
-      {sectionTable('VVS May 2025', data.vvsSchema, data.vvsTable ?? [], vvsCols, openDetail)}
-      {sectionTable('Temp e-KYC Jul 2026', data.tempSchema, data.tempTable ?? [], tempCols, openDetail)}
-      {sectionTable('Leftover Cards (09-Aug-2026)', data.leftoverSchema, data.leftoverTable ?? [], leftoverCols, openDetail)}
     </div>
   )
 }

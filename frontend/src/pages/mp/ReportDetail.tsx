@@ -4,6 +4,8 @@ import { ArrowLeft, FileSpreadsheet } from 'lucide-react'
 import DataTable from '../../components/ui/DataTable'
 import { PageHeader } from '../../components/ui/PageHeader'
 import StackedHeading from '../../components/ui/StackedHeading'
+import ReportTableGraphs from '../../components/ui/ReportTableGraphs'
+import { tableDisplayTitle } from '../../utils/displayLabels'
 import DataSourceBadge from '../../components/ui/DataSourceBadge'
 import FraudFilterBar from '../../components/layout/FraudFilterBar'
 import ClaimsFilterBar from '../../components/layout/ClaimsFilterBar'
@@ -20,7 +22,18 @@ import {
   fetchPatients,
   fetchLms,
   fetchWorkflow,
+  fetchBisCardPrinting,
+  fetchBisCardPrintData,
+  fetchBisPrintDedup,
+  fetchUmpUsers,
 } from '../../api/endpoints'
+import {
+  buildBisCardPrintingTables,
+  buildBisCardPrintDataTables,
+  buildBisPrintDedupTables,
+  buildUmpUsersTables,
+  pushSchemaTable,
+} from '../../utils/reportTableBuilders'
 import { getReportDefinition, FRAUD_AUDIT_REPORT_TABLES } from '../../data/reportConfigs'
 import { getFraudReportFilters } from '../../data/fraudFilterConfig'
 import { getClaimsFiltersForPage, buildMasterReportTableColumns } from '../../data/claimsFilterConfig'
@@ -119,6 +132,33 @@ type ModuleApiData = {
   auditColumns?: string[]
   masterKpis?: { key: string; label: string; count: number; initiatedCr: number; approvedCr: number }[]
   stateHospitalSummary?: Record<string, string | number>[]
+  jsonDataTable?: Record<string, string | number>[]
+  jsonDataColumns?: string[]
+  jsonDataSchema?: string
+  histTable?: Record<string, string | number>[]
+  histColumns?: string[]
+  histSchema?: string
+  ekycTable?: Record<string, string | number>[]
+  ekycColumns?: string[]
+  ekycSchema?: string
+  pvtgTable?: Record<string, string | number>[]
+  pvtgColumns?: string[]
+  pvtgSchema?: string
+  disabledSnapTable?: Record<string, string | number>[]
+  disabledSnapColumns?: string[]
+  disabledSnapSchema?: string
+  manpowerTable?: Record<string, string | number>[]
+  manpowerColumns?: string[]
+  manpowerSchema?: string
+  stratTable?: Record<string, string | number>[]
+  stratColumns?: string[]
+  stratSchema?: string
+  statusBisTable?: Record<string, string | number>[]
+  statusBisColumns?: string[]
+  statusBisSchema?: string
+  statusTmsTable?: Record<string, string | number>[]
+  statusTmsColumns?: string[]
+  statusTmsSchema?: string
 }
 
 function buildClaimsReportTables(apiData: ModuleApiData, source: 'api' | 'mock' | 'offline', reportTables: ModuleApiData extends never ? never : { title: string; columns: TableColumn[]; data: Record<string, string | number>[] }[]) {
@@ -128,7 +168,7 @@ function buildClaimsReportTables(apiData: ModuleApiData, source: 'api' | 'mock' 
 
   if (apiData.masterKpis?.length) {
     tables.push({
-      title: 'FRS §6 — Claim Lifecycle KPI Heads',
+      title: 'Claim Lifecycle KPI Heads',
       columns: [
         { key: 'label', label: 'KPI Head' },
         { key: 'count', label: 'Count', align: 'right' },
@@ -150,7 +190,7 @@ function buildClaimsReportTables(apiData: ModuleApiData, source: 'api' | 'mock' 
   if (apiData.table?.length) {
     const demoCols = reportTables[0]?.columns ?? []
     tables.push({
-      title: apiData.schema ?? 'Claim detail records',
+      title: tableDisplayTitle(apiData.schema, 'Claim Detail Records'),
       columns: schemaTableColumns({
         source,
         schemaKeys: apiData.columns,
@@ -165,7 +205,7 @@ function buildClaimsReportTables(apiData: ModuleApiData, source: 'api' | 'mock' 
   if (apiData.paymentTable?.length) {
     const paymentDemo = reportTables[1]?.columns ?? []
     tables.push({
-      title: apiData.paymentSchema ?? 'dmart_mp.payment_dtls',
+      title: tableDisplayTitle(apiData.paymentSchema, 'Payment Details'),
       columns: schemaTableColumns({
         source,
         schemaKeys: apiData.paymentColumns,
@@ -173,6 +213,21 @@ function buildClaimsReportTables(apiData: ModuleApiData, source: 'api' | 'mock' 
         preferredFirst: paymentDemo.map((c) => c.key),
       }),
       data: apiData.paymentTable,
+    })
+  }
+
+  if (apiData.jsonDataTable?.length) {
+    const jsonDemo = reportTables.find((t) => /Claim Line Items/i.test(t.title))?.columns ?? []
+    tables.push({
+      title: tableDisplayTitle(apiData.jsonDataSchema, 'Claim Line Items'),
+      columns: schemaTableColumns({
+        source,
+        schemaKeys: apiData.jsonDataColumns,
+        rows: apiData.jsonDataTable,
+        preferredFirst: jsonDemo.map((c) => c.key),
+        demoColumns: jsonDemo,
+      }),
+      data: apiData.jsonDataTable,
     })
   }
 
@@ -196,7 +251,7 @@ function buildModuleTables(
     const demoCols = reportTables[0]?.columns ?? []
     const preferredFirst = demoCols.map((c) => c.key)
     tables.push({
-      title: apiData.schema ?? reportTables[0]?.title ?? resolvedId,
+      title: tableDisplayTitle(apiData.schema, reportTables[0]?.title ?? resolvedId),
       columns: schemaTableColumns({
         source,
         schemaKeys: apiData.columns,
@@ -210,7 +265,7 @@ function buildModuleTables(
 
   if (resolvedId === 'users' && apiData.audit?.length) {
     tables.push({
-      title: 'dmart_mp.t_workflow_transaction_audit',
+      title: tableDisplayTitle('dmart_mp.t_workflow_transaction_audit', 'Workflow Audit'),
       columns: schemaTableColumns({
         source,
         schemaKeys: apiData.auditColumns,
@@ -225,7 +280,7 @@ function buildModuleTables(
   if (resolvedId === 'patients' && apiData.treatmentTable) {
     const treatmentDemo = reportTables[1]?.columns ?? []
     tables.push({
-      title: apiData.treatmentSchema ?? 'dmart_mp.treatment_dtls',
+      title: tableDisplayTitle(apiData.treatmentSchema, 'Treatment Details'),
       columns: schemaTableColumns({
         source,
         schemaKeys: apiData.treatmentColumns,
@@ -237,9 +292,9 @@ function buildModuleTables(
   }
 
   if (resolvedId === 'patients' && (apiData.morthTable?.length || apiData.morthColumns?.length)) {
-    const morthDemo = reportTables.find((t) => /t_morth_patient_details/i.test(t.title))?.columns ?? []
+    const morthDemo = reportTables.find((t) => /MORTH Patients/i.test(t.title))?.columns ?? []
     tables.push({
-      title: apiData.morthSchema ?? 'dmart_mp.t_morth_patient_details',
+      title: tableDisplayTitle(apiData.morthSchema, 'MORTH Patients'),
       columns: schemaTableColumns({
         source,
         schemaKeys: apiData.morthColumns,
@@ -253,7 +308,7 @@ function buildModuleTables(
   if (resolvedId === 'hospitals' && apiData.deempanelTable?.length) {
     const deempanelDemo = reportTables[1]?.columns ?? []
     tables.push({
-      title: apiData.deempanelSchema ?? 'dmart_mp.t_deempanelment_details',
+      title: tableDisplayTitle(apiData.deempanelSchema, 'De-empanelment Details'),
       columns: schemaTableColumns({
         source,
         schemaKeys: apiData.deempanelColumns,
@@ -266,9 +321,9 @@ function buildModuleTables(
   }
 
   if (resolvedId === 'hospitals' && apiData.hemTable?.length) {
-    const hemDemo = reportTables.find((t) => /t_hem_hospital/i.test(t.title))?.columns ?? []
+    const hemDemo = reportTables.find((t) => /HEM Hospital/i.test(t.title))?.columns ?? []
     tables.push({
-      title: apiData.hemSchema ?? 'dmart_mp.t_hem_hospital',
+      title: tableDisplayTitle(apiData.hemSchema, 'HEM Hospital Registry'),
       columns: schemaTableColumns({
         source,
         schemaKeys: apiData.hemColumns,
@@ -281,9 +336,9 @@ function buildModuleTables(
   }
 
   if (resolvedId === 'hospitals' && apiData.lookupTable) {
-    const lookupDemo = reportTables.find((t) => /m_lookup/i.test(t.title))?.columns ?? []
+    const lookupDemo = reportTables.find((t) => /Hospital Lookup/i.test(t.title))?.columns ?? []
     tables.push({
-      title: apiData.lookupSchema ?? 'dmart_mp.m_lookup',
+      title: tableDisplayTitle(apiData.lookupSchema, 'Hospital Lookup Codes'),
       columns: schemaTableColumns({
         source,
         schemaKeys: apiData.lookupColumns,
@@ -297,7 +352,7 @@ function buildModuleTables(
   if (resolvedId === 'beneficiaries' && apiData.sourceTable) {
     const sourceDemo = reportTables[1]?.columns ?? []
     tables.push({
-      title: apiData.sourceSchema ?? 'dmart_mp.m_source_data',
+      title: tableDisplayTitle(apiData.sourceSchema, 'Source Family Data'),
       columns: schemaTableColumns({
         source,
         schemaKeys: apiData.sourceColumns,
@@ -311,7 +366,7 @@ function buildModuleTables(
   if (resolvedId === 'beneficiaries' && apiData.disabledTable) {
     const disabledDemo = reportTables[2]?.columns ?? []
     tables.push({
-      title: apiData.disabledSchema ?? 'dmart_mp.t_bis_beneficiary_disabled',
+      title: tableDisplayTitle(apiData.disabledSchema, 'Disabled Beneficiaries'),
       columns: schemaTableColumns({
         source,
         schemaKeys: apiData.disabledColumns,
@@ -325,7 +380,7 @@ function buildModuleTables(
   if (resolvedId === 'beneficiaries' && apiData.bisTable?.length) {
     const bisDemo = reportTables[3]?.columns ?? []
     tables.push({
-      title: apiData.bisSchema ?? 'bis_raw.t_bis_beneficiary_dtls',
+      title: tableDisplayTitle(apiData.bisSchema, 'BIS Raw Beneficiaries'),
       columns: schemaTableColumns({
         source,
         schemaKeys: apiData.bisColumns,
@@ -339,7 +394,7 @@ function buildModuleTables(
   if (resolvedId === 'users' && apiData.proTable) {
     const proDemo = reportTables[1]?.columns ?? []
     tables.push({
-      title: apiData.proSchema ?? 'dmart_mp.pro_workflow_users_t',
+      title: tableDisplayTitle(apiData.proSchema, 'Pro Workflow Users'),
       columns: schemaTableColumns({
         source,
         schemaKeys: apiData.proColumns,
@@ -348,6 +403,66 @@ function buildModuleTables(
       }),
       data: filterRows(apiData.proTable),
     })
+  }
+
+  if (resolvedId === 'beneficiaries') {
+    const extras: Array<{ title: string; rows?: Record<string, string | number>[]; cols?: string[]; demoIdx: number }> = [
+      { title: tableDisplayTitle(apiData.histSchema, 'Beneficiary History'), rows: apiData.histTable, cols: apiData.histColumns, demoIdx: 4 },
+      { title: tableDisplayTitle(apiData.ekycSchema, 'Beneficiary e-KYC'), rows: apiData.ekycTable, cols: apiData.ekycColumns, demoIdx: 5 },
+      { title: tableDisplayTitle(apiData.pvtgSchema, 'PVTG by District'), rows: apiData.pvtgTable, cols: apiData.pvtgColumns, demoIdx: 6 },
+      { title: tableDisplayTitle(apiData.disabledSnapSchema, 'Disabled Beneficiaries Snapshot'), rows: apiData.disabledSnapTable, cols: apiData.disabledSnapColumns, demoIdx: 7 },
+    ]
+    for (const extra of extras) {
+      if (!extra.rows?.length) continue
+      const demo = reportTables[extra.demoIdx]?.columns ?? reportTables[0]?.columns ?? []
+      pushSchemaTable(tables, source, filterRows, {
+        title: extra.title,
+        rows: extra.rows,
+        schemaKeys: extra.cols,
+        demoColumns: demo,
+      })
+    }
+  }
+
+  if (resolvedId === 'hospitals' && apiData.manpowerTable?.length) {
+    const demo = reportTables.find((t) => /HEM Manpower/i.test(t.title))?.columns ?? []
+    pushSchemaTable(tables, source, filterRows, {
+      title: tableDisplayTitle(apiData.manpowerSchema, 'HEM Manpower'),
+      rows: apiData.manpowerTable,
+      schemaKeys: apiData.manpowerColumns,
+      demoColumns: demo,
+    })
+  }
+
+  if (resolvedId === 'patients' && apiData.stratTable?.length) {
+    const demo = reportTables.find((t) => /stratification/i.test(t.title))?.columns ?? []
+    pushSchemaTable(tables, source, filterRows, {
+      title: tableDisplayTitle(apiData.stratSchema, 'Treatment Stratification'),
+      rows: apiData.stratTable,
+      schemaKeys: apiData.stratColumns,
+      demoColumns: demo,
+    })
+  }
+
+  if (resolvedId === 'users') {
+    if (apiData.statusBisTable?.length) {
+      const demo = reportTables.find((t) => /BIS Status Master/i.test(t.title))?.columns ?? []
+      pushSchemaTable(tables, source, filterRows, {
+        title: tableDisplayTitle(apiData.statusBisSchema, 'BIS Status Master'),
+        rows: apiData.statusBisTable,
+        schemaKeys: apiData.statusBisColumns,
+        demoColumns: demo,
+      })
+    }
+    if (apiData.statusTmsTable?.length) {
+      const demo = reportTables.find((t) => /TMS Status Master/i.test(t.title))?.columns ?? []
+      pushSchemaTable(tables, source, filterRows, {
+        title: tableDisplayTitle(apiData.statusTmsSchema, 'TMS Status Master'),
+        rows: apiData.statusTmsTable,
+        schemaKeys: apiData.statusTmsColumns,
+        demoColumns: demo,
+      })
+    }
   }
 
   return tables.length ? tables : reportTables.map((t) => ({ ...t, data: [] }))
@@ -386,6 +501,14 @@ export default function ReportDetail() {
         return () => fetchLms()
       case 'users':
         return () => fetchWorkflow()
+      case 'card-printing':
+        return () => fetchBisCardPrinting()
+      case 'card-print-data':
+        return () => fetchBisCardPrintData()
+      case 'print-dedup':
+        return () => fetchBisPrintDedup()
+      case 'ump-users':
+        return () => fetchUmpUsers()
       default:
         return async () => ({ ok: false as const, error: 'No API for this report' })
     }
@@ -430,7 +553,15 @@ export default function ReportDetail() {
           ...table,
           data: claimsFilters.filterRows(table.data),
         }))
-      : buildModuleTables(resolvedId, apiData as ModuleApiData, source, report.tables, filterData)
+      : resolvedId === 'card-printing'
+        ? buildBisCardPrintingTables(apiData, source, report.tables, (rows) => rows)
+        : resolvedId === 'card-print-data'
+          ? buildBisCardPrintDataTables(apiData, source, report.tables, (rows) => rows)
+          : resolvedId === 'print-dedup'
+            ? buildBisPrintDedupTables(apiData, source, report.tables, (rows) => rows)
+            : resolvedId === 'ump-users'
+              ? buildUmpUsersTables(apiData, source, report.tables, (rows) => rows)
+              : buildModuleTables(resolvedId, apiData as ModuleApiData, source, report.tables, filterData)
 
   const tables =
     isBeneficiariesReport
@@ -470,7 +601,7 @@ export default function ReportDetail() {
           onSearchChange={fraudFilters.setSearch}
           onClear={fraudFilters.clearFilters}
           activeCount={fraudFilters.activeCount}
-          subtitle="FRS §5 — full filter set for Fraud and Audit report export"
+          subtitle="FRS — full filter set for Fraud and Audit report export"
         />
       )}
 
@@ -483,7 +614,7 @@ export default function ReportDetail() {
           onSearchChange={claimsFilters.setSearch}
           onClear={claimsFilters.clearFilters}
           activeCount={claimsFilters.activeCount}
-          subtitle="FRS §4 — Master Report TMS Claim filters"
+          subtitle="FRS — Master Report TMS Claim filters"
         />
       )}
 
@@ -509,10 +640,10 @@ export default function ReportDetail() {
           title="Standalone report view"
           subtitle={
             isFraudReport
-              ? 'Filters map to schema columns (division_name, district_name, investigation_status, trigger_type, etc.).'
+              ? 'Filters map to schema columns. Use Add graph on each table for related charts.'
               : live
-                ? 'Live schema columns from database — use top filters and export from each table.'
-                : 'Use top filters, date range, and Columns to refine this report. Export from each table.'
+                ? 'Live schema columns from database — use filters, export, and Add graph on each table.'
+                : 'Use filters and export from each table. Add graph to visualize columns from that table.'
           }
         />
       </div>
@@ -521,36 +652,42 @@ export default function ReportDetail() {
         {tables.map((table) => {
           const filtered = isFraudReport ? table.data : table.data
           return (
-            <DataTable
-              key={table.title}
-              columns={table.columns}
-              data={filtered}
-              title={`${table.title} (${filtered.length})`}
-              onRowClick={(row) =>
-                openDetail({
-                  title: String(
-                    row.reference_number ??
-                      row.case_id ??
-                      row.ben_id ??
-                      row.registration_id ??
-                      row.hosp_name ??
-                      row.patient_id ??
-                      row.user_id ??
-                      row.userid ??
-                      row.workflow_user ??
-                      row.hospital_name ??
-                      row.name ??
-                      row.code ??
-                      'Record'
-                  ),
-                  subtitle: report.title,
-                  data: row,
-                  records: [row],
-                  columns: table.columns,
-                  source: live ? 'api' : 'demo',
-                })
-              }
-            />
+            <div key={table.title} className="space-y-3">
+              <DataTable
+                columns={table.columns}
+                data={filtered}
+                title={`${table.title} (${filtered.length})`}
+                onRowClick={(row) =>
+                  openDetail({
+                    title: String(
+                      row.reference_number ??
+                        row.case_id ??
+                        row.ben_id ??
+                        row.registration_id ??
+                        row.hosp_name ??
+                        row.patient_id ??
+                        row.user_id ??
+                        row.userid ??
+                        row.workflow_user ??
+                        row.hospital_name ??
+                        row.name ??
+                        row.code ??
+                        'Record'
+                    ),
+                    subtitle: report.title,
+                    data: row,
+                    records: [row],
+                    columns: table.columns,
+                    source: live ? 'api' : 'demo',
+                  })
+                }
+              />
+              <ReportTableGraphs
+                tableTitle={table.title}
+                columns={table.columns}
+                data={filtered}
+              />
+            </div>
           )
         })}
       </div>

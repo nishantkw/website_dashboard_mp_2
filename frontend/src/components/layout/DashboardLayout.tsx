@@ -17,7 +17,9 @@ export default function DashboardLayout() {
   const isUserManagementPage = location.pathname.includes('/user-management')
   const isImportPage = location.pathname.includes('/import-bulk-data')
   const isFraudAuditPage = location.pathname.includes('/mp/fraud-audit')
-  const isClaimsPage = location.pathname.includes('/mp/claims-payments')
+  const isClaimsPage =
+    location.pathname.includes('/mp/claims-payments') ||
+    location.pathname.includes('/mp/claim-payment-details')
   const isFraudReportPage = /\/mp\/reports\/(fraud-audit|fraud|safu-)/.test(location.pathname)
   const isClaimsReportPage = location.pathname.includes('/mp/reports/claims')
   const isBeneficiariesPage = location.pathname.includes('/mp/beneficiaries')

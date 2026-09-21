@@ -1,5 +1,5 @@
 import ChartCard from '../../components/ui/ChartCard'
-import DataTable from '../../components/ui/DataTable'
+import DashboardReportsBanner from '../../components/ui/DashboardReportsBanner'
 import { PageHeader, KPIGrid } from '../../components/ui/PageHeader'
 import { InteractiveBarChart, InteractivePieChart } from '../../components/charts/InteractiveCharts'
 import { useMemo } from 'react'
@@ -9,6 +9,7 @@ import { useApiResource } from '../../hooks/useApiResource'
 import { fetchUmpUsers } from '../../api/endpoints'
 import DataSourceBadge from '../../components/ui/DataSourceBadge'
 import BackendOfflineNotice from '../../components/ui/BackendOfflineNotice'
+import { pageHeaderDescription } from '../../utils/displayLabels'
 import { schemaTableColumns } from '../../utils/schemaColumns'
 import type { KPI, TableColumn } from '../../types'
 
@@ -101,12 +102,20 @@ export default function UserMaster() {
         title="User Master (UMP)"
         description={
           live
-            ? `${data.schema ?? 'ump_raw.user_master_ump'} — schema fields`
+            ? pageHeaderDescription(
+                data.schema ?? 'ump_raw.user_master_ump',
+                'User master records from the UMP module'
+              )
             : 'Connect the backend to load UMP user records'
         }
         badge={<DataSourceBadge source={source} db={db} loading={loading} />}
       />
       <BackendOfflineNotice error={error} loading={loading} />
+
+      <DashboardReportsBanner
+        reportPath="/dashboard/mp/reports/ump-users"
+        buttonLabel="Open UMP User Master Report →"
+      />
 
       {kpis.length > 0 && <KPIGrid kpis={kpis} onKpiClick={handleKpi} />}
 
@@ -184,18 +193,6 @@ export default function UserMaster() {
         </>
       )}
 
-      <DataTable
-        columns={columns}
-        data={filtered}
-        title={`User Records (${filtered.length}${columns.length ? ` · ${columns.length} schema cols` : ''})`}
-        onRowClick={(row) =>
-          openDetail({
-            title: String(row.user_id || row.email_id || 'User'),
-            subtitle: 'Schema record',
-            data: row,
-          })
-        }
-      />
     </div>
   )
 }

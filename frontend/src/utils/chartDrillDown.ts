@@ -1,5 +1,5 @@
 import { filterRowsForClaimKpi } from './claimKpi'
-import { isRuralFlag, isUrbanFlag, rowRuralUrbanFlag } from './ruralUrban'
+import { isRuralFlag, isUrbanFlag, rowRuralUrbanFlag, labelRuralUrban } from './ruralUrban'
 import { labelEntityType } from './fraudAggregations'
 import {
   labelGender,
@@ -8,10 +8,12 @@ import {
   labelAadhaarStatus,
   labelRelation,
   labelSourceType,
+  labelHospitalType,
   isActiveRecord,
 } from './beneficiaryCodes'
 
 import { districtsMatch } from './geoMatch'
+import { resolveDivisionForDistrict } from '../data/filterOptions'
 import { isHospitalServingClaims } from '../components/ui/HospitalStatusCells'
 
 function normalizeEmpanelmentSlice(val: unknown) {
@@ -103,7 +105,7 @@ const CHART_RULES: ChartRule[] = [
   {
     test: (t) => /deempanel trend|de[- ]?empanelment trend/i.test(t),
     fields: [],
-    dateField: 'start_date',
+    dateFields: ['start_date', 'end_date', 'due_date', 'created_dt'],
   },
   {
     test: (t) => /treatment trend/i.test(t),
@@ -191,18 +193,42 @@ const CHART_RULES: ChartRule[] = [
     dateField: 'transaction_dt',
   },
   {
+    test: (t) => /enroll trend|enrollment trend/i.test(t),
+    fields: [],
+    dateFields: ['enrol_date', 'enroll_date'],
+  },
+  {
     test: (t) => /claims (amount|volume) trend|claims amount trend/i.test(t),
     fields: [],
     dateFields: [...CLAIM_TREND_DATE_FIELDS],
   },
   {
-    test: (t) => /trend/i.test(t),
+    // Fallback for claim-style trends only — specific * trend rules above must come first.
+    test: (t) =>
+      /trend/i.test(t) &&
+      !/enroll|enrollment|disabled|payment|audit|treatment|empanel|deempanel/i.test(t),
     fields: [],
     dateFields: [...CLAIM_TREND_DATE_FIELDS],
   },
   {
     test: (t) => /district.*claim|district claims/i.test(t),
     fields: ['patient_district_name', '_patient_district', '_district', 'hosp_district_name', 'district_name', 'district'],
+  },
+  {
+    test: (t) => /hospital types?|type distribution/i.test(t) && !/pro workflow|outcomes/i.test(t),
+    fields: ['hospital_type', 'hosp_type_cd', 'hosp_type', '_hospital_type'],
+  },
+  {
+    test: (t) => /hospital type outcomes/i.test(t),
+    fields: ['entity_type', 'hospital_type'],
+  },
+  {
+    test: (t) => /division hospital/i.test(t),
+    fields: ['district_name', 'district', 'dist_name'],
+  },
+  {
+    test: (t) => /state type/i.test(t),
+    fields: ['_state_type', 'state_type'],
   },
   {
     test: (t) => /district hospital/i.test(t),
@@ -248,11 +274,6 @@ const CHART_RULES: ChartRule[] = [
         match: (row) => isActiveRecord(row),
       },
     },
-  },
-  {
-    test: (t) => /enroll trend/i.test(t),
-    fields: [],
-    dateField: 'enrol_date',
   },
   {
     test: (t) => /enroll status|enrollment status/i.test(t),
@@ -345,8 +366,9 @@ const CHART_RULES: ChartRule[] = [
     exact: true,
   },
   {
-    test: (t) => /deempanel type|deempanel action/i.test(t),
-    fields: ['type'],
+    test: (t) => /de[- ]?empanelment action type|deempanel type|deempanel action/i.test(t),
+    fields: ['type', 'action_type', 'action'],
+    exact: true,
   },
   {
     test: (t) => /deempanel stop|stop payment/i.test(t),
@@ -383,6 +405,19 @@ const CHART_RULES: ChartRule[] = [
   {
     test: (t) => /trigger type/i.test(t),
     fields: ['trigger_type'],
+  },
+  {
+    test: (t) => /manpower type/i.test(t),
+    fields: ['manpower_type'],
+  },
+  {
+    test: (t) => /manpower specialization|specialization/i.test(t),
+    fields: ['specialization'],
+  },
+  {
+    test: (t) => /manpower active/i.test(t),
+    fields: ['active_status'],
+    exact: true,
   },
   {
     test: (t) => /application type/i.test(t),
@@ -439,6 +474,13 @@ function rowDateIso(value: unknown): string {
   if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`
   const dmy = s.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})/)
   if (dmy) return `${dmy[3]}-${dmy[2].padStart(2, '0')}-${dmy[1].padStart(2, '0')}`
+  const mdy = s.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2})$/)
+  if (mdy) {
+    const year = Number(mdy[3]) < 50 ? 2000 + Number(mdy[3]) : 1900 + Number(mdy[3])
+    return `${year}-${mdy[1].padStart(2, '0')}-${mdy[2].padStart(2, '0')}`
+  }
+  const d = new Date(s)
+  if (!Number.isNaN(d.getTime())) return d.toISOString().slice(0, 10)
   return ''
 }
 
@@ -474,6 +516,29 @@ const DISTRICT_FIELDS = [
   'district',
 ]
 
+/** Map raw coded column values to the same display labels charts use. */
+function labelledFieldValue(field: string, raw: unknown): string {
+  const f = field.toLowerCase()
+  if (f.includes('gender')) return labelGender(raw)
+  if (f.includes('enrl_status') || f.includes('enrollment')) return labelEnrlStatus(raw)
+  if (f.includes('card_status') || f.includes('card_print') || f === 'print_status') return labelCardStatus(raw)
+  if (f.includes('aadhar') || f.includes('aadhaar')) return labelAadhaarStatus(raw)
+  if (f === 'relation') return labelRelation(raw)
+  if (f.includes('source_type') || f === 'bis_source' || f === 'src_flag') return labelSourceType(raw)
+  if (f.includes('rural') || f.includes('urban')) return labelRuralUrban(raw)
+  if (f.includes('entity_type')) return labelEntityType(raw)
+  if (f === 'hospital_type' || f === 'hosp_type' || f === 'hosp_type_cd' || f === '_hospital_type') {
+    return labelHospitalType(raw)
+  }
+  if (f === 'active_yn') {
+    const s = String(raw ?? '').trim()
+    if (s === '1') return 'Active'
+    if (s === '0') return 'Inactive'
+    return s
+  }
+  return String(raw ?? '').trim()
+}
+
 function matchesCategory(
   row: Record<string, string | number>,
   fields: string[],
@@ -485,22 +550,64 @@ function matchesCategory(
 
   for (const field of fields) {
     const raw = String(row[field] ?? '').trim()
+    // Unknown / empty buckets
+    if (/^unknown$/i.test(category) && !raw) return true
     if (!raw) continue
+
     if (/district/i.test(field) || field === '_district' || field === 'dist_name') {
       if (districtsMatch(raw, category)) return true
       continue
     }
+
     const val = normalize(raw)
-    if (val === cat) return true
-    if (/^unknown$/i.test(category) && !raw) return true
-    if (field === 'hospital_type' || field === 'hosp_type' || field === 'hosp_type_cd') continue
-    if (!exact && cat.length > 2 && (val.includes(cat) || (cat.length >= 4 && cat.includes(val)))) return true
+    const labelled = normalize(labelledFieldValue(field, raw))
+    const catAsLabel = normalize(labelledFieldValue(field, category))
+
+    if (val === cat || labelled === cat || labelled === catAsLabel || val === catAsLabel) return true
+
+    if (field === 'hospital_type' || field === 'hosp_type' || field === 'hosp_type_cd') {
+      if (labelled === cat || labelled === catAsLabel) return true
+      continue
+    }
+
+    if (!exact && cat.length > 2 && (val.includes(cat) || labelled.includes(cat) || (cat.length >= 4 && cat.includes(val)))) {
+      return true
+    }
   }
   return false
 }
 
 function findRule(chartTitle: string): ChartRule | undefined {
   return CHART_RULES.find((rule) => rule.test(chartTitle))
+}
+
+/** Mirrors backend paymentAggregations.js — paid / rejected / pending buckets. */
+function isPaidPaymentRow(row: Record<string, string | number>): boolean {
+  const f = String(row.paid_flag ?? '').trim()
+  if (/^(1|y|yes|true|paid|p)$/i.test(f)) return true
+  return Boolean(String(row.payment_paid_dt ?? '').trim())
+}
+
+function isRejectedPaymentRow(row: Record<string, string | number>): boolean {
+  const f = String(row.reject_flag ?? '').trim()
+  if (/^(1|y|yes|true|r)$/i.test(f)) return true
+  if (String(row.reject_code ?? '').trim()) return true
+  return Boolean(String(row.payment_reject_dt ?? '').trim())
+}
+
+function filterRowsForPaymentStatus(
+  rows: Record<string, string | number>[],
+  category: string
+): Record<string, string | number>[] {
+  const cat = normalize(category)
+  return rows.filter((row) => {
+    const rejected = isRejectedPaymentRow(row)
+    const paid = isPaidPaymentRow(row)
+    if (cat === 'rejected') return rejected
+    if (cat === 'paid') return paid && !rejected
+    if (cat === 'pending') return !paid && !rejected
+    return false
+  })
 }
 
 /** Filter backend table rows for a chart segment click. */
@@ -519,11 +626,118 @@ export function filterRowsForChartClick(
     if (kpiFiltered) return kpiFiltered
   }
 
+  if (/payment status/i.test(chartTitle)) {
+    return filterRowsForPaymentStatus(rows, category)
+  }
+
+  // Labelled coded fields must run before generic field matching (A/N vs Approved/New, etc.).
+  // Skip "Others" — handled below with _othersExclude / rule fields.
+  if (
+    !isOthersCategory(category) &&
+    /hospital types?|type distribution/i.test(chartTitle) &&
+    !/pro workflow|outcomes/i.test(chartTitle)
+  ) {
+    const want = labelHospitalType(category)
+    return rows.filter((row) => {
+      const raw = row.hospital_type ?? row.hosp_type_cd ?? row.hosp_type ?? row._hospital_type
+      return labelHospitalType(raw) === want
+    })
+  }
+
+  if (!isOthersCategory(category) && /hospital type outcomes/i.test(chartTitle)) {
+    const want = normalize(labelEntityType(category) || category)
+    return rows.filter((row) => {
+      const labelled = normalize(labelEntityType(row.entity_type || row.hospital_type))
+      return labelled === want
+    })
+  }
+
+  if (!isOthersCategory(category) && /division hospital/i.test(chartTitle)) {
+    const want = normalize(category)
+    return rows.filter((row) => {
+      const dist = String(row.district_name ?? row.district ?? row.dist_name ?? '').trim()
+      const div = resolveDivisionForDistrict(dist)
+      return normalize(div) === want
+    })
+  }
+
+  if (
+    !isOthersCategory(category) &&
+    /de[- ]?empanelment action type|deempanel type|deempanel action/i.test(chartTitle)
+  ) {
+    const want = normalize(category)
+    return rows.filter((row) => {
+      const raw = String(row.type ?? row.action_type ?? row.action ?? '').trim()
+      return normalize(raw) === want
+    })
+  }
+
+  if (!isOthersCategory(category) && /state type/i.test(chartTitle)) {
+    const want = normalize(category)
+    return rows.filter((row) => {
+      const raw = String(row._state_type ?? row.state_type ?? '').trim()
+      return normalize(raw) === want
+    })
+  }
+
+  if (/gender/i.test(chartTitle)) {
+    const want = labelGender(category)
+    return rows.filter((row) => labelGender(row.gender ?? row.card_gender ?? row.user_gender) === want)
+  }
+
+  if ((/enroll status|enrollment status|bis enroll/i.test(chartTitle)) && !/trend/i.test(chartTitle)) {
+    const want = labelEnrlStatus(category)
+    return rows.filter((row) => labelEnrlStatus(row.enrl_status) === want)
+  }
+
+  if (/card status/i.test(chartTitle) && !/print status|card print/i.test(chartTitle)) {
+    const want = labelCardStatus(category)
+    return rows.filter((row) => labelCardStatus(row.card_status ?? row.card_print_status) === want)
+  }
+
+  if (/aadhaar/i.test(chartTitle)) {
+    const want = labelAadhaarStatus(category)
+    return rows.filter((row) => labelAadhaarStatus(row.aadhar_status ?? row.aadhaar_status) === want)
+  }
+
+  if (
+    /^relation$/i.test(chartTitle) ||
+    /beneficiary relation/i.test(chartTitle) ||
+    /source relation/i.test(chartTitle)
+  ) {
+    const want = normalize(labelRelation(category))
+    return rows.filter((row) => normalize(labelRelation(row.relation)) === want)
+  }
+
   const rule = findRule(chartTitle)
   const othersExclude = parseOthersExclude(payload)
   if (isOthersCategory(category) || othersExclude.length) {
-    const fields = rule?.fields?.length ? rule.fields : DISTRICT_FIELDS
     const exclude = othersExclude.length ? othersExclude : []
+
+    if (exclude.length && /division hospital/i.test(chartTitle)) {
+      const wantExclude = exclude.map(normalize)
+      return rows.filter((row) => {
+        const dist = String(row.district_name ?? row.district ?? row.dist_name ?? '').trim()
+        const div = normalize(resolveDivisionForDistrict(dist))
+        return Boolean(div) && !wantExclude.includes(div)
+      })
+    }
+
+    if (
+      exclude.length &&
+      /hospital types?|type distribution/i.test(chartTitle) &&
+      !/pro workflow|outcomes/i.test(chartTitle)
+    ) {
+      const wantExclude = exclude.map((n) => labelHospitalType(n))
+      return rows.filter((row) => {
+        const labelled = labelHospitalType(
+          row.hospital_type ?? row.hosp_type_cd ?? row.hosp_type ?? row._hospital_type
+        )
+        return labelled !== 'Unknown' && !wantExclude.includes(labelled)
+      })
+    }
+
+    const fields = rule?.fields?.length ? rule.fields : DISTRICT_FIELDS
     if (exclude.length) {
       return rows.filter((row) => !exclude.some((name) => matchesCategory(row, fields, name, Boolean(rule?.exact))))
     }
@@ -536,7 +750,16 @@ export function filterRowsForChartClick(
   if (!rule) {
     const cat = normalize(category)
     return rows.filter((row) =>
-      Object.values(row).some((val) => normalize(String(val ?? '')) === cat)
+      Object.entries(row).some(([key, val]) => {
+        if (val == null || String(val).trim() === '') {
+          return cat === 'unknown'
+        }
+        if (normalize(String(val)) === cat) return true
+        const labelled = normalize(labelledFieldValue(key, val))
+        if (labelled === cat) return true
+        if (labelled === normalize(labelledFieldValue(key, category))) return true
+        return false
+      })
     )
   }
 
@@ -575,9 +798,18 @@ export function filterRowsForChartClick(
     })
   }
 
-  if ((/^active status$/i.test(chartTitle) || /active vs inactive/i.test(chartTitle)) && !/hem|user/i.test(chartTitle)) {
+  if ((/^active status$/i.test(chartTitle) || /active vs inactive/i.test(chartTitle)) && !/hem|user|manpower/i.test(chartTitle)) {
     const wantServing = /^active$/i.test(category)
     return rows.filter((row) => isHospitalServingClaims(row) === wantServing)
+  }
+
+  if (/manpower active/i.test(chartTitle)) {
+    const wantActive = /^active$/i.test(category)
+    return rows.filter((row) => {
+      const s = String(row.active_status ?? '').trim()
+      const isActive = /^(1|active|yes|true)$/i.test(s)
+      return wantActive ? isActive : !isActive
+    })
   }
 
   if (/empanelment status/i.test(chartTitle)) {
@@ -596,31 +828,6 @@ export function filterRowsForChartClick(
     })
   }
 
-  if (/gender/i.test(chartTitle)) {
-    const want = labelGender(category)
-    return rows.filter((row) => labelGender(row.gender ?? row.card_gender ?? row.user_gender) === want)
-  }
-
-  if ((/enroll status|enrollment status|bis enroll/i.test(chartTitle)) && !/trend/i.test(chartTitle)) {
-    const want = labelEnrlStatus(category)
-    return rows.filter((row) => labelEnrlStatus(row.enrl_status) === want)
-  }
-
-  if (/card status/i.test(chartTitle)) {
-    const want = labelCardStatus(category)
-    return rows.filter((row) => labelCardStatus(row.card_status ?? row.card_print_status) === want)
-  }
-
-  if (/aadhaar/i.test(chartTitle)) {
-    const want = labelAadhaarStatus(category)
-    return rows.filter((row) => labelAadhaarStatus(row.aadhar_status ?? row.aadhaar_status) === want)
-  }
-
-  if (/^relation$/i.test(chartTitle) || /beneficiary relation/i.test(chartTitle)) {
-    const want = labelRelation(category)
-    return rows.filter((row) => labelRelation(row.relation) === want)
-  }
-
   if (/scheme/i.test(chartTitle)) {
     return rows.filter((row) => normalize(String(row.scheme_code ?? '')) === normalize(category))
   }
@@ -634,29 +841,11 @@ export function filterRowsForChartClick(
     return rows.filter((row) => labelSourceType(row.source_type || row.src_flag) === want)
   }
 
-  if (/payment status/i.test(chartTitle)) {
-    const cat = normalize(category)
-    return rows.filter((row) => {
-      const rejected =
-        /^(1|y|yes|true|r)$/i.test(String(row.reject_flag ?? '').trim()) ||
-        Boolean(String(row.reject_code ?? '').trim()) ||
-        Boolean(String(row.payment_reject_dt ?? '').trim())
-      const paid =
-        /^(1|y|yes|true|paid|p)$/i.test(String(row.paid_flag ?? '').trim()) ||
-        Boolean(String(row.payment_paid_dt ?? '').trim())
-      if (cat === 'rejected') return rejected
-      if (cat === 'paid') return paid && !rejected
-      if (cat === 'pending') return !paid && !rejected
-      return false
-    })
-  }
-
   if (/pro workflow hospital type/i.test(chartTitle)) {
-    const cat = normalize(category)
+    const want = labelHospitalType(category)
     return rows.filter((row) => {
-      const raw = String(row.hospital_type ?? '').trim()
-      const labelled = /^g$/i.test(raw) || /gov/i.test(raw) ? 'government' : /^p$/i.test(raw) || /priv/i.test(raw) ? 'private' : normalize(raw)
-      return labelled === cat || normalize(raw) === cat
+      const raw = row.hospital_type ?? row.hosp_type_cd ?? row._hospital_type
+      return labelHospitalType(raw) === want
     })
   }
 

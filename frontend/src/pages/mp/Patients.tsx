@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import ChartCard from '../../components/ui/ChartCard'
-import DataTable from '../../components/ui/DataTable'
+import DashboardReportsBanner from '../../components/ui/DashboardReportsBanner'
 import { PageHeader, KPIGrid } from '../../components/ui/PageHeader'
 import ModuleFilterBar from '../../components/layout/ModuleFilterBar'
 import { InteractiveBarChart, InteractiveLineChart, InteractivePieChart } from '../../components/charts/InteractiveCharts'
@@ -12,6 +12,8 @@ import { fetchPatients } from '../../api/endpoints'
 import DataSourceBadge from '../../components/ui/DataSourceBadge'
 import BackendOfflineNotice from '../../components/ui/BackendOfflineNotice'
 import { schemaTableColumns } from '../../utils/schemaColumns'
+import DashboardSectionHeader from '../../components/ui/DashboardSectionHeader'
+import { pageHeaderDescription } from '../../utils/displayLabels'
 import type { KPI, TableColumn } from '../../types'
 
 const SPECIALTY_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ef4444', '#94a3b8']
@@ -173,6 +175,7 @@ export default function Patients() {
     tableRows: filtered,
     columns,
     datasetTitle: 'Patient Records',
+    pageFilters: moduleFilters.filters,
     resolveContext: (chartTitle) => {
       if (/morth/i.test(chartTitle)) {
         return { rows: morthFilteredRows, columns: morthColumns, datasetTitle: 'MORTH Patients' }
@@ -228,9 +231,10 @@ export default function Patients() {
         title="Patients & Treatment"
         description={
           live
-            ? `${data.schema ?? 'dmart_mp.t_patient_dtls'} · ${data.treatmentSchema ?? 'dmart_mp.treatment_dtls'}${
-                data.morthSchema ? ` · ${data.morthSchema}` : ''
-              }`
+            ? pageHeaderDescription(
+                data.schema ?? 'dmart_mp.t_patient_dtls',
+                'Registered patients, treatment details, and MORTH accident-care records'
+              )
             : 'Connect the backend to load patient and treatment records'
         }
         badge={<DataSourceBadge source={source} db={db} loading={loading} />}
@@ -248,6 +252,11 @@ export default function Patients() {
         onSearchChange={moduleFilters.setSearch}
         onClear={moduleFilters.clearFilters}
         activeCount={moduleFilters.activeCount}
+      />
+
+      <DashboardReportsBanner
+        reportPath="/dashboard/mp/reports/patients"
+        buttonLabel="Open Patients Report →"
       />
 
       {kpis.length > 0 && <KPIGrid kpis={kpis} onKpiClick={handleKpi} />}
@@ -319,27 +328,13 @@ export default function Patients() {
         </>
       )}
 
-      <DataTable
-        columns={columns}
-        data={filtered}
-        title={`Patient Records (${filtered.length}${columns.length ? ` · ${columns.length} schema cols` : ''})`}
-        onRowClick={(row) =>
-          openDetail({
-            title: String(row.registration_id || row.name || 'Patient'),
-            subtitle: 'Schema record',
-            data: row,
-          })
-        }
-      />
-
       {(morthRows.length > 0 || morthColumns.length > 0) && (
         <>
-          <div className="mb-4 mt-5 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
-            <p className="text-sm font-semibold text-[#1a5c38]">MORTH patients — dmart_mp.t_morth_patient_details</p>
-            <p className="text-xs text-slate-500">
-              Road-accident patient registry (eDAR / MORTH care plan, severity, hospital). Columns match Result 18.csv.
-            </p>
-          </div>
+          <DashboardSectionHeader
+            title={data.morthSchema ?? 'dmart_mp.t_morth_patient_details'}
+            fallbackTitle="MORTH Patients"
+            subtitle="Road-accident patient registry (eDAR / MORTH care plan, severity, hospital)"
+          />
           {morthKpis.length > 0 && <KPIGrid kpis={morthKpis} onKpiClick={handleKpi} />}
           {(morthSeverity.length > 0 || morthGender.length > 0) && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -367,62 +362,16 @@ export default function Patients() {
               )}
             </div>
           )}
-          <DataTable
-            columns={morthColumns}
-            data={morthFilteredRows}
-            title={`MORTH Patients — dmart_mp.t_morth_patient_details (${morthFilteredRows.length}${
-              morthColumns.length ? ` · ${morthColumns.length} schema cols` : ''
-            })`}
-            onRowClick={(row) =>
-              openDetail({
-                title: String(row.name || row.patient_registration_id || row.id_pk || 'MORTH patient'),
-                subtitle: String(row.hospital_name || 'dmart_mp.t_morth_patient_details'),
-                data: row,
-                columns: morthColumns,
-              })
-            }
-          />
         </>
       )}
 
-      <div className="mt-5">
-        <DataTable
-          columns={treatmentColumns}
-          data={treatmentFiltered}
-          title={`Treatment Details — dmart_mp.treatment_dtls (${treatmentFiltered.length}${
-            treatmentColumns.length ? ` · ${treatmentColumns.length} schema cols` : ''
-          })`}
-          onRowClick={(row) =>
-            openDetail({
-              title: String(row.caseid || row.registration_id || 'Treatment'),
-              subtitle: 'dmart_mp.treatment_dtls',
-              data: row,
-              columns: treatmentColumns,
-            })
-          }
-        />
-      </div>
-
       {stratFiltered.length > 0 && (
         <div className="mt-5">
-          <div className="mb-4 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
-            <p className="text-sm font-semibold text-[#1a5c38]">
-              Treatment stratification — {data.stratSchema || 'dmart_mp.treatment_stratification_details'}
-            </p>
-            <p className="text-xs text-slate-500">Procedure stratification tiers and amounts by registration</p>
-          </div>
-          <DataTable
-            columns={stratColumns}
-            data={stratFiltered}
-            title={`Treatment Stratification (${stratFiltered.length})`}
-            onRowClick={(row) =>
-              openDetail({
-                title: String(row.procedurename || row.registration_id || 'Stratification'),
-                subtitle: data.stratSchema || 'stratification',
-                data: row,
-                columns: stratColumns,
-              })
-            }
+          <DashboardSectionHeader
+            title={data.stratSchema ?? 'dmart_mp.treatment_stratification_details'}
+            fallbackTitle="Treatment Stratification"
+            subtitle="Procedure stratification tiers and amounts by registration"
+            className="mb-4 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3"
           />
         </div>
       )}

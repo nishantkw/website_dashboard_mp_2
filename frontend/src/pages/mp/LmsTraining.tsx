@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import DataTable from '../../components/ui/DataTable'
+import DashboardReportsBanner from '../../components/ui/DashboardReportsBanner'
 import { PageHeader, KPIGrid } from '../../components/ui/PageHeader'
 import ModuleFilterBar from '../../components/layout/ModuleFilterBar'
 import { useDrillDown } from '../../hooks/useDrillDown'
@@ -9,6 +9,7 @@ import { useApiResource } from '../../hooks/useApiResource'
 import { fetchLms } from '../../api/endpoints'
 import DataSourceBadge from '../../components/ui/DataSourceBadge'
 import BackendOfflineNotice from '../../components/ui/BackendOfflineNotice'
+import { pageHeaderDescription } from '../../utils/displayLabels'
 import { schemaTableColumns } from '../../utils/schemaColumns'
 import type { KPI, TableColumn } from '../../types'
 
@@ -73,7 +74,10 @@ export default function LmsTraining() {
         title="LMS Training"
         description={
           live
-            ? `${data.schema ?? 'dmart_mp.lms_user_course_completion_status'} — schema fields`
+            ? pageHeaderDescription(
+                data.schema ?? 'dmart_mp.lms_user_course_completion_status',
+                'AB-PMJAY and ABDM course completion by role and entity'
+              )
             : 'Connect the backend to load LMS records'
         }
         badge={<DataSourceBadge source={source} db={db} loading={loading} />}
@@ -93,22 +97,15 @@ export default function LmsTraining() {
         activeCount={moduleFilters.activeCount}
       />
 
+      <DashboardReportsBanner
+        reportPath="/dashboard/mp/reports/lms"
+        buttonLabel="Open LMS Training Report →"
+      />
+
       {kpis.length > 0 && (
         <KPIGrid kpis={kpis} onKpiClick={(kpi: KPI) => openFromKpi(kpi.label, kpi.value, { change: kpi.change ?? 0 })} />
       )}
 
-      <DataTable
-        columns={columns}
-        data={filtered}
-        title={`Training Records (${filtered.length}${columns.length ? ` · ${columns.length} schema cols` : ''})`}
-        onRowClick={(row) =>
-          openDetail({
-            title: String(row.userid || row.username || 'LMS User'),
-            subtitle: 'Schema record',
-            data: row,
-          })
-        }
-      />
     </div>
   )
 }
