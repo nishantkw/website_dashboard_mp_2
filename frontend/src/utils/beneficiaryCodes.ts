@@ -78,6 +78,21 @@ export function labelRelation(val: unknown): string {
     const code = String(m[1]).padStart(2, '0')
     if (RELATION[code]) return RELATION[code]
   }
+  // Normalize common free-text / uppercase labels to the same display names as codes
+  const upper = s.toUpperCase()
+  const byName: Record<string, string> = {
+    SELF: 'Self',
+    SPOUSE: 'Spouse',
+    SON: 'Son',
+    DAUGHTER: 'Daughter',
+    FATHER: 'Father',
+    MOTHER: 'Mother',
+    BROTHER: 'Brother',
+    SISTER: 'Sister',
+    OTHER: 'Other',
+    GRANDCHILD: 'Grandchild',
+  }
+  if (byName[upper]) return byName[upper]
   return s
 }
 
@@ -89,6 +104,16 @@ export function labelSourceType(val: unknown): string {
   if (/^s$/i.test(s)) return 'SECC'
   if (/^vvs$/i.test(s)) return 'VVS'
   if (/^asha$/i.test(s)) return 'ASHA'
+  return s
+}
+
+/** Hospital ownership: G/P codes, Government/Private labels, claim-derived Public. PP stays PP. */
+export function labelHospitalType(val: unknown): string {
+  const s = String(val ?? '').trim()
+  if (!s) return 'Unknown'
+  if (/^pp$/i.test(s)) return 'PP'
+  if (/^public$/i.test(s) || /^g$/i.test(s) || /gov/i.test(s)) return 'Government'
+  if (/^p$/i.test(s) || /priv/i.test(s)) return 'Private'
   return s
 }
 
@@ -259,9 +284,12 @@ export function filterRowsForCardPrintingKpi<T extends Record<string, string | n
   if (key === 'with abha') {
     return rows.filter((row) => Boolean(String(row.abha_no ?? row.abha_id ?? '').trim()))
   }
-  if (key === 'families') {
-    const seen = new Set(rows.map((row) => String(row.family_id ?? '').trim()).filter(Boolean))
-    return rows.filter((row) => seen.has(String(row.family_id ?? '').trim()))
+  if (key === 'card records' || key === 'families') {
+    if (key === 'families') {
+      const seen = new Set(rows.map((row) => String(row.family_id ?? '').trim()).filter(Boolean))
+      return rows.filter((row) => seen.has(String(row.family_id ?? '').trim()))
+    }
+    return rows
   }
   return null
 }

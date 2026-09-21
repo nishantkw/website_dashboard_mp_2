@@ -1,6 +1,6 @@
 import ChartCard from '../../components/ui/ChartCard'
-import DataTable from '../../components/ui/DataTable'
 import { PageHeader, KPIGrid } from '../../components/ui/PageHeader'
+import DashboardReportsBanner from '../../components/ui/DashboardReportsBanner'
 import CardPrintingFilterBar from '../../components/layout/CardPrintingFilterBar'
 import { InteractiveBarChart, InteractivePieChart } from '../../components/charts/InteractiveCharts'
 import { useMemo } from 'react'
@@ -11,6 +11,7 @@ import { useApiResource } from '../../hooks/useApiResource'
 import { fetchBisCardPrinting } from '../../api/endpoints'
 import DataSourceBadge from '../../components/ui/DataSourceBadge'
 import BackendOfflineNotice from '../../components/ui/BackendOfflineNotice'
+import { pageHeaderDescription } from '../../utils/displayLabels'
 import { schemaTableColumns } from '../../utils/schemaColumns'
 import { filterRowsForCardPrintingKpi } from '../../utils/beneficiaryCodes'
 import { filterRowsForRuralUrbanLabel } from '../../utils/ruralUrban'
@@ -78,9 +79,10 @@ export default function CardPrinting() {
 
   const { openFromChart, openFromKpi, openDetail, Modal } = useDrillDown({
     live,
-    tableRows: filtered,
+    tableRows: live ? table : filtered,
     columns: tableColumns,
     datasetTitle: 'Card Printing Records',
+    pageFilters: cardFilters.filters,
   })
 
   const handleKpi = (kpi: KPI) => {
@@ -118,7 +120,10 @@ export default function CardPrinting() {
         title="Card Printing Status"
         description={
           live
-            ? `${data.schema ?? 'dmart_mp.t_card_printing_status'} — schema fields`
+            ? pageHeaderDescription(
+                data.schema ?? 'dmart_mp.t_card_printing_status',
+                'Beneficiary card print status, district, and enrollment details'
+              )
             : 'Connect the backend to load card printing records'
         }
         badge={<DataSourceBadge source={source} db={db} loading={loading} />}
@@ -133,6 +138,11 @@ export default function CardPrinting() {
         onSearchChange={cardFilters.setSearch}
         onClear={cardFilters.clearFilters}
         activeCount={cardFilters.activeCount}
+      />
+
+      <DashboardReportsBanner
+        reportPath="/dashboard/mp/reports/card-printing"
+        buttonLabel="Open Card Printing Report →"
       />
 
       {kpis.length > 0 && <KPIGrid kpis={kpis} onKpiClick={handleKpi} />}
@@ -180,19 +190,6 @@ export default function CardPrinting() {
           </ChartCard>
         </div>
       )}
-
-      <DataTable
-        columns={tableColumns}
-        data={filtered}
-        title={`Card Records (${filtered.length}${tableColumns.length ? ` · ${tableColumns.length} schema cols` : ''})`}
-        onRowClick={(row) =>
-          openDetail({
-            title: String(row.card_no || row.ben_id || 'Card'),
-            subtitle: 'Schema record',
-            data: row,
-          })
-        }
-      />
     </div>
   )
 }

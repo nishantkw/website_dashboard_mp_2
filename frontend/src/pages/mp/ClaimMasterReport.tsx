@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import DataTable from '../../components/ui/DataTable'
 import { PageHeader } from '../../components/ui/PageHeader'
+import ReportTableGraphs from '../../components/ui/ReportTableGraphs'
 import ClaimsFilterBar from '../../components/layout/ClaimsFilterBar'
 import DataSourceBadge from '../../components/ui/DataSourceBadge'
 import BackendOfflineNotice from '../../components/ui/BackendOfflineNotice'
@@ -91,6 +92,12 @@ export default function ClaimMasterReport() {
         columns={columns}
         data={rows}
         title={`${reportMeta?.title ?? reportId} (${rows.length} rows)`}
+      />
+
+      <ReportTableGraphs
+        tableTitle={reportMeta?.title ?? reportId}
+        columns={columns}
+        data={rows}
       />
     </div>
   )

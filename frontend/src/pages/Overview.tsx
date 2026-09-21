@@ -1,6 +1,6 @@
 import { useRef, useState, useMemo, useEffect, useCallback } from 'react'
 import ChartCard from '../components/ui/ChartCard'
-import DataTable from '../components/ui/DataTable'
+import DashboardReportsBanner from '../components/ui/DashboardReportsBanner'
 import { PageHeader, KPIGrid } from '../components/ui/PageHeader'
 import { InteractiveBarChart, InteractiveLineChart, InteractivePieChart } from '../components/charts/InteractiveCharts'
 import { useDrillDown } from '../hooks/useDrillDown'
@@ -12,6 +12,7 @@ import { schemaTableColumns } from '../utils/schemaColumns'
 import { TABLE_PAGE_SIZE } from '../hooks/useTableControls'
 import { useGlobalFilters } from '../context/FilterContext'
 import { monthLabelToRange } from '../utils/chartDrillDown'
+import { canonicalMpDistrict, getDivisionForDistrict } from '../data/filterOptions'
 import type { KPI, TableColumn } from '../types'
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4']
@@ -208,8 +209,11 @@ export default function Overview() {
               params.set('date_to', range.to)
             }
           }
-          if (/district/i.test(chartTitle) && sliceName && !isOthers) {
-            params.set('district', sliceName)
+          if (/district/i.test(chartTitle) && !/division/i.test(chartTitle) && sliceName && !isOthers) {
+            const district = canonicalMpDistrict(sliceName) || sliceName
+            params.set('district', district)
+            const parentDiv = getDivisionForDistrict(district)
+            if (parentDiv) params.set('division', parentDiv)
           }
           if (/claim status/i.test(chartTitle) && sliceName && !isOthers) {
             params.set('case_status', sliceName)
@@ -284,7 +288,6 @@ export default function Overview() {
         datasetTitle: 'Hospitals',
         source: 'api',
       })
-      requestAnimationFrame(() => tableRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
     } finally {
       setHospitalLoading(false)
     }
@@ -403,6 +406,11 @@ export default function Overview() {
       />
       <BackendOfflineNotice error={error} loading={loading} />
 
+      <DashboardReportsBanner
+        reportPath="/dashboard/mp/reports/hospitals"
+        buttonLabel="Open Hospitals Report →"
+      />
+
       {kpis.length > 0 && <KPIGrid kpis={kpis} onKpiClick={handleKpiClick} />}
 
       {live && (
@@ -457,44 +465,6 @@ export default function Overview() {
         </>
       )}
 
-      <div ref={tableRef}>
-        {hospitalError && (
-          <p className="mb-4 rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">{hospitalError}</p>
-        )}
-        {(hospitalLoading || hospitalRows.length > 0) && (
-          <DataTable
-            columns={hospitalColumns}
-            data={hospitalRows}
-            title={
-              hospitalLoading
-                ? 'Hospitals — loading unique records…'
-                : `Hospitals (${hospitalTotal.toLocaleString()} unique)`
-            }
-            serverPagination={
-              hospitalTotal > 0
-                ? {
-                    totalRows: hospitalTotal,
-                    page: hospitalPage,
-                    pageSize: TABLE_PAGE_SIZE,
-                    onPageChange: (next) => {
-                      void showHospitalTable('Hospitals', next)
-                    },
-                  }
-                : undefined
-            }
-            fetchExportData={fetchOverviewHospitalExport}
-            onRowClick={(row) =>
-              openDetail({
-                title: String(row.hosp_name || row.hospital_name || row.hosp_id || 'Hospital'),
-                subtitle: String(row.district_name || row.state_name || 'Hospital details'),
-                data: row,
-                columns: hospitalColumns,
-                source: 'api',
-              })
-            }
-          />
-        )}
-      </div>
     </div>
   )
 }

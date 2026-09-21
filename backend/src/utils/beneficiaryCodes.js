@@ -78,6 +78,20 @@ export function labelRelation(val) {
     const code = String(m[1]).padStart(2, '0')
     if (RELATION[code]) return RELATION[code]
   }
+  const upper = s.toUpperCase()
+  const byName = {
+    SELF: 'Self',
+    SPOUSE: 'Spouse',
+    SON: 'Son',
+    DAUGHTER: 'Daughter',
+    FATHER: 'Father',
+    MOTHER: 'Mother',
+    BROTHER: 'Brother',
+    SISTER: 'Sister',
+    OTHER: 'Other',
+    GRANDCHILD: 'Grandchild',
+  }
+  if (byName[upper]) return byName[upper]
   return s
 }
 

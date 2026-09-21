@@ -1,5 +1,5 @@
 import ChartCard from '../../components/ui/ChartCard'
-import DataTable from '../../components/ui/DataTable'
+import DashboardReportsBanner from '../../components/ui/DashboardReportsBanner'
 import { PageHeader, KPIGrid } from '../../components/ui/PageHeader'
 import { InteractiveBarChart, InteractiveLineChart, InteractivePieChart } from '../../components/charts/InteractiveCharts'
 import { useMemo, useState, useEffect, useCallback } from 'react'
@@ -8,7 +8,7 @@ import { useModuleFilters } from '../../hooks/useModuleFilters'
 import { getModuleFilters, type ModuleFilterKey } from '../../data/moduleFilterConfig'
 import ModuleFilterBar from '../../components/layout/ModuleFilterBar'
 import { useApiResource } from '../../hooks/useApiResource'
-import { fetchHospitalsSection, fetchHospitalsExport, fetchOverviewHospitals } from '../../api/endpoints'
+import { fetchHospitalsSection, fetchHospitalsExport } from '../../api/endpoints'
 import DataSourceBadge from '../../components/ui/DataSourceBadge'
 import BackendOfflineNotice from '../../components/ui/BackendOfflineNotice'
 import { schemaTableColumns } from '../../utils/schemaColumns'
@@ -17,6 +17,7 @@ import type { FilterField, FilterValues, KPI, TableColumn } from '../../types'
 import type { ExportSheet } from '../../utils/exportUtils'
 import { applyPageFilters } from '../../utils/applyPageFilters'
 import { isHospitalEmpanelled, isHospitalServingClaims } from '../../components/ui/HospitalStatusCells'
+import DashboardSectionHeader from '../../components/ui/DashboardSectionHeader'
 
 export type HospitalSection = 'overview' | 'master' | 'deempanel' | 'hem' | 'lookup'
 
@@ -378,14 +379,29 @@ export default function Hospitals({ section = 'master' }: { section?: HospitalSe
 
   const { openDetail, openFromChart, openFromKpi, Modal } = useDrillDown({
     live,
-    tableRows: filtered,
-    columns,
+    tableRows:
+      section === 'deempanel'
+        ? deempanelFiltered
+        : section === 'hem'
+          ? hemFiltered
+          : section === 'lookup'
+            ? lookupFiltered
+            : filtered,
+    columns:
+      section === 'deempanel'
+        ? deempanelColumns
+        : section === 'hem'
+          ? hemColumns
+          : section === 'lookup'
+            ? lookupColumns
+            : columns,
     datasetTitle: meta.title,
+    pageFilters: moduleFilters.filters,
     resolveContext: (chartTitle) => {
       if (/lookup/i.test(chartTitle)) {
         return { rows: lookupFiltered, columns: lookupColumns, datasetTitle: 'Hospital Lookup' }
       }
-      if (/deempanel/i.test(chartTitle)) {
+      if (/deempanel|de[- ]?empanel/i.test(chartTitle)) {
         return { rows: deempanelFiltered, columns: deempanelColumns, datasetTitle: 'De-empanelment Details' }
       }
       if (/\bhem\b/i.test(chartTitle)) {
@@ -397,26 +413,36 @@ export default function Hospitals({ section = 'master' }: { section?: HospitalSe
       live && (section === 'overview' || section === 'master')
         ? async (payload, chartTitle) => {
             if (/lookup|deempanel|\bhem\b/i.test(chartTitle)) return null
-            if (/hospital types|type distribution/i.test(chartTitle)) {
-              const typeName = String(payload.name ?? '').trim()
-              const isOthers = /^others$/i.test(typeName)
-              const params = new URLSearchParams(moduleFilters.queryString.replace(/^\?/, ''))
-              if (typeName && !isOthers) params.set('hospital_type', typeName)
-              params.set('limit', '500')
-              params.set('offset', '0')
-              const res = await fetchOverviewHospitals(`?${params.toString()}`, 120000)
-              if (!res.ok) return null
-              return {
-                rows: (res.data.table ?? []) as Record<string, string | number>[],
-                columns,
-                datasetTitle: typeName ? `Hospitals — ${typeName}` : 'Hospital Records',
-                alreadyFiltered: !isOthers,
+            const sliceName = String(payload.name ?? '').trim()
+            const isOthers = /^others$/i.test(sliceName)
+            const params = new URLSearchParams(moduleFilters.queryString.replace(/^\?/, ''))
+
+            // Push slice into server filters when possible (Unknown division now supported).
+            if (!isOthers && sliceName) {
+              if (/hospital types|type distribution/i.test(chartTitle)) {
+                params.set('hospital_type', sliceName)
+              } else if (/division hospital/i.test(chartTitle)) {
+                params.set('division', sliceName)
+              } else if (/district hospital/i.test(chartTitle)) {
+                params.set('district', sliceName)
               }
             }
-            const res = await fetchHospitalsExport(moduleFilters.queryString)
+
+            const res = await fetchHospitalsExport(`?${params.toString()}`)
             if (!res.ok) return null
             const rows = (res.data.table ?? []) as Record<string, string | number>[]
-            return { rows, columns, datasetTitle: 'Hospital Records' }
+            const serverSliced =
+              !isOthers &&
+              Boolean(
+                params.get('hospital_type') || params.get('division') || params.get('district')
+              )
+            return {
+              rows,
+              columns,
+              datasetTitle: sliceName ? `Hospitals — ${sliceName}` : 'Hospital Records',
+              // Others / trend / status still need client-side filterRowsForChartClick.
+              alreadyFiltered: serverSliced,
+            }
           }
         : undefined,
   })
@@ -580,6 +606,11 @@ export default function Hospitals({ section = 'master' }: { section?: HospitalSe
         />
       )}
 
+      <DashboardReportsBanner
+        reportPath="/dashboard/mp/reports/hospitals"
+        buttonLabel="Open Hospitals Report →"
+      />
+
       {(section === 'master' || section === 'overview') && kpis.length > 0 && (
         <KPIGrid kpis={kpis} onKpiClick={handleKpi} exportLabel="KPI Cards" />
       )}
@@ -660,40 +691,14 @@ export default function Hospitals({ section = 'master' }: { section?: HospitalSe
         </>
       )}
 
-      {showMasterTable && (
-        <DataTable
-          columns={columns}
-          data={filtered}
-          title={`Hospital Records (${tableTotal.toLocaleString()} unique)`}
-          serverPagination={
-            live
-              ? {
-                  totalRows: tableTotal,
-                  page,
-                  pageSize: TABLE_PAGE_SIZE,
-                  onPageChange: setPage,
-                }
-              : undefined
-          }
-          fetchExportData={live ? fetchHospitalExport : undefined}
-          onRowClick={(row) =>
-            openDetail({
-              title: String(row.hospital_name || row.hosp_name || row.name || 'Hospital'),
-              subtitle: 'Schema record',
-              data: row,
-            })
-          }
-        />
-      )}
-
       {section === 'hem' && (
         <>
-          <div className="mb-4 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
-            <p className="text-sm font-semibold text-[#1a5c38]">HEM hospital — dmart_mp.t_hem_hospital</p>
-            <p className="text-xs text-slate-500">
-              Hospital Empanelment Module registry (ownership, HFR ID, nodal officer, certificate)
-            </p>
-          </div>
+          <DashboardSectionHeader
+            title="dmart_mp.t_hem_hospital"
+            fallbackTitle="HEM Hospital Registry"
+            subtitle="Hospital Empanelment Module registry (ownership, HFR ID, nodal officer, certificate)"
+            className="mb-4 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3"
+          />
           {(kpis.length > 0 || hemKpis.length > 0) && (
             <KPIGrid
               kpis={[...kpis, ...hemKpis]}
@@ -715,30 +720,17 @@ export default function Hospitals({ section = 'master' }: { section?: HospitalSe
               )}
             </div>
           )}
-          <DataTable
-            columns={hemColumns}
-            data={hemFiltered}
-            title={`HEM Hospital — dmart_mp.t_hem_hospital (${hemFiltered.length}${
-              hemColumns.length ? ` · ${hemColumns.length} schema cols` : ''
-            })`}
-            onRowClick={(row) =>
-              openDetail({
-                title: String(row.hosp_name || row.hospital_name || row.hosp_id || 'HEM hospital'),
-                subtitle: String(row.facility_id || 'dmart_mp.t_hem_hospital'),
-                data: row,
-                columns: hemColumns,
-              })
-            }
-          />
         </>
       )}
 
       {section === 'deempanel' && (
         <>
-          <div className="mb-4 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
-            <p className="text-sm font-semibold text-[#1a5c38]">De-empanelment — dmart_mp.t_deempanelment_details</p>
-            <p className="text-xs text-slate-500">Hospital de-empanelment, stop-payment and revoke actions</p>
-          </div>
+          <DashboardSectionHeader
+            title="dmart_mp.t_deempanelment_details"
+            fallbackTitle="De-empanelment Details"
+            subtitle="Hospital de-empanelment, stop-payment and revoke actions"
+            className="mb-4 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3"
+          />
           {deempanelKpis.length > 0 && (
             <KPIGrid kpis={deempanelKpis} onKpiClick={handleKpi} exportLabel="Deempanel KPI Cards" />
           )}
@@ -763,30 +755,17 @@ export default function Hospitals({ section = 'master' }: { section?: HospitalSe
               )}
             </div>
           )}
-          <DataTable
-            columns={deempanelColumns}
-            data={deempanelFiltered}
-            title={`De-empanelment Details (${deempanelFiltered.length}${
-              deempanelColumns.length ? ` · ${deempanelColumns.length} schema cols` : ''
-            })`}
-            onRowClick={(row) =>
-              openDetail({
-                title: String(row.hospital_name || row.hosp_id || 'De-empanelment'),
-                subtitle: String(row.type || 'dmart_mp.t_deempanelment_details'),
-                data: row,
-                columns: deempanelColumns,
-              })
-            }
-          />
         </>
       )}
 
       {section === 'lookup' && (
         <>
-          <div className="mb-4 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
-            <p className="text-sm font-semibold text-[#1a5c38]">Hospital lookup — dmart_mp.m_lookup</p>
-            <p className="text-xs text-slate-500">Reference codes used for hospital type and related mappings</p>
-          </div>
+          <DashboardSectionHeader
+            title="dmart_mp.m_lookup"
+            fallbackTitle="Hospital Lookup Codes"
+            subtitle="Reference codes used for hospital type and related mappings"
+            className="mb-4 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3"
+          />
           {(lookupCategory.length > 0 || lookupStatus.length > 0) && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
               {lookupCategory.length > 0 && (
@@ -801,19 +780,6 @@ export default function Hospitals({ section = 'master' }: { section?: HospitalSe
               )}
             </div>
           )}
-          <DataTable
-            columns={lookupColumns}
-            data={lookupFiltered}
-            title={`Lookup Values (${lookupFiltered.length}${lookupColumns.length ? ` · ${lookupColumns.length} schema cols` : ''})`}
-            onRowClick={(row) =>
-              openDetail({
-                title: String(row.lookup_value || row.lookup_cd || 'Lookup'),
-                subtitle: String(row.lookup_cd || 'dmart_mp.m_lookup'),
-                data: row,
-                columns: lookupColumns,
-              })
-            }
-          />
         </>
       )}
     </div>

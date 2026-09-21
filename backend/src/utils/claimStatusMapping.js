@@ -101,11 +101,12 @@ export function deriveStateType(row, mappedDivision) {
 }
 
 export function deriveHospitalType(row) {
-  const ht = String(row.hospital_type || '').toLowerCase()
-  if (/gov|public|government/.test(ht)) return 'Public'
-  if (/priv/.test(ht)) return 'Private'
   const raw = String(row.hospital_type || '').trim()
-  return raw || 'Unknown'
+  if (!raw) return 'Unknown'
+  if (/^pp$/i.test(raw)) return 'PP'
+  if (/^g$/i.test(raw) || /gov|public|government/i.test(raw)) return 'Government'
+  if (/^p$/i.test(raw) || /priv/i.test(raw)) return 'Private'
+  return raw
 }
 
 export function deriveSpecialtyCode(row) {

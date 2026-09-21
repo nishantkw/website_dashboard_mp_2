@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import ChartCard from '../../components/ui/ChartCard'
-import DataTable from '../../components/ui/DataTable'
 import { PageHeader, KPIGrid } from '../../components/ui/PageHeader'
+import DashboardReportsBanner from '../../components/ui/DashboardReportsBanner'
 import BeneficiariesFilterBar from '../../components/layout/BeneficiariesFilterBar'
 import { InteractiveBarChart, InteractivePieChart, InteractiveLineChart } from '../../components/charts/InteractiveCharts'
 import { useDrillDown } from '../../hooks/useDrillDown'
@@ -15,6 +15,8 @@ import { schemaTableColumns } from '../../utils/schemaColumns'
 import { districtEnrollmentChart } from '../../utils/chartDataPrep'
 import { filterRowsForRuralUrbanLabel } from '../../utils/ruralUrban'
 import { filterRowsForBeneficiaryKpi } from '../../utils/beneficiaryCodes'
+import DashboardSectionHeader from '../../components/ui/DashboardSectionHeader'
+import { pageHeaderDescription } from '../../utils/displayLabels'
 import type { KPI, TableColumn } from '../../types'
 
 const GENDER_COLORS = ['#3b82f6', '#ec4899', '#8b5cf6']
@@ -266,6 +268,7 @@ export default function Beneficiaries() {
     tableRows: filtered,
     columns,
     datasetTitle: 'Beneficiary Records',
+    pageFilters: benFilters.filters,
     resolveContext: (chartTitle) => {
       if (/^bis /i.test(chartTitle)) {
         return { rows: bisFiltered, columns: bisColumns, datasetTitle: 'BIS Raw Beneficiaries' }
@@ -374,11 +377,10 @@ export default function Beneficiaries() {
         title="Beneficiaries"
         description={
           live
-            ? `${data.schema ?? 'dmart_mp.t_bis_beneficiary_dtls'}${
-                data.sourceSchema ? ` · ${data.sourceSchema}` : ''
-              }${data.disabledSchema ? ` · ${data.disabledSchema}` : ''}${
-                data.histSchema ? ` · ${data.histSchema}` : ''
-              } — ${columns.length} schema fields`
+            ? pageHeaderDescription(
+                data.schema ?? 'dmart_mp.t_bis_beneficiary_dtls',
+                'Enrollment, card status, eKYC, ABHA, and district-wise beneficiary details'
+              )
             : 'Connect the backend to load beneficiary records'
         }
         badge={<DataSourceBadge source={source} db={db} loading={loading} />}
@@ -393,6 +395,11 @@ export default function Beneficiaries() {
         onSearchChange={benFilters.setSearch}
         onClear={benFilters.clearFilters}
         activeCount={benFilters.activeCount}
+      />
+
+      <DashboardReportsBanner
+        reportPath="/dashboard/mp/reports/beneficiaries"
+        buttonLabel="Open Beneficiaries Report →"
       />
 
       {kpis.length > 0 && <KPIGrid kpis={kpis} onKpiClick={handleKpi} />}
@@ -543,54 +550,24 @@ export default function Beneficiaries() {
         </div>
       )}
 
-      <DataTable
-        columns={columns}
-        data={filtered}
-        title={`Beneficiary Records (${filtered.length}${columns.length ? ` · ${columns.length} schema cols` : ''})`}
-        onRowClick={(row) =>
-          openDetail({
-            title: String(row.ben_id || row.name || 'Beneficiary'),
-            subtitle: 'Schema record',
-            data: row,
-          })
-        }
-      />
-
       {histFiltered.length > 0 && (
         <>
-          <div className="mb-4 mt-5 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
-            <p className="text-sm font-semibold text-[#1a5c38]">Beneficiary history — dmart_mp.t_bis_beneficiary_dtl_hist</p>
-            <p className="text-xs text-slate-500">
-              Historical snapshots of beneficiary details (enrollment, active status, card and Aadhaar flags)
-            </p>
-          </div>
-          {histKpis.length > 0 && <KPIGrid kpis={histKpis} onKpiClick={handleKpi} />}
-          <DataTable
-            columns={histColumns}
-            data={histFiltered}
-            title={`Beneficiary History — dmart_mp.t_bis_beneficiary_dtl_hist (${histFiltered.length}${
-              histColumns.length ? ` · ${histColumns.length} schema cols` : ''
-            })`}
-            onRowClick={(row) =>
-              openDetail({
-                title: String(row.ben_id || row.name || 'History record'),
-                subtitle: 'dmart_mp.t_bis_beneficiary_dtl_hist',
-                data: row,
-                columns: histColumns,
-              })
-            }
+          <DashboardSectionHeader
+            title={data.histSchema ?? 'dmart_mp.t_bis_beneficiary_dtl_hist'}
+            fallbackTitle="Beneficiary History"
+            subtitle="Historical snapshots of beneficiary details (enrollment, active status, card and Aadhaar flags)"
           />
+          {histKpis.length > 0 && <KPIGrid kpis={histKpis} onKpiClick={handleKpi} />}
         </>
       )}
 
       {sourceFiltered.length > 0 && (
         <>
-          <div className="mb-4 mt-5 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
-            <p className="text-sm font-semibold text-[#1a5c38]">Source family data — dmart_mp.m_source_data</p>
-            <p className="text-xs text-slate-500">
-              Intake records with family ID, relation, enrollment and card fields from the beneficiary source table
-            </p>
-          </div>
+          <DashboardSectionHeader
+            title={data.sourceSchema ?? 'dmart_mp.m_source_data'}
+            fallbackTitle="Source Family Data"
+            subtitle="Intake records with family ID, relation, enrollment and card fields from the beneficiary source table"
+          />
           {hasSourceCharts && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
               {sourceRelation.length > 0 && (
@@ -654,32 +631,16 @@ export default function Beneficiaries() {
               )}
             </div>
           )}
-          <DataTable
-            columns={sourceColumns}
-            data={sourceFiltered}
-            title={`Source Family Data — dmart_mp.m_source_data (${sourceFiltered.length}${
-              sourceColumns.length ? ` · ${sourceColumns.length} schema cols` : ''
-            })`}
-            onRowClick={(row) =>
-              openDetail({
-                title: String(row.name || row.src_family_id || 'Source record'),
-                subtitle: 'dmart_mp.m_source_data',
-                data: row,
-                columns: sourceColumns,
-              })
-            }
-          />
         </>
       )}
 
       {disabledFiltered.length > 0 && (
         <>
-          <div className="mb-4 mt-5 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
-            <p className="text-sm font-semibold text-[#1a5c38]">Disabled beneficiaries — dmart_mp.t_bis_beneficiary_disabled</p>
-            <p className="text-xs text-slate-500">
-              Cards and members marked disabled, with reason, card status and disable date
-            </p>
-          </div>
+          <DashboardSectionHeader
+            title={data.disabledSchema ?? 'dmart_mp.t_bis_beneficiary_disabled'}
+            fallbackTitle="Disabled Beneficiaries"
+            subtitle="Cards and members marked disabled, with reason, card status and disable date"
+          />
           {disabledKpis.length > 0 && <KPIGrid kpis={disabledKpis} onKpiClick={handleKpi} />}
           {hasDisabledCharts && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -732,32 +693,16 @@ export default function Beneficiaries() {
               )}
             </div>
           )}
-          <DataTable
-            columns={disabledColumns}
-            data={disabledFiltered}
-            title={`Disabled Beneficiaries — dmart_mp.t_bis_beneficiary_disabled (${disabledFiltered.length}${
-              disabledColumns.length ? ` · ${disabledColumns.length} schema cols` : ''
-            })`}
-            onRowClick={(row) =>
-              openDetail({
-                title: String(row.name || row.card_no || row.member_id || 'Disabled record'),
-                subtitle: 'dmart_mp.t_bis_beneficiary_disabled',
-                data: row,
-                columns: disabledColumns,
-              })
-            }
-          />
         </>
       )}
 
       {bisFiltered.length > 0 && (
         <>
-          <div className="mb-4 mt-5 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
-            <p className="text-sm font-semibold text-[#1a5c38]">BIS raw beneficiaries — bis_raw.t_bis_beneficiary_dtls</p>
-            <p className="text-xs text-slate-500">
-              Raw BIS beneficiary master (ben ID, family, district, enrollment) distinct from the dmart beneficiary table
-            </p>
-          </div>
+          <DashboardSectionHeader
+            title={data.bisSchema ?? 'bis_raw.t_bis_beneficiary_dtls'}
+            fallbackTitle="BIS Raw Beneficiaries"
+            subtitle="Raw BIS beneficiary master (ben ID, family, district, enrollment) distinct from the datamart beneficiary table"
+          />
           {bisKpis.length > 0 && <KPIGrid kpis={bisKpis} onKpiClick={handleKpi} />}
           {(bisGender.length > 0 || bisEnroll.length > 0 || bisSourceType.length > 0 || bisCardStatus.length > 0) && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -809,94 +754,37 @@ export default function Beneficiaries() {
               )}
             </div>
           )}
-          <DataTable
-            columns={bisColumns}
-            data={bisFiltered}
-            title={`BIS Raw Beneficiaries — bis_raw.t_bis_beneficiary_dtls (${bisFiltered.length}${
-              bisColumns.length ? ` · ${bisColumns.length} schema cols` : ''
-            })`}
-            onRowClick={(row) =>
-              openDetail({
-                title: String(row.ben_id || row.name || row.id_pk || 'BIS record'),
-                subtitle: 'bis_raw.t_bis_beneficiary_dtls',
-                data: row,
-                columns: bisColumns,
-              })
-            }
-          />
         </>
       )}
 
       {ekycFiltered.length > 0 && (
         <>
-          <div className="mb-4 mt-5 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
-            <p className="text-sm font-semibold text-[#1a5c38]">
-              Beneficiary e-KYC — {data.ekycSchema || 'dmart_mp.t_beneficiary_ekyc_dtls_17july2025_old'}
-            </p>
-            <p className="text-xs text-slate-500">Older e-KYC snapshot (identity, address, card status)</p>
-          </div>
-          {ekycKpis.length > 0 && <KPIGrid kpis={ekycKpis} onKpiClick={handleKpi} />}
-          <DataTable
-            columns={ekycColumns}
-            data={ekycFiltered}
-            title={`e-KYC Details (${ekycFiltered.length})`}
-            onRowClick={(row) =>
-              openDetail({
-                title: String(row.name || row.card_no || row.id_pk || 'e-KYC'),
-                subtitle: data.ekycSchema || 'e-KYC',
-                data: row,
-                columns: ekycColumns,
-              })
-            }
+          <DashboardSectionHeader
+            title={data.ekycSchema ?? 'dmart_mp.t_beneficiary_ekyc_dtls_17july2025_old'}
+            fallbackTitle="Beneficiary e-KYC"
+            subtitle="Older e-KYC snapshot (identity, address, card status)"
           />
+          {ekycKpis.length > 0 && <KPIGrid kpis={ekycKpis} onKpiClick={handleKpi} />}
         </>
       )}
 
       {pvtgFiltered.length > 0 && (
         <>
-          <div className="mb-4 mt-5 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
-            <p className="text-sm font-semibold text-[#1a5c38]">
-              PVTG by District — {data.pvtgSchema || 'dmart_mp.pvtg_by_district_7march_v3'}
-            </p>
-            <p className="text-xs text-slate-500">Particularly Vulnerable Tribal Group beneficiaries and SHA actions</p>
-          </div>
-          {pvtgKpis.length > 0 && <KPIGrid kpis={pvtgKpis} onKpiClick={handleKpi} />}
-          <DataTable
-            columns={pvtgColumns}
-            data={pvtgFiltered}
-            title={`PVTG Records (${pvtgFiltered.length})`}
-            onRowClick={(row) =>
-              openDetail({
-                title: String(row.name || row.card_no || 'PVTG'),
-                subtitle: data.pvtgSchema || 'PVTG',
-                data: row,
-                columns: pvtgColumns,
-              })
-            }
+          <DashboardSectionHeader
+            title={data.pvtgSchema ?? 'dmart_mp.pvtg_by_district_7march_v3'}
+            fallbackTitle="PVTG by District"
+            subtitle="Particularly Vulnerable Tribal Group beneficiaries and SHA actions"
           />
+          {pvtgKpis.length > 0 && <KPIGrid kpis={pvtgKpis} onKpiClick={handleKpi} />}
         </>
       )}
 
       {disabledSnapFiltered.length > 0 && (
         <>
-          <div className="mb-4 mt-5 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
-            <p className="text-sm font-semibold text-[#1a5c38]">
-              Disabled snapshot (19-Aug-2025) —{' '}
-              {data.disabledSnapSchema || 'dmart_mp.t_bis_beneficiary_disabled_19aug2025'}
-            </p>
-          </div>
-          <DataTable
-            columns={disabledSnapColumns}
-            data={disabledSnapFiltered}
-            title={`Disabled Snapshot (${disabledSnapFiltered.length})`}
-            onRowClick={(row) =>
-              openDetail({
-                title: String(row.name || row.card_no || 'Disabled'),
-                subtitle: data.disabledSnapSchema || 'disabled snapshot',
-                data: row,
-                columns: disabledSnapColumns,
-              })
-            }
+          <DashboardSectionHeader
+            title={data.disabledSnapSchema ?? 'dmart_mp.t_bis_beneficiary_disabled_19aug2025'}
+            fallbackTitle="Disabled Beneficiaries Snapshot"
+            subtitle="Point-in-time snapshot as of 19-Aug-2025"
           />
         </>
       )}

@@ -1,5 +1,5 @@
 import ChartCard from '../../components/ui/ChartCard'
-import DataTable from '../../components/ui/DataTable'
+import DashboardReportsBanner from '../../components/ui/DashboardReportsBanner'
 import { PageHeader, KPIGrid } from '../../components/ui/PageHeader'
 import { InteractiveBarChart, InteractiveLineChart, InteractivePieChart } from '../../components/charts/InteractiveCharts'
 import { useMemo } from 'react'
@@ -133,7 +133,7 @@ export default function SafuMisDashboard({
     })
   }, [viewTables, data, source, applyFilters])
 
-  const schemaLabel = Object.values(FRAUD_SCHEMA_TABLES).join(' · ')
+  const dataSourcesLabel = Object.values(FRAUD_SCHEMA_TABLES).join(' · ')
   const hasCharts =
     fraudType.length > 0 ||
     triggerType.length > 0 ||
@@ -208,7 +208,7 @@ export default function SafuMisDashboard({
           title={config.title}
           description={
             live
-              ? `${config.frSection} — ${schemaLabel}`
+              ? `${config.frSection} — ${dataSourcesLabel}`
               : 'Connect the backend to load fraud & audit records'
           }
           badge={<DataSourceBadge source={source} db={db} loading={loading} />}
@@ -229,6 +229,11 @@ export default function SafuMisDashboard({
         </div>
       )}
       <BackendOfflineNotice error={error} loading={loading} />
+
+      <DashboardReportsBanner
+        reportPath="/dashboard/mp/reports/fraud-audit"
+        buttonLabel="Open Fraud & Audit Report →"
+      />
 
       {kpis.length > 0 && <KPIGrid kpis={kpis} onKpiClick={handleKpi} />}
 
@@ -457,22 +462,6 @@ export default function SafuMisDashboard({
         </>
       )}
 
-      {tableBlocks.map(({ spec, rows, cols }) => (
-        <div key={spec.title} className="mb-4">
-          <DataTable
-            columns={cols.length ? cols : schemaColumns(spec.columnKeys)}
-            data={rows}
-            title={`${spec.title} (${rows.length})`}
-            onRowClick={(row) =>
-              openDetail({
-                title: String(row.reference_number ?? row.id_pk ?? row.hospital_name ?? row.workflow_user ?? 'Record'),
-                subtitle: spec.title,
-                data: row,
-              })
-            }
-          />
-        </div>
-      ))}
     </div>
   )
 }

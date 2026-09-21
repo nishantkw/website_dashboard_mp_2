@@ -243,7 +243,7 @@ router.get('/card-print-data', async (req, res) => {
     const primary = aug.table.length ? aug : vvs.table.length ? vvs : temp
     const status = countByField(primary.table, 'card_status')
     const district = countByField(primary.table, 'dist_name')
-    const urbanRural = countByField(primary.table, 'rural_urban_flag')
+    const urbanRural = countBy(primary.table, (d) => labelRuralUrban(d.rural_urban_flag ?? d.urban_or_rural))
 
     res.json({
       db: aug.db || vvs.db || temp.db || leftover.db,

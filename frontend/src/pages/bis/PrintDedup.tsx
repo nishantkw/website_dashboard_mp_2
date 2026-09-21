@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
-import DataTable from '../../components/ui/DataTable'
 import { PageHeader, KPIGrid } from '../../components/ui/PageHeader'
+import DashboardReportsBanner from '../../components/ui/DashboardReportsBanner'
 import { useDrillDown } from '../../hooks/useDrillDown'
 import { useApiResource } from '../../hooks/useApiResource'
 import { fetchBisPrintDedup } from '../../api/endpoints'
@@ -67,45 +67,13 @@ export default function PrintDedup() {
         badge={<DataSourceBadge source={source} db={db} loading={loading} />}
       />
       <BackendOfflineNotice error={error} loading={loading} />
+
+      <DashboardReportsBanner
+        reportPath="/dashboard/mp/reports/print-dedup"
+        buttonLabel="Open Already Printed Cards Report →"
+      />
+
       {kpis.length > 0 && <KPIGrid kpis={kpis} onKpiClick={(kpi) => openFromKpi(kpi.label, kpi.value)} />}
-
-      <div className="mb-4 mt-2 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
-        <p className="text-sm font-semibold text-[#1a5c38]">
-          29-Jun batch — {data.batchASchema || 'dmart_mp.already_printed_card_no_290626'}
-        </p>
-      </div>
-      <DataTable
-        columns={batchACols}
-        data={data.batchATable ?? []}
-        title={`Already Printed (29-Jun) (${(data.batchATable ?? []).length})`}
-        onRowClick={(row) =>
-          openDetail({
-            title: String(row.card_no || 'Card'),
-            subtitle: data.batchASchema || 'already_printed',
-            data: row,
-            columns: batchACols,
-          })
-        }
-      />
-
-      <div className="mb-4 mt-5 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
-        <p className="text-sm font-semibold text-[#1a5c38]">
-          09-Aug batch — {data.batchBSchema || 'dmart_mp.already_printed_card_no_34321992_8672488_09082026'}
-        </p>
-      </div>
-      <DataTable
-        columns={batchBCols}
-        data={data.batchBTable ?? []}
-        title={`Already Printed (09-Aug) (${(data.batchBTable ?? []).length})`}
-        onRowClick={(row) =>
-          openDetail({
-            title: String(row.card_no || 'Card'),
-            subtitle: data.batchBSchema || 'already_printed',
-            data: row,
-            columns: batchBCols,
-          })
-        }
-      />
     </div>
   )
 }

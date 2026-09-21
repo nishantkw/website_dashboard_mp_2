@@ -1,4 +1,4 @@
-import { districtsForDivision, matchesStateTypeFilter, pushGeoSql, districtsMatch } from '../data/mpDivisions.js'
+import { matchesStateTypeFilter, pushGeoSql, matchesDivisionFilter } from '../data/mpDivisions.js'
 
 /**
  * WHERE clause for dmart_mp.hospital_master_with_quality_certification_final
@@ -23,8 +23,19 @@ export function buildHospitalWhere(q, options = {}) {
     if (/^unknown$/i.test(String(q.hospital_type))) {
       parts.push(`(hospital_type IS NULL OR btrim(hospital_type::text) = '' OR hospital_type::text ILIKE 'unknown')`)
     } else {
-      params.push(String(q.hospital_type).trim())
-      parts.push(`btrim(hospital_type::text) ILIKE $${params.length}`)
+      const key = normalizeHospitalTypeKey(q.hospital_type)
+      if (key === 'government') {
+        parts.push(
+          `(upper(btrim(hospital_type::text)) IN ('G','GOVERNMENT','GOV','GOVT','PUBLIC') OR hospital_type::text ILIKE '%gov%')`
+        )
+      } else if (key === 'private') {
+        parts.push(
+          `((upper(btrim(hospital_type::text)) IN ('P','PRIVATE') OR hospital_type::text ILIKE '%priv%') AND upper(btrim(hospital_type::text)) <> 'PP')`
+        )
+      } else {
+        params.push(String(q.hospital_type).trim())
+        parts.push(`btrim(hospital_type::text) ILIKE $${params.length}`)
+      }
     }
   }
   if (includeNabh && q.nabh) {
@@ -56,13 +67,27 @@ function includesLoose(haystack, needle) {
   return String(haystack ?? '').toLowerCase().includes(String(needle ?? '').toLowerCase())
 }
 
+/**
+ * Normalize ownership labels so chart slices (Private/Government) match DB codes (P/G)
+ * and claim-derived Public. "PP" must stay distinct from Private.
+ */
+export function normalizeHospitalTypeKey(val) {
+  const t = String(val ?? '').trim()
+  if (!t) return 'unknown'
+  if (/^unknown$/i.test(t)) return 'unknown'
+  if (/^pp$/i.test(t)) return 'pp'
+  if (/^public$/i.test(t) || /^g$/i.test(t) || /gov/i.test(t)) return 'government'
+  if (/^p$/i.test(t) || /priv/i.test(t)) return 'private'
+  return t.toLowerCase()
+}
+
 /** Chart slices use COALESCE(hospital_type, 'Unknown'). "P" must not also match "PP". */
 export function hospitalTypeEquals(rowType, filterType) {
   const a = String(rowType ?? '').trim()
   const b = String(filterType ?? '').trim()
   if (!b) return true
   if (/^unknown$/i.test(b)) return !a || /^unknown$/i.test(a)
-  return a.toLowerCase() === b.toLowerCase()
+  return normalizeHospitalTypeKey(a) === normalizeHospitalTypeKey(b)
 }
 
 /** Actual DB values: "Entry level NABH - 110", "NABH Full - 115" — not Yes/No. */
@@ -94,17 +119,12 @@ export function filterHospitalRows(rows, q = {}, options = {}) {
   const { includeNabh = true, includeHospitalStatus = true } = options
   if (!q || Object.keys(q).length === 0) return rows
 
-  const districtAllow =
-    !q.district && q.division
-      ? new Set(districtsForDivision(q.division).map((d) => String(d).toLowerCase()))
-      : null
-
   return rows.filter((row) => {
     const district = String(row.district_name || row.dist_name || '')
     if (q.state_type && q.state_type !== 'Both' && !matchesStateTypeFilter(row, q.state_type)) return false
     const applyMpGeo = q.state_type !== 'Portability'
     if (applyMpGeo && q.district && !includesLoose(district, q.district)) return false
-    if (applyMpGeo && districtAllow?.size && ![...districtAllow].some((d) => districtsMatch(district, d))) return false
+    if (applyMpGeo && q.division && !matchesDivisionFilter(district, q.division)) return false
     if (q.hospital_type && !hospitalTypeEquals(row.hospital_type, q.hospital_type)) return false
     if (includeNabh && q.nabh && !matchesNabhFilter(row, q.nabh)) return false
     if (includeHospitalStatus && q.hospital_status) {

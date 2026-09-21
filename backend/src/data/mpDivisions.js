@@ -85,8 +85,11 @@ export function matchesDistrictFilter(rowDistrict, filterDistrict) {
 
 export function matchesDivisionFilter(rowDistrict, divisionName) {
   if (!divisionName) return true
+  // Charts bucket unmapped / blank districts as "Unknown" via divisionForDistrict().
+  if (/^unknown$/i.test(String(divisionName))) {
+    return divisionForDistrict(rowDistrict) === 'Unknown'
+  }
   const allowed = districtsForDivision(divisionName)
-  if (!allowed.length) return false
   if (allowed.some((d) => districtsMatch(rowDistrict, d))) return true
   return divisionForDistrict(rowDistrict) === divisionName
 }

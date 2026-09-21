@@ -53,8 +53,8 @@ export const CLAIMS_MASTER_REPORTS = [
   { id: 'district-hospital-type', title: 'Report 7 — District + Hospital Type', description: 'Division, district and hospital type summary' },
   { id: 'hospital-specialty', title: 'Report 8 — Hospital + Specialty', description: 'Hospital and specialty combination' },
   { id: 'full-detail', title: 'Report 9 — Full Detail', description: 'State type, division, district, hospital, type and specialty' },
-  { id: 'tms-recovery', title: 'Report 10 — TMS Recovery', description: 'Recovery cases from dmart_mp.tms_recovery (amount, reason, status, dates)' },
-  { id: 'payment-dtls', title: 'Report 11 — Payment Details', description: 'Bank payments from dmart_mp.payment_dtls (paid / rejected, amount, dates)' },
+  { id: 'tms-recovery', title: 'Report 10 — TMS Recovery', description: 'Recovery cases with amount, reason, status, and dates' },
+  { id: 'payment-dtls', title: 'Report 11 — Payment Details', description: 'Bank payment records with paid / rejected flags, amount, and dates' },
 ]
 
 export const CLAIM_KPI_COLUMNS = [

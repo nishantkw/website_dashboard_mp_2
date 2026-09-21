@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FileSpreadsheet } from 'lucide-react'
 import ChartCard from '../../components/ui/ChartCard'
-import DataTable from '../../components/ui/DataTable'
 import { PageHeader, KPIGrid } from '../../components/ui/PageHeader'
 import { InteractiveBarChart, InteractiveLineChart, InteractivePieChart } from '../../components/charts/InteractiveCharts'
 import ClaimsFilterBar from '../../components/layout/ClaimsFilterBar'
@@ -12,21 +11,21 @@ import { fetchClaims } from '../../api/endpoints'
 import DataSourceBadge from '../../components/ui/DataSourceBadge'
 import BackendOfflineNotice from '../../components/ui/BackendOfflineNotice'
 import StackedHeading from '../../components/ui/StackedHeading'
+import { pageHeaderDescription } from '../../utils/displayLabels'
 import MoneyColumnHeader from '../../components/ui/MoneyColumnHeader'
 import { formatMoneyValue, type MoneyNotation } from '../../utils/moneyFormat'
 import { schemaTableColumns } from '../../utils/schemaColumns'
 import { monthLabelToRange } from '../../utils/chartDrillDown'
-import { getClaimsFiltersForPage, buildMasterReportTableColumns } from '../../data/claimsFilterConfig'
+import { getClaimsFiltersForPage } from '../../data/claimsFilterConfig'
 import { useClaimsFilters } from '../../hooks/useClaimsFilters'
-import { filterRowsForClaimKpi, resolveClaimKpiKey } from '../../utils/claimKpi'
+import { canonicalMpDistrict, getDivisionForDistrict } from '../../data/filterOptions'
+import { resolveClaimKpiKey } from '../../utils/claimKpi'
 import type { KPI, TableColumn } from '../../types'
 
 const CASE_TYPE_COLORS = ['#10b981', '#ef4444', '#8b5cf6', '#f59e0b']
 const STATUS_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#94a3b8', '#6366f1']
 const STATE_COLORS = ['#2563eb', '#d97706']
 const HOSPITAL_TYPE_COLORS = ['#10b981', '#6366f1', '#94a3b8']
-
-const PAYMENT_COLORS = ['#10b981', '#ef4444', '#f59e0b', '#6366f1', '#94a3b8']
 
 const preferredColumns: TableColumn[] = [
   { key: 'case_id', label: 'Case ID' },
@@ -41,30 +40,13 @@ const preferredColumns: TableColumn[] = [
   { key: 'amount_claim_paid', label: 'Paid', align: 'right' },
 ]
 
-const paymentPreferred: TableColumn[] = [
-  { key: 'case_id', label: 'Case ID' },
-  { key: 'payment_type', label: 'Payment Type' },
-  { key: 'bank_name', label: 'Bank' },
-  { key: 'payment_unique_id', label: 'Payment Unique ID' },
-  { key: 'transaction_amount', label: 'Amount', align: 'right' },
-  { key: 'transaction_dt', label: 'Transaction Date' },
-  { key: 'paid_flag', label: 'Paid Flag' },
-  { key: 'payment_paid_dt', label: 'Paid Date' },
-  { key: 'reject_flag', label: 'Reject Flag' },
-  { key: 'payer_id', label: 'Payer ID' },
-  { key: 'state_code', label: 'State Code' },
-]
-
 const EMPTY = {
   kpis: [] as KPI[],
   charts: {} as Record<string, never>,
   table: [] as Record<string, string | number>[],
-  paymentTable: [] as Record<string, string | number>[],
   jsonDataTable: [] as Record<string, string | number>[],
   columns: [] as string[],
-  paymentColumns: [] as string[],
   jsonDataColumns: [] as string[],
-  paymentKpis: [] as KPI[],
   jsonDataKpis: [] as KPI[],
   masterKpis: [] as { key: string; label: string; count: number; initiatedCr: number; approvedCr: number }[],
   stateHospitalSummary: [] as Record<string, string | number>[],
@@ -100,15 +82,11 @@ export default function ClaimsPayments() {
   const hospitalTypeData = data.charts?.hospitalType ?? []
   const divisionData = data.charts?.division ?? data.charts?.patientState ?? []
   const claimsTrend = data.charts?.claimsTrend ?? []
-  const paymentType = data.charts?.paymentType ?? []
-  const paymentStatus = data.charts?.paymentStatus ?? []
-  const paymentBank = data.charts?.paymentBank ?? []
-  const paymentTrend = data.charts?.paymentTrend ?? []
-  const paymentKpis = data.paymentKpis ?? []
   const jsonDataKpis = data.jsonDataKpis ?? []
 
   const districtChartHeight = Math.min(420, Math.max(260, districtData.length * 36 + 72))
   const divisionChartHeight = Math.min(380, Math.max(240, divisionData.length * 40 + 72))
+  const statusChartHeight = Math.min(420, Math.max(280, statusData.length * 32 + 64))
   const tableRows = useMemo(
     () =>
       ((data.table ?? []) as Record<string, string | number>[]).map((row) => ({
@@ -125,9 +103,7 @@ export default function ClaimsPayments() {
     () => claimsFilters.filterRows(tableRows),
     [claimsFilters.filterRows, tableRows]
   )
-  const summaryRows = (data.stateHospitalSummary ?? []) as Record<string, string | number>[]
 
-  const summaryColumns = useMemo(() => buildMasterReportTableColumns('state-hospital-type'), [])
   const columns = useMemo(
     () =>
       schemaTableColumns({
@@ -139,18 +115,7 @@ export default function ClaimsPayments() {
       }),
     [source, data.columns, tableRows]
   )
-  const paymentRows = (data.paymentTable ?? []) as Record<string, string | number>[]
   const jsonDataRows = (data.jsonDataTable ?? []) as Record<string, string | number>[]
-  const paymentColumns = useMemo(
-    () =>
-      schemaTableColumns({
-        source,
-        schemaKeys: data.paymentColumns,
-        rows: paymentRows,
-        preferredFirst: paymentPreferred.map((c) => c.key),
-      }),
-    [source, data.paymentColumns, paymentRows]
-  )
   const jsonDataColumns = useMemo(
     () =>
       schemaTableColumns({
@@ -177,30 +142,37 @@ export default function ClaimsPayments() {
     tableRows: filteredTable,
     columns,
     datasetTitle: 'Claim Records',
-    resolveContext: (chartTitle) => {
-      if (/payment /i.test(chartTitle)) {
-        return { rows: paymentRows, columns: paymentColumns, datasetTitle: 'Payment Details' }
-      }
-        return { rows: filteredTable, columns, datasetTitle: 'Claim Records' }
-    },
+    pageFilters: claimsFilters.filters,
     fetchDrillDown: live
       ? async (payload, chartTitle) => {
-          if (/payment /i.test(chartTitle)) return null
-          const districtName = String(payload.name ?? '').trim()
-          const wantsDistrict = /district/i.test(chartTitle) && districtName && !/^others$/i.test(districtName)
-          const wantsDivision = /division/i.test(chartTitle) && districtName && !/^others$/i.test(districtName)
+          const sliceName = String(payload.name ?? '').trim()
+          const wantsDistrict =
+            /district/i.test(chartTitle) &&
+            !/division/i.test(chartTitle) &&
+            Boolean(sliceName) &&
+            !/^others$/i.test(sliceName)
+          const wantsDivision =
+            /division/i.test(chartTitle) &&
+            !/district/i.test(chartTitle) &&
+            Boolean(sliceName) &&
+            !/^others$/i.test(sliceName)
           const wantsTrend = /trend/i.test(chartTitle)
           if (!wantsTrend && !wantsDistrict && !wantsDivision) return null
           const params = new URLSearchParams(claimsFilters.queryString.replace(/^\?/, ''))
           if (wantsTrend) {
-            const range = monthLabelToRange(String(payload.name ?? ''))
+            const range = monthLabelToRange(sliceName)
             if (range) {
               params.set('date_from', range.from)
               params.set('date_to', range.to)
             }
           }
-          if (wantsDistrict) params.set('district', districtName)
-          if (wantsDivision) params.set('division', districtName)
+          if (wantsDistrict) {
+            const district = canonicalMpDistrict(sliceName) || sliceName
+            params.set('district', district)
+            const parentDiv = getDivisionForDistrict(district)
+            if (parentDiv) params.set('division', parentDiv)
+          }
+          if (wantsDivision) params.set('division', sliceName)
           const qs = params.toString() ? `?${params.toString()}` : ''
           const res = await fetchClaims(qs)
           if (!res.ok) return null
@@ -208,18 +180,18 @@ export default function ClaimsPayments() {
             ...row,
             specialty: String(row.specialty ?? row._specialty_code ?? row.speciality_code ?? ''),
           }))
-          return { rows, columns, datasetTitle: payload.name ? `Claim Records — ${payload.name}` : 'Claim Records' }
+          return {
+            rows,
+            columns,
+            datasetTitle: payload.name ? `Claim Records — ${payload.name}` : 'Claim Records',
+            alreadyFiltered: wantsDistrict || wantsDivision || wantsTrend,
+          }
         }
       : undefined,
   })
 
   const [selectedKpi, setSelectedKpi] = useState<{ key: string; label: string } | null>(null)
   const [moneyNotation, setMoneyNotation] = useState<MoneyNotation>('indian')
-
-  const kpiTableRows = useMemo(() => {
-    if (!selectedKpi) return filteredTable
-    return filterRowsForClaimKpi(filteredTable, selectedKpi.label, selectedKpi.key) ?? filteredTable
-  }, [filteredTable, selectedKpi])
 
   const handleKpiClick = (kpi: KPI) => {
     const key = kpi.key || resolveClaimKpiKey(kpi.label) || kpi.label
@@ -230,24 +202,7 @@ export default function ClaimsPayments() {
     } else {
       closeDetail()
     }
-    requestAnimationFrame(() => {
-      document.getElementById('claim-detail-table')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    })
   }
-
-  const handlePaymentKpi = (kpi: KPI) => {
-    openDetail({
-      title: kpi.label,
-      subtitle: `${paymentRows.length} record${paymentRows.length === 1 ? '' : 's'}`,
-      records: paymentRows,
-      columns: paymentColumns,
-      datasetTitle: 'Payment Details',
-      source: live ? 'api' : 'demo',
-    })
-  }
-
-  const hasPaymentCharts =
-    paymentType.length > 0 || paymentStatus.length > 0 || paymentBank.length > 0 || paymentTrend.length > 0
 
   return (
     <div>
@@ -256,9 +211,10 @@ export default function ClaimsPayments() {
         title="Master Report TMS — Claim Status Dashboard"
         description={
           live
-            ? `${data.schema ?? 'dmart_mp.claim_paid_excel_t'}${
-                data.paymentSchema ? ` · ${data.paymentSchema}` : ''
-              } — FRS claim lifecycle KPIs by State Type & Hospital Type`
+            ? pageHeaderDescription(
+                data.schema ?? 'dmart_mp.claim_paid_excel_t',
+                'FRS claim lifecycle KPIs by state type and hospital type'
+              )
             : 'Connect the backend to load claim status data'
         }
         badge={<DataSourceBadge source={source} db={db} loading={loading} />}
@@ -278,14 +234,30 @@ export default function ClaimsPayments() {
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-100 bg-white px-4 py-3 shadow-sm">
         <div className="flex items-center gap-2 text-sm text-slate-600">
           <FileSpreadsheet className="h-4 w-4 text-[#2d8a4e]" />
-          <span>11 master report formats available (State Type / Division / District / Hospital / Specialty / TMS Recovery / Payment Details)</span>
+          <span>
+            Detailed tables (Report 6 matrix, full claim records) — open{' '}
+            <strong>Master Reports</strong>
+            {' · '}
+            Payment KPIs and charts —{' '}
+            <Link to="/dashboard/mp/claim-payment-details" className="font-semibold text-[#1a5c38] hover:underline">
+              Claim Payment Details
+            </Link>
+          </span>
         </div>
-        <Link
-          to="/dashboard/mp/claims-payments/master-report"
-          className="rounded-lg bg-[#1a5c38] px-4 py-2 text-xs font-semibold text-white hover:bg-[#2d8a4e]"
-        >
-          Open Master Reports →
-        </Link>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <Link
+            to="/dashboard/mp/claim-payment-details"
+            className="rounded-lg border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-2 text-xs font-semibold text-[#1a5c38] hover:bg-[#e8f5ec]"
+          >
+            Claim Payment Details →
+          </Link>
+          <Link
+            to="/dashboard/mp/claims-payments/master-report"
+            className="rounded-lg bg-[#1a5c38] px-4 py-2 text-xs font-semibold text-white hover:bg-[#2d8a4e]"
+          >
+            Open Master Reports →
+          </Link>
+        </div>
       </div>
 
       {kpis.length > 0 && (
@@ -300,8 +272,21 @@ export default function ClaimsPayments() {
             </ChartCard>
           )}
           {statusData.length > 0 && (
-            <ChartCard title="Claim Lifecycle Status" subtitle="FRS §6 KPI buckets" exportData={statusData}>
-              <InteractivePieChart data={statusData} colors={STATUS_COLORS} innerRadius={55} chartTitle="Claim Lifecycle Status" onItemClick={openFromChart} />
+            <ChartCard
+              title="Claim Lifecycle Status"
+              subtitle="KPI buckets (overlapping — not unique claim total)"
+              exportData={statusData}
+            >
+              <InteractiveBarChart
+                data={statusData}
+                chartTitle="Claim Lifecycle Status"
+                layout="vertical"
+                height={statusChartHeight}
+                integerAxis
+                onItemClick={openFromChart}
+                bars={[{ dataKey: 'value', fill: '#3b82f6', name: 'Count' }]}
+                cellColors={STATUS_COLORS}
+              />
             </ChartCard>
           )}
         </div>
@@ -389,8 +374,39 @@ export default function ClaimsPayments() {
         </div>
       )}
 
+      {jsonDataRows.length > 0 && (
+        <>
+          <div className="mb-4 mt-5 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
+            <StackedHeading
+              size="section"
+              titleAs="p"
+              title="Claim Line Items"
+              subtitle="Package and procedure line amounts (claimed vs approved, TDS/RF, net payable)"
+              titleClassName="text-sm font-semibold text-[#1a5c38]"
+              subtitleClassName="text-xs text-slate-500"
+            />
+          </div>
+          {jsonDataKpis.length > 0 && (
+            <KPIGrid
+              kpis={jsonDataKpis}
+              onKpiClick={(kpi) =>
+                openDetail({
+                  title: kpi.label,
+                  subtitle: `${jsonDataRows.length} line item${jsonDataRows.length === 1 ? '' : 's'}`,
+                  records: jsonDataRows,
+                  columns: jsonDataColumns,
+                })
+              }
+            />
+          )}
+          <p className="text-xs text-slate-500">
+            Full line-item export: <strong>Reports → Master Report TMS — Claims & Payments</strong> (Claim Line Items).
+          </p>
+        </>
+      )}
+
       {masterKpis.length > 0 && (
-        <div className="mb-4 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="mb-4 mt-5 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-100 px-4 py-4">
             <StackedHeading
               title="Default KPI Heads"
@@ -422,170 +438,6 @@ export default function ClaimsPayments() {
             </tbody>
           </table>
         </div>
-      )}
-
-      {summaryRows.length > 0 && (
-        <div className="mb-4">
-          <DataTable
-            columns={summaryColumns.slice(0, 12)}
-            data={summaryRows}
-            title="Report 6 — State Type + Hospital Type Summary (FRS §5 layout)"
-          />
-        </div>
-      )}
-
-      <div id="claim-detail-table">
-        {selectedKpi && (
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#2d8a4e]/20 bg-[#eaf5ed] px-4 py-2 text-sm text-[#1a5c38]">
-            <span>
-              Showing <strong>{selectedKpi.label}</strong> — {kpiTableRows.length} claim
-              {kpiTableRows.length === 1 ? '' : 's'}
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedKpi(null)
-                closeDetail()
-              }}
-              className="rounded-md px-2 py-1 text-xs font-semibold text-[#1a5c38] hover:bg-white"
-            >
-              Show all claims
-            </button>
-          </div>
-        )}
-        <DataTable
-          columns={columns}
-          data={kpiTableRows}
-          title={
-            selectedKpi
-              ? `${selectedKpi.label} (${kpiTableRows.length})`
-              : `Claim Detail Records (${filteredTable.length}${columns.length ? ` · schema cols: ${columns.length}` : ''})`
-          }
-          onRowClick={(row) =>
-            openDetail({
-              title: String(row.case_id || row.registration_id || 'Claim'),
-              subtitle: String(row.case_status || ''),
-              data: row,
-            })
-          }
-        />
-      </div>
-
-      {paymentRows.length > 0 && (
-        <>
-          <div className="mb-4 mt-5 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
-            <p className="text-sm font-semibold text-[#1a5c38]">Payment details — dmart_mp.payment_dtls</p>
-            <p className="text-xs text-slate-500">
-              Bank transaction records linked to claims (paid / rejected flags, amount, payer)
-            </p>
-          </div>
-          {paymentKpis.length > 0 && <KPIGrid kpis={paymentKpis} onKpiClick={handlePaymentKpi} />}
-          {hasPaymentCharts && (
-            <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-              {paymentStatus.length > 0 && (
-                <ChartCard title="Payment Status" subtitle="paid / rejected" exportData={paymentStatus}>
-                  <InteractivePieChart
-                    data={paymentStatus}
-                    colors={PAYMENT_COLORS}
-                    innerRadius={55}
-                    chartTitle="Payment Status"
-                    onItemClick={openFromChart}
-                  />
-                </ChartCard>
-              )}
-              {paymentType.length > 0 && (
-                <ChartCard title="Payment Type" subtitle="payment_type" exportData={paymentType}>
-                  <InteractivePieChart
-                    data={paymentType}
-                    colors={['#2563eb', '#10b981', '#f59e0b', '#8b5cf6', '#94a3b8']}
-                    innerRadius={55}
-                    chartTitle="Payment Type"
-                    onItemClick={openFromChart}
-                  />
-                </ChartCard>
-              )}
-              {paymentBank.length > 0 && (
-                <ChartCard title="Payment Bank" subtitle="bank_name" exportData={paymentBank}>
-                  <InteractiveBarChart
-                    data={paymentBank}
-                    chartTitle="Payment Bank"
-                    layout="vertical"
-                    height={Math.min(360, Math.max(220, paymentBank.length * 36 + 72))}
-                    integerAxis
-                    onItemClick={openFromChart}
-                    bars={[{ dataKey: 'value', fill: '#2563eb', name: 'Payments' }]}
-                  />
-                </ChartCard>
-              )}
-              {paymentTrend.length > 0 && (
-                <ChartCard title="Payment Trend" subtitle="Monthly transactions" exportData={paymentTrend}>
-                  <InteractiveLineChart
-                    data={paymentTrend}
-                    chartTitle="Payment Trend"
-                    height={260}
-                    integerAxis
-                    onItemClick={openFromChart}
-                    lines={[{ dataKey: 'payments', stroke: '#059669', name: 'Payments' }]}
-                  />
-                </ChartCard>
-              )}
-            </div>
-          )}
-          <DataTable
-            columns={paymentColumns}
-            data={paymentRows}
-            title={`Payment Details — dmart_mp.payment_dtls (${paymentRows.length}${
-              paymentColumns.length ? ` · ${paymentColumns.length} schema cols` : ''
-            })`}
-            onRowClick={(row) =>
-              openDetail({
-                title: String(row.case_id || row.payment_unique_id || 'Payment'),
-                subtitle: 'dmart_mp.payment_dtls',
-                data: row,
-                columns: paymentColumns,
-              })
-            }
-          />
-        </>
-      )}
-
-      {jsonDataRows.length > 0 && (
-        <>
-          <div className="mb-4 mt-5 rounded-xl border border-[#c5e0ce] bg-[#f4fbf6] px-4 py-3">
-            <p className="text-sm font-semibold text-[#1a5c38]">
-              Claim line items — {data.jsonDataSchema || 'dmart_mp.json_data'}
-            </p>
-            <p className="text-xs text-slate-500">
-              Package/procedure line amounts (claimed vs approved, TDS/RF, net payable)
-            </p>
-          </div>
-          {jsonDataKpis.length > 0 && (
-            <KPIGrid
-              kpis={jsonDataKpis}
-              onKpiClick={(kpi) =>
-                openDetail({
-                  title: kpi.label,
-                  subtitle: `${jsonDataRows.length} line item${jsonDataRows.length === 1 ? '' : 's'}`,
-                  records: jsonDataRows,
-                  columns: jsonDataColumns,
-                })
-              }
-            />
-          )}
-          <DataTable
-            columns={jsonDataColumns}
-            data={jsonDataRows}
-            title={`Claim Line Items — json_data (${jsonDataRows.length})`}
-            onRowClick={(row) =>
-              openDetail({
-                title: String(row.packagecode || row.registration_id || row.id || 'Line item'),
-                subtitle: data.jsonDataSchema || 'json_data',
-                data: row,
-                columns: jsonDataColumns,
-              })
-            }
-          />
-        </>
       )}
     </div>
   )

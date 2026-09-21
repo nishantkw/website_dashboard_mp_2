@@ -3,14 +3,13 @@ import { query } from '../db/pool.js'
 import { clientError } from '../utils/clientError.js'
 import { getPrimaryTableForModule } from '../utils/schemaRegistry.js'
 import { changeFromCounts, isSafeIdent, monthOverMonthChange } from '../utils/kpiChange.js'
-import { filterHospitalRows } from '../utils/hospitalFilters.js'
 import { loadClaimRows, countClaimRows, monthCountsForClaimTables } from '../utils/claimSources.js'
 import { initiatedAmount } from '../utils/claimStatusMapping.js'
+import { loadHospitalMasterRows } from '../utils/hospitalRows.js'
 import {
   tableColumnSet,
   hospitalIdentitySql,
   countUniqueHospitals,
-  loadUniqueHospitalRows,
   parseHospitalPaging,
   stripHospitalPaging,
 } from '../utils/hospitalIdentity.js'
@@ -183,8 +182,9 @@ router.get('/', async (req, res) => {
     const claimsTrend = { rows: claimsTrendFromRows(claimRows) }
 
     const hospitalsPrimary = getPrimaryTableForModule('hospitals')
-    const loadedHospitals = await loadUniqueHospitalRows()
-    const filteredHospitals = filterHospitalRows(loadedHospitals.table, q)
+    // Use normalized master rows (P/G → Private/Government) so chart slices match drill-down filters.
+    const loadedHospitals = await loadHospitalMasterRows(q)
+    const filteredHospitals = loadedHospitals.table
     const hospitalTypeRows = hospitalTypeFromRows(filteredHospitals)
     counts.hospitals = filteredHospitals.length
     if (hospitalsPrimary) schemas.hospitals = `${hospitalsPrimary.schema}.${hospitalsPrimary.table}`
@@ -224,8 +224,8 @@ router.get('/', async (req, res) => {
 router.get('/hospitals', async (req, res) => {
   try {
     const q = req.query || {}
-    const result = await loadUniqueHospitalRows()
-    const table = filterHospitalRows(result.table, stripHospitalPaging(q))
+    const result = await loadHospitalMasterRows(stripHospitalPaging(q))
+    const table = result.table
     const detail = q.detail === '1' || q.detail === 'true'
     const { limit, offset } = parseHospitalPaging(q)
     const page = detail ? table : table.slice(offset, offset + limit)

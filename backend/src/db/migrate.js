@@ -18,6 +18,7 @@ async function migrate() {
     '007_beneficiary_dtl_hist.sql',
     '008_widen_pk_bigint.sql',
     '009_morth_patient_details.sql',
+    '010_pmjay_schema_ref_tables.sql',
   ].filter((f) => fs.existsSync(path.join(SQL_DIR, f)))
 
   for (const file of files) {

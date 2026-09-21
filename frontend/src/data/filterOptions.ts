@@ -90,12 +90,28 @@ export function getDivisionForDistrict(districtName: string): string | undefined
     d.districts.some((dist) => dist.toLowerCase() === raw)
   )
   if (exact) return exact.division
+
+  const norm = normalizeDistrictLabel(districtName)
+  if (norm) {
+    const byNorm = MP_DIVISIONS.find((d) =>
+      d.districts.some((dist) => normalizeDistrictLabel(dist) === norm)
+    )
+    if (byNorm) return byNorm.division
+  }
+
   return MP_DIVISIONS.find((d) =>
     d.districts.some((dist) => {
       const name = dist.toLowerCase()
       return raw.includes(name) || (name.length >= 4 && name.includes(raw))
     })
   )?.division
+}
+
+/** Same as backend divisionForDistrict — blank / unmapped districts → "Unknown". */
+export function resolveDivisionForDistrict(districtName?: string | null): string {
+  const raw = String(districtName ?? '').trim()
+  if (!raw || /^unknown$/i.test(raw)) return 'Unknown'
+  return getDivisionForDistrict(raw) || 'Unknown'
 }
 
 export const DISTRICT_OPTIONS = getDistrictsForDivision()

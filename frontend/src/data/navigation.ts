@@ -52,13 +52,14 @@ export const navigation: NavItem[] = [
     icon: 'Building2',
     children: [
       { id: 'mp-claims', label: 'Claim Status Dashboard', path: '/dashboard/mp/claims-payments', end: true },
+      { id: 'mp-claim-payments', label: 'Claim Payment Details', path: '/dashboard/mp/claim-payment-details' },
       { id: 'mp-claims-master', label: 'Master Report TMS', path: '/dashboard/mp/claims-payments/master-report' },
       { id: 'mp-beneficiaries', label: 'Beneficiaries', path: '/dashboard/mp/beneficiaries' },
       {
         id: 'mp-hospitals-patients',
         label: 'Hospitals & Patients',
         children: [
-          { id: 'mp-hospitals', label: 'Hospitals', path: '/dashboard/mp/hospitals', end: true },
+          { id: 'mp-hospitals', label: 'Hospital Master', path: '/dashboard/mp/hospitals', end: true },
           { id: 'mp-hospitals-deempanel', label: 'De-empanelment', path: '/dashboard/mp/hospitals/deempanel' },
           { id: 'mp-hospitals-hem', label: 'HEM Hospitals', path: '/dashboard/mp/hospitals/hem' },
           { id: 'mp-hospitals-manpower', label: 'HEM Manpower', path: '/dashboard/mp/hospitals/manpower' },
