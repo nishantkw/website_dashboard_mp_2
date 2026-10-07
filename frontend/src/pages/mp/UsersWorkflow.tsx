@@ -279,7 +279,7 @@ export default function UsersWorkflow() {
               </ChartCard>
             )}
             {processData.length > 0 && (
-              <ChartCard title="Workflow Process" subtitle="CLM_T / PRE_T from workflow_users_t" exportData={processData}>
+              <ChartCard title="Workflow Process" subtitle="Claims and pre-authorisation" exportData={processData}>
                 <InteractivePieChart
                   data={processData}
                   colors={PROCESS_COLORS}
@@ -293,7 +293,7 @@ export default function UsersWorkflow() {
 
           {statusData.length > 0 && (
             <div className="mb-4">
-              <ChartCard title="Workflow Status" subtitle="status_descrption" exportData={statusData}>
+              <ChartCard title="Workflow Status" exportData={statusData}>
                 <InteractiveBarChart
                   data={statusData}
                   chartTitle="Workflow Status"
@@ -346,7 +346,7 @@ export default function UsersWorkflow() {
 
           <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
             {auditRoleData.length > 0 && (
-              <ChartCard title="Audit Roles" subtitle="previous_workflow_role" exportData={auditRoleData}>
+              <ChartCard title="Audit Roles" exportData={auditRoleData}>
                 <InteractivePieChart
                   data={auditRoleData}
                   colors={ROLE_COLORS}
@@ -357,7 +357,7 @@ export default function UsersWorkflow() {
               </ChartCard>
             )}
             {auditProcessData.length > 0 && (
-              <ChartCard title="Audit Process" subtitle="workflow_process_code on audit" exportData={auditProcessData}>
+              <ChartCard title="Audit Process" exportData={auditProcessData}>
                 <InteractiveBarChart
                   data={auditProcessData}
                   chartTitle="Audit Process"
@@ -370,7 +370,7 @@ export default function UsersWorkflow() {
               </ChartCard>
             )}
             {schemeData.length > 0 && (
-              <ChartCard title="Scheme" subtitle="scheme_code on audit" exportData={schemeData}>
+              <ChartCard title="Scheme" exportData={schemeData}>
                 <InteractivePieChart
                   data={schemeData}
                   colors={SCHEME_COLORS}
@@ -381,7 +381,7 @@ export default function UsersWorkflow() {
               </ChartCard>
             )}
             {auditTrend.length > 0 && (
-              <ChartCard title="Audit Trend" subtitle="Events by month (created_dt)" exportData={auditTrend}>
+              <ChartCard title="Audit Trend" subtitle="Events by month" exportData={auditTrend}>
                 <InteractiveLineChart
                   data={auditTrend}
                   chartTitle="Audit Trend"
@@ -407,7 +407,7 @@ export default function UsersWorkflow() {
           {(proProcess.length > 0 || proRole.length > 0 || proService.length > 0 || proHospitalType.length > 0 || proStatus.length > 0) && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
               {proProcess.length > 0 && (
-                <ChartCard title="Pro Workflow Process" subtitle="workflow_process_code" exportData={proProcess}>
+                <ChartCard title="Pro Workflow Process" exportData={proProcess}>
                   <InteractivePieChart
                     data={proProcess}
                     colors={PROCESS_COLORS}
@@ -418,7 +418,7 @@ export default function UsersWorkflow() {
                 </ChartCard>
               )}
               {proRole.length > 0 && (
-                <ChartCard title="Pro Workflow Role" subtitle="workflow_role" exportData={proRole}>
+                <ChartCard title="Pro Workflow Role" exportData={proRole}>
                   <InteractivePieChart
                     data={proRole}
                     colors={ROLE_COLORS}
@@ -429,7 +429,7 @@ export default function UsersWorkflow() {
                 </ChartCard>
               )}
               {proService.length > 0 && (
-                <ChartCard title="Pro Workflow Service" subtitle="service_request_type" exportData={proService}>
+                <ChartCard title="Pro Workflow Service" exportData={proService}>
                   <InteractiveBarChart
                     data={proService}
                     chartTitle="Pro Workflow Service"
@@ -442,7 +442,7 @@ export default function UsersWorkflow() {
                 </ChartCard>
               )}
               {proHospitalType.length > 0 && (
-                <ChartCard title="Pro Workflow Hospital Type" subtitle="hospital_type" exportData={proHospitalType}>
+                <ChartCard title="Pro Workflow Hospital Type" exportData={proHospitalType}>
                   <InteractiveBarChart
                     data={proHospitalType}
                     chartTitle="Pro Workflow Hospital Type"
@@ -455,7 +455,7 @@ export default function UsersWorkflow() {
                 </ChartCard>
               )}
               {proStatus.length > 0 && (
-                <ChartCard title="Pro Workflow Status" subtitle="status_descrption" exportData={proStatus}>
+                <ChartCard title="Pro Workflow Status" exportData={proStatus}>
                   <InteractiveBarChart
                     data={proStatus}
                     chartTitle="Pro Workflow Status"

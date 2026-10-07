@@ -99,6 +99,14 @@ export function statsForRows(rows) {
   }
 }
 
+const FIELD_KPI_PREFIX = {
+  entity_type: 'Entity Type',
+  application_type: 'Application Type',
+  fraud_type: 'Fraud Type',
+  trigger_type: 'Trigger Type',
+  trigger_code: 'Trigger Code',
+}
+
 function kpisFromField(rows, field, labelFn, colorFn) {
   const grouped = {}
   for (const row of rows) {
@@ -110,7 +118,8 @@ function kpisFromField(rows, field, labelFn, colorFn) {
   }
   return Object.entries(grouped).map(([name, group]) =>
     buildKpi({
-      label: `${name} (${field})`,
+      label: FIELD_KPI_PREFIX[field] ? `${FIELD_KPI_PREFIX[field]}: ${name}` : name,
+      key: `${field}:${name}`,
       value: group.length,
       color: colorFn?.(name) || 'blue',
       rows,
@@ -133,7 +142,8 @@ function investigationStatusKpis(cases) {
   }
   return Object.entries(grouped).map(([label, group]) =>
     buildKpi({
-      label: `${label} (investigation_status)`,
+      label,
+      key: `investigation_status:${label}`,
       value: group.rows.length,
       color: group.color,
       rows: cases,
@@ -148,7 +158,8 @@ function amountKpi(cases, field, label, color) {
   const total = Math.round(withAmount.reduce((sum, row) => sum + (Number(row[field]) || 0), 0))
   return [
     buildKpi({
-      label: `${label} (${field})`,
+      label,
+      key: `amount:${field}`,
       value: total,
       color,
       rows: cases,
@@ -173,7 +184,8 @@ function schemaCaseKpis(cases) {
   if (hospitals.size) {
     kpis.push(
       buildKpi({
-        label: 'Hospitals (entity_id)',
+        label: 'Hospitals',
+        key: 'hospitals',
         value: hospitals.size,
         color: 'blue',
         rows: cases,
@@ -206,7 +218,7 @@ export function buildSafuKpis(view, cases, triggers) {
   if (view === 'doctor-wise') {
     const doctors = new Set(cases.map((c) => c.investigator).filter(filled))
     const extra = doctors.size
-      ? [buildKpi({ label: 'Active Investigators (investigator)', value: doctors.size, color: 'blue', rows: cases, predicate: (row) => filled(row.investigator) })]
+      ? [buildKpi({ label: 'Active Investigators', key: 'investigators', value: doctors.size, color: 'blue', rows: cases, predicate: (row) => filled(row.investigator) })]
       : []
     return [...extra, ...caseKpis]
   }

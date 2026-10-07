@@ -35,10 +35,21 @@ function getClaimCountTables(query = {}) {
   return tables
 }
 
-function claimGeoClause(q = {}) {
+function claimFilterClause(q = {}) {
   const parts = []
   const params = []
   pushGeoSql(parts, params, q, CLAIM_DISTRICT_COLS)
+  const dateExpr = 'COALESCE(claim_init_date, preauth_init_date, admission_dt)'
+  const from = String(q.date_from || '').slice(0, 10)
+  const to = String(q.date_to || '').slice(0, 10)
+  if (from) {
+    params.push(from)
+    parts.push(`${dateExpr}::date >= $${params.length}::date`)
+  }
+  if (to) {
+    params.push(to)
+    parts.push(`${dateExpr}::date <= $${params.length}::date`)
+  }
   const clause = parts.length ? `WHERE ${parts.join(' AND ')}` : ''
   return { clause, params }
 }
@@ -46,7 +57,7 @@ function claimGeoClause(q = {}) {
 /** Full SQL COUNT across claim source tables (not the 10k sample used for charts). */
 export async function countClaimRows(req = { query: {} }) {
   const q = { ...req.query }
-  const { clause, params } = claimGeoClause(q)
+  const { clause, params } = claimFilterClause(q)
   let total = 0
   const sources = []
   for (const t of getClaimCountTables(q)) {
@@ -66,7 +77,7 @@ export async function countClaimRows(req = { query: {} }) {
 
 export async function monthCountsForClaimTables(req = { query: {} }) {
   const q = { ...req.query }
-  const { clause, params } = claimGeoClause(q)
+  const { clause, params } = claimFilterClause(q)
   const dateExpr = 'COALESCE(claim_init_date, preauth_init_date, admission_dt)'
   let currentCount = 0
   let previousCount = 0
@@ -118,6 +129,24 @@ export async function loadClaimRows(req) {
     ],
   })
 
+  const dateExpr = 'COALESCE(claim_init_date, preauth_init_date, admission_dt)'
+  const from = String(q.date_from || '').slice(0, 10)
+  const to = String(q.date_to || '').slice(0, 10)
+  const extra = []
+  if (from) {
+    params.push(from)
+    extra.push(`${dateExpr}::date >= $${params.length}::date`)
+  }
+  if (to) {
+    params.push(to)
+    extra.push(`${dateExpr}::date <= $${params.length}::date`)
+  }
+  const whereParts = [
+    ...(clause ? [clause.replace(/^WHERE\s+/i, '')] : []),
+    ...extra,
+  ]
+  const where = whereParts.length ? `WHERE ${whereParts.join(' AND ')}` : ''
+
   const tables = getClaimSourceTables(q)
   let allRows = []
   let db = null
@@ -126,7 +155,7 @@ export async function loadClaimRows(req) {
   for (const t of tables) {
     try {
       const { rows, _db } = await query(
-        `SELECT * FROM ${t.schema}.${t.table} ${clause} ORDER BY 1 DESC LIMIT 10000`,
+        `SELECT * FROM ${t.schema}.${t.table} ${where} ORDER BY 1 DESC LIMIT 10000`,
         params
       )
       allRows = allRows.concat(rows)

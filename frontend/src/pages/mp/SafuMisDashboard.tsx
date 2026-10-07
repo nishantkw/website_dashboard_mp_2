@@ -184,7 +184,7 @@ export default function SafuMisDashboard({
   })
 
   const handleKpi = (kpi: KPI) => {
-    const matched = filterRowsForFraudKpi(kpi.label, caseBlock?.rows ?? [], triggerBlock?.rows ?? [])
+    const matched = filterRowsForFraudKpi(kpi, caseBlock?.rows ?? [], triggerBlock?.rows ?? [])
     if (matched) {
       const block = matched.source === 'trigger' ? triggerBlock : caseBlock
       openDetail({
@@ -262,7 +262,7 @@ export default function SafuMisDashboard({
           {(amountByDoctor.length > 0 || fraudType.length > 0) && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
               {amountByDoctor.length > 0 && (
-                <ChartCard title="Amount at Risk by Doctor" subtitle="Sum of amount_risk per investigator" exportData={amountByDoctor}>
+                <ChartCard title="Amount at Risk by Doctor" subtitle="Total amount at risk per investigator" exportData={amountByDoctor}>
                   <InteractiveBarChart
                     data={amountByDoctor}
                     chartTitle="Amount at Risk by Doctor"
@@ -287,7 +287,7 @@ export default function SafuMisDashboard({
         <>
           <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
             {byOfficer.length > 0 && (
-              <ChartCard title="Cases by SHA-AFO Officer" subtitle="Grouped by workflow_user" exportData={byOfficer}>
+              <ChartCard title="Cases by SHA-AFO Officer" subtitle="Grouped by officer" exportData={byOfficer}>
                 <InteractiveBarChart
                   data={byOfficer}
                   chartTitle="SHA-AFO Officer Cases"
@@ -413,12 +413,12 @@ export default function SafuMisDashboard({
           {(entityType.length > 0 || applicationType.length > 0) && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
               {entityType.length > 0 && (
-                <ChartCard title="Entity Type (entity_type)" subtitle="G = Government, P = Private" exportData={entityType}>
+                <ChartCard title="Entity Type" subtitle="G = Government, P = Private" exportData={entityType}>
                   <InteractivePieChart data={entityType} colors={ENTITY_COLORS} innerRadius={55} chartTitle="Entity Type" onItemClick={openFromChart} />
                 </ChartCard>
               )}
               {applicationType.length > 0 && (
-                <ChartCard title="Application Type (application_type)" exportData={applicationType}>
+                <ChartCard title="Application Type" exportData={applicationType}>
                   <InteractivePieChart data={applicationType} colors={APP_COLORS} innerRadius={55} chartTitle="Application Type" onItemClick={openFromChart} />
                 </ChartCard>
               )}
@@ -427,12 +427,12 @@ export default function SafuMisDashboard({
           {(fraudType.length > 0 || district.length > 0) && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
               {fraudType.length > 0 && (
-                <ChartCard title="Fraud Type (fraud_type)" exportData={fraudType}>
+                <ChartCard title="Fraud Type" exportData={fraudType}>
                   <InteractivePieChart data={fraudType} colors={FRAUD_TYPE_COLORS} innerRadius={55} chartTitle="Fraud Types" onItemClick={openFromChart} />
                 </ChartCard>
               )}
               {district.length > 0 && (
-                <ChartCard title="Cases by District (district_name)" exportData={district}>
+                <ChartCard title="Cases by District" exportData={district}>
                   <InteractiveBarChart data={district} chartTitle="District Cases" layout="vertical" height={260} onItemClick={openFromChart} bars={[{ dataKey: 'value', fill: '#ef4444', name: 'Suspicious Cases' }]} />
                 </ChartCard>
               )}
@@ -441,12 +441,12 @@ export default function SafuMisDashboard({
           {(triggerType.length > 0 || triggerCode.length > 0) && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
               {triggerType.length > 0 && (
-                <ChartCard title="Trigger Type (trigger_type)" exportData={triggerType}>
+                <ChartCard title="Trigger Type" exportData={triggerType}>
                   <InteractiveBarChart data={triggerType} chartTitle="Trigger Types" height={260} onItemClick={openFromChart} bars={[{ dataKey: 'value', fill: '#dc2626', name: 'Triggers' }]} cellColors={TRIGGER_COLORS} />
                 </ChartCard>
               )}
               {triggerCode.length > 0 && (
-                <ChartCard title="Trigger Code (trigger_code)" exportData={triggerCode}>
+                <ChartCard title="Trigger Code" exportData={triggerCode}>
                   <InteractiveBarChart data={triggerCode} chartTitle="Trigger Codes" height={260} onItemClick={openFromChart} bars={[{ dataKey: 'value', fill: '#f97316', name: 'Triggers' }]} />
                 </ChartCard>
               )}
@@ -454,7 +454,7 @@ export default function SafuMisDashboard({
           )}
           {amountRecovered.length > 0 && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <ChartCard title="Amount Recovered (amount_recovered by crt_date)" exportData={amountRecovered}>
+              <ChartCard title="Amount Recovered" exportData={amountRecovered}>
                 <InteractiveBarChart data={amountRecovered} chartTitle="Recovery by Month" height={260} onItemClick={openFromChart} bars={[{ dataKey: 'value', fill: '#10b981', name: 'Recovered (₹)' }]} />
               </ChartCard>
             </div>

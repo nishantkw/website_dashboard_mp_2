@@ -123,7 +123,7 @@ export default function UserMaster() {
         <>
           <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
             {statusData.length > 0 && (
-              <ChartCard title="User Status" subtitle="active_status from user_master_ump" exportData={statusData}>
+              <ChartCard title="User Status" exportData={statusData}>
                 <InteractivePieChart
                   data={statusData}
                   colors={STATUS_COLORS}
@@ -134,7 +134,7 @@ export default function UserMaster() {
               </ChartCard>
             )}
             {genderData.length > 0 && (
-              <ChartCard title="User Gender" subtitle="user_gender" exportData={genderData}>
+              <ChartCard title="User Gender" exportData={genderData}>
                 <InteractivePieChart
                   data={genderData}
                   colors={GENDER_COLORS}
@@ -177,7 +177,7 @@ export default function UserMaster() {
 
           {stateData.length > 0 && (
             <div className="mb-4">
-              <ChartCard title="Users by State" subtitle="user_state_code" exportData={stateData}>
+              <ChartCard title="Users by State" exportData={stateData}>
                 <InteractiveBarChart
                   data={stateData}
                   chartTitle="Users by State"

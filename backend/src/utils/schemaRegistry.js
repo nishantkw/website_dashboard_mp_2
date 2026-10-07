@@ -7,11 +7,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const REGISTRY_PATH = path.join(__dirname, '../data/schemaRegistry.json')
 
 let _cache = null
+let _cacheMtimeMs = 0
 
 function loadRegistryFile() {
-  if (_cache) return _cache
+  const stat = fs.statSync(REGISTRY_PATH)
+  const mtimeMs = Number(stat.mtimeMs) || 0
+  if (_cache && mtimeMs === _cacheMtimeMs) return _cache
   const raw = fs.readFileSync(REGISTRY_PATH, 'utf8')
   _cache = JSON.parse(raw)
+  _cacheMtimeMs = mtimeMs
   return _cache
 }
 
@@ -127,6 +131,8 @@ export function getPrimaryTableForModule(module) {
     fraud: 't_suspicious_api_case_data',
     workflow: 'workflow_users_t',
     lms: 'lms_user_course_completion_status',
+    doctors: 'doctor_details_with_registartionandcaseid',
+    icd_doctors: 'icd_data_doctor_details',
     ump: 'user_master_ump',
     bis: 't_card_printing_status',
   }

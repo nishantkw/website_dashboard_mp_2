@@ -143,6 +143,22 @@ export function filterHospitalRows(rows, q = {}, options = {}) {
       ].join(' ')
       if (!includesLoose(hay, q.search)) return false
     }
+    if (q.date_from || q.date_to) {
+      // Strict: a selected date range must match empanelment date. Missing dates do not count.
+      const raw =
+        row.hosp_empaneled_date ||
+        row.empaneled_date ||
+        row.empanelled_date ||
+        row.enrol_date ||
+        row.enroll_date ||
+        ''
+      const d = String(raw).slice(0, 10)
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return false
+      const from = String(q.date_from || '').slice(0, 10)
+      const to = String(q.date_to || '').slice(0, 10)
+      if (from && d < from) return false
+      if (to && d > to) return false
+    }
     return true
   })
 }

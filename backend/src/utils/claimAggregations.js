@@ -89,16 +89,16 @@ export function filterClaimRows(rows, query = {}) {
         r._specialty_data.toLowerCase().includes(q)
     )
   }
-  if (query.date_from) {
+  if (query.date_from || query.date_to) {
+    const from = String(query.date_from || '').slice(0, 10)
+    const to = String(query.date_to || '').slice(0, 10)
     out = out.filter((r) => {
       const d = String(r.claim_init_date || r.preauth_init_date || r.admission_dt || '').slice(0, 10)
-      return !d || d >= query.date_from
-    })
-  }
-  if (query.date_to) {
-    out = out.filter((r) => {
-      const d = String(r.claim_init_date || r.preauth_init_date || r.admission_dt || '').slice(0, 10)
-      return !d || d <= query.date_to
+      // Strict: undated rows are outside any selected range (e.g. "Today").
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return false
+      if (from && d < from) return false
+      if (to && d > to) return false
+      return true
     })
   }
   if (query.search) {

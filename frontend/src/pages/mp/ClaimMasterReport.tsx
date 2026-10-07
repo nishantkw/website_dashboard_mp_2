@@ -39,6 +39,17 @@ export default function ClaimMasterReport() {
   const columns = useMemo(() => buildMasterReportTableColumns(reportId), [reportId])
   const rows = (data.rows ?? []) as Record<string, string | number>[]
 
+  const exportSheets = useMemo(
+    () => [
+      {
+        name: reportMeta?.title ?? 'Master Report',
+        rows,
+        columns: columns.map((c) => ({ key: c.key, label: c.label })),
+      },
+    ],
+    [reportMeta?.title, rows, columns]
+  )
+
   return (
     <div>
       <div className="mb-4">
@@ -59,6 +70,7 @@ export default function ClaimMasterReport() {
             : 'Connect the backend to load master report data'
         }
         badge={<DataSourceBadge source={source} db={db} loading={loading} />}
+        exportSheets={exportSheets}
       />
       <BackendOfflineNotice error={error} loading={loading} />
 

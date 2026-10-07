@@ -60,6 +60,14 @@ function withMomLabel(kpi: Omit<KPI, 'changeLabel'> & { changeLabel?: string }):
   }
 }
 
+const FIELD_KPI_PREFIX: Record<string, string> = {
+  entity_type: 'Entity Type',
+  application_type: 'Application Type',
+  fraud_type: 'Fraud Type',
+  trigger_type: 'Trigger Type',
+  trigger_code: 'Trigger Code',
+}
+
 function kpisFromField(
   rows: Record<string, unknown>[],
   field: string,
@@ -74,7 +82,12 @@ function kpisFromField(
     grouped[name] = (grouped[name] || 0) + 1
   }
   return Object.entries(grouped).map(([name, value]) =>
-    withMomLabel({ label: `${name} (${field})`, value: String(value), color: colorFn(name) })
+    withMomLabel({
+      label: FIELD_KPI_PREFIX[field] ? `${FIELD_KPI_PREFIX[field]}: ${name}` : name,
+      key: `${field}:${name}`,
+      value: String(value),
+      color: colorFn(name),
+    })
   )
 }
 
@@ -88,7 +101,8 @@ function investigationStatusKpis(cases: Record<string, unknown>[]): KPI[] {
   }
   return Object.entries(grouped).map(([label, group]) =>
     withMomLabel({
-      label: `${label} (investigation_status)`,
+      label,
+      key: `investigation_status:${label}`,
       value: String(group.count),
       color: group.color,
     })
@@ -107,7 +121,7 @@ function schemaCaseKpis(cases: Record<string, unknown>[]): KPI[] {
   ]
   const hospitals = new Set(cases.map((c) => String(c.entity_id ?? '').trim()).filter(Boolean))
   if (hospitals.size) {
-    kpis.push(withMomLabel({ label: 'Hospitals (entity_id)', value: String(hospitals.size), color: 'blue' }))
+    kpis.push(withMomLabel({ label: 'Hospitals', key: 'hospitals', value: String(hospitals.size), color: 'blue' }))
   }
   return kpis
 }
@@ -132,7 +146,7 @@ export function buildSafuKpis(
   if (view === 'doctor-wise') {
     const doctors = new Set(cases.map((c) => c.investigator).filter(filled))
     const extra = doctors.size
-      ? [withMomLabel({ label: 'Active Investigators (investigator)', value: String(doctors.size), color: 'blue' })]
+      ? [withMomLabel({ label: 'Active Investigators', key: 'investigators', value: String(doctors.size), color: 'blue' })]
       : []
     return [...extra, ...caseKpis]
   }
@@ -144,24 +158,34 @@ export function buildSafuKpis(
   return [...caseKpis, ...triggerKpis]
 }
 
+const FRAUD_KPI_FIELDS = 'investigation_status|entity_type|application_type|fraud_type|trigger_type|trigger_code'
+
 export function filterRowsForFraudKpi<T extends Record<string, unknown>>(
-  label: string,
+  kpi: Pick<KPI, 'label' | 'key'>,
   cases: T[],
   triggers: T[]
 ): { rows: T[]; source: 'case' | 'trigger' } | null {
+  const label = kpi.label
+  const key = kpi.key ?? ''
   if (/^suspicious cases$/i.test(label)) return { rows: cases, source: 'case' }
   if (/^triggers$/i.test(label)) return { rows: triggers, source: 'trigger' }
-  if (/^hospitals \(entity_id\)$/i.test(label)) {
+  if (key === 'hospitals' || /^hospitals \(entity_id\)$/i.test(label)) {
     return { rows: cases.filter((row) => filled(row.entity_id)), source: 'case' }
   }
-  if (/^active investigators/i.test(label)) {
+  if (key === 'investigators' || /^active investigators/i.test(label)) {
     return { rows: cases.filter((row) => filled(row.investigator)), source: 'case' }
   }
+  const amountMatch = key.match(/^amount:(.+)$/)
+  if (amountMatch) {
+    const amountField = amountMatch[1]
+    return { rows: cases.filter((row) => Number(row[amountField]) > 0), source: 'case' }
+  }
 
-  const fieldMatch = label.match(/^(.*)\s+\((investigation_status|entity_type|application_type|fraud_type|trigger_type|trigger_code)\)$/i)
-  if (!fieldMatch) return null
-  const name = fieldMatch[1].trim()
-  const field = fieldMatch[2]
+  const keyMatch = key.match(new RegExp(`^(${FRAUD_KPI_FIELDS}):(.*)$`, 'i'))
+  const labelMatch = keyMatch ? null : label.match(new RegExp(`^(.*)\\s+\\((${FRAUD_KPI_FIELDS})\\)$`, 'i'))
+  if (!keyMatch && !labelMatch) return null
+  const name = (keyMatch ? keyMatch[2] : labelMatch![1]).trim()
+  const field = keyMatch ? keyMatch[1] : labelMatch![2]
   const source = field.startsWith('trigger') ? 'trigger' : 'case'
   const rows = source === 'trigger' ? triggers : cases
   const filtered = rows.filter((row) => {

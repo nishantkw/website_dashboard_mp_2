@@ -443,7 +443,7 @@ export default function Beneficiaries() {
             </ChartCard>
           )}
           {enrollStatus.length > 0 && (
-            <ChartCard title="Enrollment Status" subtitle="enrl_status (A = Approved, N = New)" exportData={enrollStatus}>
+            <ChartCard title="Enrollment Status" subtitle="A = Approved, N = New" exportData={enrollStatus}>
               <InteractivePieChart
                 data={enrollStatus}
                 colors={STATUS_COLORS}
@@ -459,7 +459,7 @@ export default function Beneficiaries() {
       {(cardStatus.length > 0 || aadhaarStatus.length > 0 || scheme.length > 0 || benSourceType.length > 0) && (
         <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
           {cardStatus.length > 0 && (
-            <ChartCard title="Card Status" subtitle="card_status" exportData={cardStatus}>
+            <ChartCard title="Card Status" exportData={cardStatus}>
               <InteractivePieChart
                 data={cardStatus}
                 colors={CARD_COLORS}
@@ -470,7 +470,7 @@ export default function Beneficiaries() {
             </ChartCard>
           )}
           {aadhaarStatus.length > 0 && (
-            <ChartCard title="Aadhaar Status" subtitle="aadhar_status" exportData={aadhaarStatus}>
+            <ChartCard title="Aadhaar Status" exportData={aadhaarStatus}>
               <InteractivePieChart
                 data={aadhaarStatus}
                 colors={STATUS_COLORS}
@@ -481,7 +481,7 @@ export default function Beneficiaries() {
             </ChartCard>
           )}
           {scheme.length > 0 && (
-            <ChartCard title="Scheme" subtitle="scheme_code" exportData={scheme}>
+            <ChartCard title="Scheme" exportData={scheme}>
               <InteractiveBarChart
                 data={scheme}
                 chartTitle="Scheme"
@@ -494,7 +494,7 @@ export default function Beneficiaries() {
             </ChartCard>
           )}
           {benSourceType.length > 0 && (
-            <ChartCard title="Beneficiary Source" subtitle="source_type" exportData={benSourceType}>
+            <ChartCard title="Beneficiary Source" exportData={benSourceType}>
               <InteractiveBarChart
                 data={benSourceType}
                 chartTitle="Beneficiary Source"
@@ -512,7 +512,7 @@ export default function Beneficiaries() {
       {(benRelation.length > 0 || authMode.length > 0 || enrollTrend.length > 0) && (
         <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
           {benRelation.length > 0 && (
-            <ChartCard title="Relation" subtitle="relation" exportData={benRelation}>
+            <ChartCard title="Relation" exportData={benRelation}>
               <InteractivePieChart
                 data={benRelation}
                 colors={RELATION_COLORS}
@@ -523,7 +523,7 @@ export default function Beneficiaries() {
             </ChartCard>
           )}
           {authMode.length > 0 && (
-            <ChartCard title="Auth Mode" subtitle="auth_mode" exportData={authMode}>
+            <ChartCard title="Auth Mode" exportData={authMode}>
               <InteractiveBarChart
                 data={authMode}
                 chartTitle="Auth Mode"
@@ -536,7 +536,7 @@ export default function Beneficiaries() {
             </ChartCard>
           )}
           {enrollTrend.length > 0 && (
-            <ChartCard title="Enrollment Trend" subtitle="enrol_date by month" exportData={enrollTrend}>
+            <ChartCard title="Enrollment Trend" subtitle="Enrollments by month" exportData={enrollTrend}>
               <InteractiveLineChart
                 data={enrollTrend}
                 chartTitle="Enroll Trend"
@@ -571,7 +571,7 @@ export default function Beneficiaries() {
           {hasSourceCharts && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
               {sourceRelation.length > 0 && (
-                <ChartCard title="Source Relation" subtitle="relation" exportData={sourceRelation}>
+                <ChartCard title="Source Relation" exportData={sourceRelation}>
                   <InteractivePieChart
                     data={sourceRelation}
                     colors={RELATION_COLORS}
@@ -582,7 +582,7 @@ export default function Beneficiaries() {
                 </ChartCard>
               )}
               {sourceCardStatus.length > 0 && (
-                <ChartCard title="Source Card Status" subtitle="card_status" exportData={sourceCardStatus}>
+                <ChartCard title="Source Card Status" exportData={sourceCardStatus}>
                   <InteractivePieChart
                     data={sourceCardStatus}
                     colors={CARD_COLORS}
@@ -593,7 +593,7 @@ export default function Beneficiaries() {
                 </ChartCard>
               )}
               {sourceType.length > 0 && (
-                <ChartCard title="Source Type" subtitle="source_type / bis_source" exportData={sourceType}>
+                <ChartCard title="Source Type" exportData={sourceType}>
                   <InteractiveBarChart
                     data={sourceType}
                     chartTitle="Source Type"
@@ -606,7 +606,7 @@ export default function Beneficiaries() {
                 </ChartCard>
               )}
               {sourceRuralUrban.length > 0 && (
-                <ChartCard title="Source Rural / Urban" subtitle="rural_urban_flag" exportData={sourceRuralUrban}>
+                <ChartCard title="Source Rural / Urban" exportData={sourceRuralUrban}>
                   <InteractiveBarChart
                     data={sourceRuralUrban}
                     chartTitle="Source Rural/Urban"
@@ -619,7 +619,7 @@ export default function Beneficiaries() {
                 </ChartCard>
               )}
               {sourceNfsa.length > 0 && (
-                <ChartCard title="Source NFSA Type" subtitle="nfsa_type" exportData={sourceNfsa}>
+                <ChartCard title="Source NFSA Type" exportData={sourceNfsa}>
                   <InteractivePieChart
                     data={sourceNfsa}
                     colors={RELATION_COLORS}
@@ -645,7 +645,7 @@ export default function Beneficiaries() {
           {hasDisabledCharts && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
               {disabledReason.length > 0 && (
-                <ChartCard title="Disabled Reason" subtitle="reason_desc" exportData={disabledReason}>
+                <ChartCard title="Disabled Reason" exportData={disabledReason}>
                   <InteractiveBarChart
                     data={disabledReason}
                     chartTitle="Disabled Reason"
@@ -658,7 +658,7 @@ export default function Beneficiaries() {
                 </ChartCard>
               )}
               {disabledCardStatus.length > 0 && (
-                <ChartCard title="Disabled Card Status" subtitle="card_status" exportData={disabledCardStatus}>
+                <ChartCard title="Disabled Card Status" exportData={disabledCardStatus}>
                   <InteractivePieChart
                     data={disabledCardStatus}
                     colors={CARD_COLORS}
@@ -669,7 +669,7 @@ export default function Beneficiaries() {
                 </ChartCard>
               )}
               {disabledSourceType.length > 0 && (
-                <ChartCard title="Disabled Source Type" subtitle="source_type" exportData={disabledSourceType}>
+                <ChartCard title="Disabled Source Type" exportData={disabledSourceType}>
                   <InteractivePieChart
                     data={disabledSourceType}
                     colors={RELATION_COLORS}
@@ -680,7 +680,7 @@ export default function Beneficiaries() {
                 </ChartCard>
               )}
               {disabledTrend.length > 0 && (
-                <ChartCard title="Disabled Trend" subtitle="disabled_date by month" exportData={disabledTrend}>
+                <ChartCard title="Disabled Trend" subtitle="Disabled cards by month" exportData={disabledTrend}>
                   <InteractiveLineChart
                     data={disabledTrend}
                     chartTitle="Disabled Trend"
@@ -718,7 +718,7 @@ export default function Beneficiaries() {
                 </ChartCard>
               )}
               {bisEnroll.length > 0 && (
-                <ChartCard title="BIS Enrollment" subtitle="enrl_status" exportData={bisEnroll}>
+                <ChartCard title="BIS Enrollment" exportData={bisEnroll}>
                   <InteractivePieChart
                     data={bisEnroll}
                     colors={STATUS_COLORS}
@@ -729,7 +729,7 @@ export default function Beneficiaries() {
                 </ChartCard>
               )}
               {bisSourceType.length > 0 && (
-                <ChartCard title="BIS Source Type" subtitle="source_type" exportData={bisSourceType}>
+                <ChartCard title="BIS Source Type" exportData={bisSourceType}>
                   <InteractiveBarChart
                     data={bisSourceType}
                     chartTitle="BIS Source Type"
@@ -742,7 +742,7 @@ export default function Beneficiaries() {
                 </ChartCard>
               )}
               {bisCardStatus.length > 0 && (
-                <ChartCard title="BIS Card Status" subtitle="card_status" exportData={bisCardStatus}>
+                <ChartCard title="BIS Card Status" exportData={bisCardStatus}>
                   <InteractivePieChart
                     data={bisCardStatus}
                     colors={CARD_COLORS}

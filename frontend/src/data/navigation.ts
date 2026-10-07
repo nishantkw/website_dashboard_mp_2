@@ -48,7 +48,7 @@ export const navigation: NavItem[] = [
 
   {
     id: 'mp',
-    label: 'Madhya Pradesh (dmart_mp)',
+    label: 'Madhya Pradesh',
     icon: 'Building2',
     children: [
       { id: 'mp-claims', label: 'Claim Status Dashboard', path: '/dashboard/mp/claims-payments', end: true },
@@ -65,9 +65,26 @@ export const navigation: NavItem[] = [
           { id: 'mp-hospitals-manpower', label: 'HEM Manpower', path: '/dashboard/mp/hospitals/manpower' },
           { id: 'mp-hospitals-lookup', label: 'Hospital Lookup', path: '/dashboard/mp/hospitals/lookup' },
           { id: 'mp-patients', label: 'Patients & Treatment', path: '/dashboard/mp/patients' },
+          { id: 'mp-doctor-details', label: 'Doctor Details', path: '/dashboard/mp/doctor-details' },
+          {
+            id: 'mp-icd-doctor-details',
+            label: 'ICD Doctor Details',
+            path: '/dashboard/mp/icd-doctor-details',
+          },
         ],
       },
-      { id: 'mp-fraud', label: 'Fraud and Audit', path: '/dashboard/mp/fraud-audit' },
+      {
+        id: 'mp-fraud',
+        label: 'Fraud and Audit',
+        children: [
+          { id: 'mp-fraud-audit', label: 'Fraud Dashboard', path: '/dashboard/mp/fraud-audit', end: true },
+          {
+            id: 'mp-nafu-safu-source',
+            label: 'NAFU / SAFU Source',
+            path: '/dashboard/mp/fraud-audit/nafu-safu-source',
+          },
+        ],
+      },
       { id: 'mp-users', label: 'Users & Workflow', path: '/dashboard/mp/users-workflow' },
       { id: 'mp-lms', label: 'LMS Training', path: '/dashboard/mp/lms-training' },
       { id: 'mp-reports', label: 'Report', path: '/dashboard/mp/reports' },

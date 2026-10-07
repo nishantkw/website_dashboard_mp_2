@@ -147,6 +147,9 @@ CREATE TABLE dmart_mp.hospital_master_with_quality_certification_final (
 );
 
 DROP TABLE IF EXISTS dmart_mp.icd_data_doctor_details CASCADE;
+-- ICD codes linked to registration/case — NOT doctor_details_with_registartionandcaseid.
+-- Shared cols with that table: registration_id, case_id, patient_state_code only.
+-- Unique here: id, code, display, type, typedescription, idpk.
 CREATE TABLE dmart_mp.icd_data_doctor_details (
   registration_id text,
   case_id text,

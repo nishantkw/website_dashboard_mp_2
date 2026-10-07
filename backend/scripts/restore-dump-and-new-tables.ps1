@@ -7,6 +7,8 @@ $ErrorActionPreference = 'Stop'
 $backendRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
 $dump = Join-Path $backendRoot '.dump\pmjay.sql'
 $newTablesSql = Join-Path $backendRoot 'sql\010_pmjay_schema_ref_tables.sql'
+$doctorTablesSql = Join-Path $backendRoot 'sql\011_doctor_details.sql'
+$nafuSafuSql = Join-Path $backendRoot 'sql\012_m_nafu_safu_source.sql'
 
 if (-not (Test-Path $dump)) {
   throw "Dump not found: $dump"
@@ -37,13 +39,31 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host ""
-Write-Host "Step 2/3: Creating newer website tables (010)..." -ForegroundColor Cyan
+Write-Host "Step 2/3: Creating newer website tables (010 + 011 + 012)..." -ForegroundColor Cyan
 docker run --rm `
   -v "${backendRoot}\sql:/sql" `
   postgres:16 `
   psql $NeonUrl -v ON_ERROR_STOP=0 -f /sql/010_pmjay_schema_ref_tables.sql
 if ($LASTEXITCODE -ne 0) {
-  throw "Failed creating new tables"
+  throw "Failed creating new tables (010)"
+}
+if (Test-Path $doctorTablesSql) {
+  docker run --rm `
+    -v "${backendRoot}\sql:/sql" `
+    postgres:16 `
+    psql $NeonUrl -v ON_ERROR_STOP=0 -f /sql/011_doctor_details.sql
+  if ($LASTEXITCODE -ne 0) {
+    Write-Host "Doctor details table create finished with errors (often OK if already exists)." -ForegroundColor Yellow
+  }
+}
+if (Test-Path $nafuSafuSql) {
+  docker run --rm `
+    -v "${backendRoot}\sql:/sql" `
+    postgres:16 `
+    psql $NeonUrl -v ON_ERROR_STOP=0 -f /sql/012_m_nafu_safu_source.sql
+  if ($LASTEXITCODE -ne 0) {
+    Write-Host "NAFU/SAFU source table create finished with errors (often OK if already exists)." -ForegroundColor Yellow
+  }
 }
 
 Write-Host ""

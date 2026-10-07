@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState, type ReactNode } from 'react'
+import { useLayoutEffect, useMemo, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import clsx from 'clsx'
 import type { KPI } from '../../types'
@@ -12,7 +12,10 @@ interface PageHeaderProps {
   title: string
   description?: string
   badge?: ReactNode
-  /** KPI cards + graph series for CSV/Excel (PDF still prints the page). */
+  /**
+   * Extra Excel/CSV sheets (KPI cards, charts, tables).
+   * Always merged after the existing Report Info sheet — does not replace it.
+   */
   exportSheets?: ExportSheet[]
 }
 
@@ -21,11 +24,34 @@ function isInternalDescription(text?: string) {
   return /\b(dmart_mp|ump_raw)\./i.test(text) || /schema fields/i.test(text)
 }
 
+const REPORT_INFO_COLUMNS = [
+  { key: 'Page', label: 'Page' },
+  { key: 'Description', label: 'Description' },
+  { key: 'ExportDate', label: 'Export Date' },
+]
+
 export function PageHeader({ title, description, badge, exportSheets }: PageHeaderProps) {
   const publicDescription = isInternalDescription(description) ? undefined : description
-  const exportData = [
-    { Page: title, Description: publicDescription || title, ExportDate: new Date().toLocaleDateString() },
-  ]
+  const reportInfoRows = useMemo(
+    () => [
+      {
+        Page: title,
+        Description: publicDescription || title,
+        ExportDate: new Date().toLocaleDateString('en-IN'),
+      },
+    ],
+    [title, publicDescription]
+  )
+
+  // Keep previous Report Info export, then append KPI/chart/table sheets.
+  const mergedSheets = useMemo((): ExportSheet[] | undefined => {
+    if (!exportSheets?.length) return undefined
+    return [
+      { name: 'Report Info', rows: reportInfoRows, columns: REPORT_INFO_COLUMNS },
+      ...exportSheets,
+    ]
+  }, [exportSheets, reportInfoRows])
+
   const [slot, setSlot] = useState<HTMLElement | null>(null)
   const [ready, setReady] = useState(false)
 
@@ -51,11 +77,11 @@ export function PageHeader({ title, description, badge, exportSheets }: PageHead
           title={title}
           subtitle={publicDescription || title}
           filename={`${title.toLowerCase().replace(/\s+/g, '_')}_report`}
-          data={exportData}
+          data={reportInfoRows}
           buttonSize="sm"
           variant="primary"
           isFullPageExport={true}
-          sheets={exportSheets}
+          sheets={mergedSheets}
           includeVisuals
         />
       </div>

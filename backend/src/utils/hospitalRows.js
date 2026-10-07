@@ -345,3 +345,57 @@ export async function loadHospitalMasterRows(queryParams = {}) {
     lookupTable: lookupLoad.table,
   }
 }
+
+/**
+ * Geo filter for tables that only link to hospitals (hospital_id / hospital_name)
+ * and lack district_name-style columns (e.g. dmart_mp.t_patient_dtls).
+ * Appends SQL to `parts`/`params`. Returns true when a geo constraint was applied.
+ */
+export async function pushHospitalLinkedGeoSql(parts, params, q, cols) {
+  if (!(q?.district || q?.division)) return false
+  const hasId = cols?.has?.('hospital_id')
+  const hasName = cols?.has?.('hospital_name')
+  if (!hasId && !hasName) return false
+
+  const { table } = await loadHospitalMasterRows({
+    division: q.division,
+    district: q.district,
+    state_type: q.state_type,
+  })
+
+  const ids = []
+  const names = []
+  const seenId = new Set()
+  const seenName = new Set()
+  for (const h of table) {
+    for (const key of ['hosp_id', 'facility_id', 'hospital_code']) {
+      const id = String(h[key] ?? '').trim()
+      if (id && !seenId.has(id)) {
+        seenId.add(id)
+        ids.push(id)
+      }
+    }
+    const name = String(h.hospital_name || h.hosp_name || '').trim().toLowerCase()
+    if (name && !seenName.has(name)) {
+      seenName.add(name)
+      names.push(name)
+    }
+  }
+
+  const ors = []
+  if (hasId && ids.length) {
+    params.push(ids)
+    ors.push(`btrim(hospital_id::text) = ANY($${params.length}::text[])`)
+  }
+  if (hasName && names.length) {
+    params.push(names)
+    ors.push(`lower(btrim(COALESCE(hospital_name, '')::text)) = ANY($${params.length}::text[])`)
+  }
+
+  if (!ors.length) {
+    parts.push('FALSE')
+    return true
+  }
+  parts.push(`(${ors.join(' OR ')})`)
+  return true
+}

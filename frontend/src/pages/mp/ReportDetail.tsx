@@ -16,10 +16,13 @@ import { useClaimsFilters } from '../../hooks/useClaimsFilters'
 import { useApiResource } from '../../hooks/useApiResource'
 import {
   fetchFraud,
+  fetchNafuSafuSource,
   fetchClaims,
   fetchBeneficiaries,
   fetchHospitals,
   fetchPatients,
+  fetchDoctors,
+  fetchIcdDoctors,
   fetchLms,
   fetchWorkflow,
   fetchBisCardPrinting,
@@ -497,6 +500,12 @@ export default function ReportDetail() {
         return () => fetchHospitals()
       case 'patients':
         return () => fetchPatients()
+      case 'doctors':
+        return () => fetchDoctors()
+      case 'icd-doctors':
+        return () => fetchIcdDoctors()
+      case 'nafu-safu-source':
+        return () => fetchNafuSafuSource()
       case 'lms':
         return () => fetchLms()
       case 'users':
@@ -571,6 +580,18 @@ export default function ReportDetail() {
         }))
       : tablesRaw
 
+  const exportSheets = useMemo(
+    () =>
+      tables
+        .filter((table) => table.data.length > 0)
+        .map((table) => ({
+          name: tableDisplayTitle(table.title) || table.title,
+          rows: table.data,
+          columns: table.columns.map((c) => ({ key: c.key, label: c.label })),
+        })),
+    [tables]
+  )
+
   return (
     <div>
       <Modal />
@@ -589,6 +610,7 @@ export default function ReportDetail() {
         title={report.title}
         description={report.description}
         badge={<DataSourceBadge source={source} db={db} loading={loading} />}
+        exportSheets={exportSheets}
       />
       <BackendOfflineNotice error={error} loading={loading} />
 

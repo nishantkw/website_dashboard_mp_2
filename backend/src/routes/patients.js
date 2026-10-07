@@ -6,6 +6,8 @@ import { resolveColumns } from '../utils/schemaColumns.js'
 import { getPrimaryTableForModule } from '../utils/schemaRegistry.js'
 import { buildKpi } from '../utils/kpiChange.js'
 import { pushGeoSql } from '../data/mpDivisions.js'
+import { pushHospitalLinkedGeoSql } from '../utils/hospitalRows.js'
+import { tableColumnSet } from '../utils/hospitalIdentity.js'
 import {
   filterTreatmentRows,
   buildTreatmentCharts,
@@ -20,7 +22,9 @@ const primary = getPrimaryTableForModule('patients')
 const SCHEMA = primary?.schema ?? 'dmart_mp'
 const TABLE = primary?.table ?? 't_patient_dtls'
 
-function buildPatientWhere(q) {
+const PATIENT_GEO_NAME_COLS = ['district_name', 'patient_district_name', 'hosp_district_name']
+
+async function buildPatientWhere(q) {
   const parts = []
   const params = []
 
@@ -33,7 +37,17 @@ function buildPatientWhere(q) {
   }
 
   if (q.district || q.division) {
-    pushGeoSql(parts, params, q, ['district_name', 'patient_district_name', 'hosp_district_name'])
+    try {
+      const cols = await tableColumnSet(SCHEMA, TABLE)
+      const available = PATIENT_GEO_NAME_COLS.filter((c) => cols.has(c))
+      if (available.length) {
+        pushGeoSql(parts, params, q, available)
+      } else {
+        await pushHospitalLinkedGeoSql(parts, params, q, cols)
+      }
+    } catch {
+      // Skip geo filter if column probe fails.
+    }
   }
 
   if (q.patient_status) pushIlike(['status_id', 'patient_status', 'ip_op'], q.patient_status)
@@ -95,7 +109,7 @@ async function loadStratificationRows() {
 
 router.get('/', async (req, res) => {
   try {
-    const { clause, params } = buildPatientWhere(req.query)
+    const { clause, params } = await buildPatientWhere(req.query)
 
     let table = []
     let columns = []

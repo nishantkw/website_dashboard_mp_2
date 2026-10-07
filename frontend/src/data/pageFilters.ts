@@ -72,6 +72,22 @@ export const pageFilterConfigs: Record<string, FilterField[]> = {
     { key: 'hospital_status', label: 'Currently Serving', type: 'select', options: USER_STATUS_OPTIONS, column: 'active_status' },
   ],
   mp_hospitals_lookup: [],
+  mp_nafu_safu_source: [
+    { key: 'status', label: 'Status', type: 'select', options: SAFU_CASE_STATUS_OPTIONS, column: 'status' },
+    { key: 'trigger_type', label: 'Trigger Type', type: 'select', options: TRIGGER_TYPE_OPTIONS, column: 'trigger_type' },
+    {
+      key: 'fraud_not_fraud',
+      label: 'Fraud / Not Fraud',
+      type: 'select',
+      options: [
+        { value: 'Fraud', label: 'Fraud' },
+        { value: 'Not Fraud', label: 'Not Fraud' },
+      ],
+      column: 'fraud_not_fraud',
+    },
+    { key: 'date_from', label: 'From Date', type: 'date', column: 'trigger_timestamp' },
+    { key: 'date_to', label: 'To Date', type: 'date', column: 'trigger_timestamp' },
+  ],
   mp_patients: [
     { key: 'division', label: 'Division', type: 'select', options: DIVISION_OPTIONS, column: 'division_name' },
     { key: 'district', label: 'District', type: 'select', options: DISTRICT_OPTIONS, column: 'district_name' },
@@ -79,6 +95,8 @@ export const pageFilterConfigs: Record<string, FilterField[]> = {
     { key: 'date_from', label: 'Admission From', type: 'date', column: 'admission_dt' },
     { key: 'date_to', label: 'Admission To', type: 'date', column: 'admission_dt' },
   ],
+  mp_doctors: [],
+  mp_icd_doctors: [],
   mp_fraud: [
     { key: 'division', label: 'Division', type: 'select', options: DIVISION_OPTIONS, column: 'division_name' },
     { key: 'district', label: 'District', type: 'select', options: DISTRICT_OPTIONS, column: 'district_name' },

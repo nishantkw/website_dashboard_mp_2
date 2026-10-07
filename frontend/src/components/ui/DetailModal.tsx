@@ -399,7 +399,8 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
           ? !String(recDistrict ?? '').trim() || /^unknown$/i.test(String(recDistrict))
           : !recDistrict || districtsMatch(recDistrict, districtFilter))
 
-      const matchDate = rowMatchesDateRange(rec, dateFrom, dateTo)
+      const matchDate =
+        datesLocked || rowMatchesDateRange(rec, dateFrom, dateTo)
 
       return matchSearch && matchStatus && matchDivision && matchDistrict && matchDate
     })
@@ -411,6 +412,7 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
     districtFilter,
     dateFrom,
     dateTo,
+    datesLocked,
     usesPatientGeo,
     showStatusFilter,
     showDivisionFilter,

@@ -154,7 +154,6 @@
     "schema": "dmart_mp",
     "col_count_doc": 9,
     "columns": [
-      "free",
       "registration_id",
       "case_id",
       "id",

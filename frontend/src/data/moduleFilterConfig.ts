@@ -7,7 +7,10 @@ export type ModuleFilterKey =
   | 'mp_hospitals_deempanel'
   | 'mp_hospitals_hem'
   | 'mp_hospitals_lookup'
+  | 'mp_nafu_safu_source'
   | 'mp_patients'
+  | 'mp_doctors'
+  | 'mp_icd_doctors'
   | 'mp_lms'
   | 'mp_workflow'
 
@@ -45,6 +48,23 @@ export const MODULE_FILTER_META: Record<
     searchPlaceholder: 'Lookup code / value...',
     searchColumns: ['lookup_cd', 'lookup_value', 'type', 'created_by'],
   },
+  mp_nafu_safu_source: {
+    title: 'NAFU / SAFU Source Filters',
+    subtitle: 'Status, trigger type, fraud flag, SAFU action and date range',
+    searchPlaceholder: 'Suspicious ID / Entity / Trigger...',
+    searchColumns: [
+      'suspicious_id',
+      'pmrssm_id',
+      'status',
+      'trigger_reason',
+      'trigger_description',
+      'suspicious_entity',
+      'trigger_type',
+      'file_name',
+      'fraud_not_fraud',
+      'safu_action',
+    ],
+  },
   mp_patients: {
     title: 'Patient Filters',
     subtitle: 'Division, district, patient status, dates — search also matches treatment case ID / specialty',
@@ -58,6 +78,33 @@ export const MODULE_FILTER_META: Record<
       'caseid',
       'type_desc',
       'procedure_name',
+    ],
+  },
+  mp_doctors: {
+    title: 'Doctor Details Filters',
+    subtitle: 'Name, registration no., qualification and contact',
+    searchPlaceholder: 'Doctor name / Reg No / Case...',
+    searchColumns: [
+      'docregnum',
+      'docname',
+      'docqualification',
+      'doccontactnumber',
+      'registration_id',
+      'case_id',
+    ],
+  },
+  mp_icd_doctors: {
+    title: 'ICD Doctor Filters',
+    subtitle: 'ICD code, display and type (separate from Doctor Details)',
+    searchPlaceholder: 'ICD code / display / case...',
+    searchColumns: [
+      'code',
+      'display',
+      'type',
+      'typedescription',
+      'registration_id',
+      'case_id',
+      'idpk',
     ],
   },
   mp_lms: {
