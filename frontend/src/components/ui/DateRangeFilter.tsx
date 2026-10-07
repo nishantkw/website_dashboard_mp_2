@@ -33,6 +33,18 @@ export function calcDateRange(preset: Exclude<DatePreset, '' | 'custom'>) {
   return { from, to: end }
 }
 
+/** Restore preset label after refresh when stored dates still match a named range. */
+export function inferDatePreset(dateFrom: string, dateTo: string): DatePreset {
+  if (!dateFrom && !dateTo) return ''
+  for (const preset of ['today', 'yesterday', 'last_7', 'last_30'] as const) {
+    const range = calcDateRange(preset)
+    if (formatLocalDate(range.from) === dateFrom && formatLocalDate(range.to) === dateTo) {
+      return preset
+    }
+  }
+  return 'custom'
+}
+
 interface DateRangeFilterProps {
   dateFrom: string
   dateTo: string
@@ -55,17 +67,17 @@ export default function DateRangeFilter({
   grow = false,
   disabled = false,
 }: DateRangeFilterProps) {
-  const [preset, setPreset] = useState<DatePreset>(() => (dateFrom || dateTo ? 'custom' : ''))
+  const [preset, setPreset] = useState<DatePreset>(() => inferDatePreset(dateFrom, dateTo))
   // Tracks the last (dateFrom, dateTo) this component pushed via onChange, so the effect
-  // below can tell "parent echoed our own change back" apart from "a click elsewhere in the
-  // app (e.g. a chart drill-down) set these props externally" — only the latter should
+  // below can tell "parent echoed our own change back" apart from "a click elsewhere in
+  // the app (e.g. a chart drill-down) set these props externally" — only the latter should
   // force the preset to sync.
   const lastPushed = useRef({ from: dateFrom, to: dateTo })
 
   useEffect(() => {
     if (dateFrom === lastPushed.current.from && dateTo === lastPushed.current.to) return
     lastPushed.current = { from: dateFrom, to: dateTo }
-    setPreset(dateFrom || dateTo ? 'custom' : '')
+    setPreset(inferDatePreset(dateFrom, dateTo))
   }, [dateFrom, dateTo])
 
   const selectClass =
@@ -168,8 +180,43 @@ export default function DateRangeFilter({
 
 const DOB_KEYS = /^(patient_dob|dob|date_of_birth|year_of_birth|card_yob|age)$/i
 
+function toIsoDate(value: unknown): string {
+  const s = String(value ?? '').trim()
+  if (!s) return ''
+  const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`
+  const dmy = s.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})/)
+  if (dmy) return `${dmy[3]}-${dmy[2].padStart(2, '0')}-${dmy[1].padStart(2, '0')}`
+  const d = new Date(s)
+  if (!Number.isNaN(d.getTime())) return d.toISOString().slice(0, 10)
+  return ''
+}
+
+function isHospitalMasterRow(row: Record<string, string | number>): boolean {
+  const hasHosp =
+    row.hosp_id != null ||
+    row.facility_id != null ||
+    row.hospital_name != null ||
+    row.hosp_name != null
+  if (!hasHosp) return false
+  // Claims / payment rows also have hospital fields — keep claim date priority there.
+  if (row.claim_init_date != null || row.preauth_init_date != null || row.case_id != null) return false
+  if (row.start_date != null && (row.stop_payment != null || row.reasons != null)) return false
+  return true
+}
+
 /** Event dates only — same order as claims amount/volume trend charts. Never use DOB. */
 export function getRowDateValue(row: Record<string, string | number>): string | null {
+  // Hospital master: only empanelment date (matches Overview/API hospital date filter).
+  // Do not fall back to deempanel_date / created_dt — that empties the drill-down while the KPI stays non-zero.
+  if (isHospitalMasterRow(row)) {
+    for (const key of ['empaneled_date', 'hosp_empaneled_date', 'empanelled_date', 'enrol_date', 'enroll_date']) {
+      const str = toIsoDate(row[key])
+      if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str
+    }
+    return null
+  }
+
   const dateKeys = [
     // De-empanelment / action tables — prefer action dates over created_dt
     'start_date',
@@ -199,25 +246,13 @@ export function getRowDateValue(row: Record<string, string | number>): string | 
     'submission_date',
   ]
 
-  const toIso = (value: unknown): string => {
-    const s = String(value ?? '').trim()
-    if (!s) return ''
-    const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/)
-    if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`
-    const dmy = s.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})/)
-    if (dmy) return `${dmy[3]}-${dmy[2].padStart(2, '0')}-${dmy[1].padStart(2, '0')}`
-    const d = new Date(s)
-    if (!Number.isNaN(d.getTime())) return d.toISOString().slice(0, 10)
-    return ''
-  }
-
   for (const key of dateKeys) {
-    const str = toIso(row[key])
+    const str = toIsoDate(row[key])
     if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str
   }
   for (const [key, val] of Object.entries(row)) {
     if (DOB_KEYS.test(key) || /dob|birth|yob/i.test(key)) continue
-    const str = toIso(val)
+    const str = toIsoDate(val)
     if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str
   }
   return null
@@ -230,7 +265,8 @@ export function rowMatchesDateRange(
 ): boolean {
   if (!dateFrom && !dateTo) return true
   const rowDate = getRowDateValue(row)
-  if (!rowDate) return true
+  // Strict: missing dates are not in the selected range.
+  if (!rowDate) return false
   if (dateFrom && rowDate < dateFrom) return false
   if (dateTo && rowDate > dateTo) return false
   return true

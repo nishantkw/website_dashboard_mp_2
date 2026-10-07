@@ -709,12 +709,12 @@ export default function Hospitals({ section = 'master' }: { section?: HospitalSe
           {(hemOwnership.length > 0 || hemActive.length > 0) && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
               {hemOwnership.length > 0 && (
-                <ChartCard title="HEM Ownership" subtitle="hosp_type_cd" exportData={hemOwnership}>
+                <ChartCard title="HEM Ownership" exportData={hemOwnership}>
                   <InteractivePieChart data={hemOwnership} colors={TYPE_COLORS} innerRadius={55} chartTitle="HEM Ownership" onItemClick={openFromChart} />
                 </ChartCard>
               )}
               {hemActive.length > 0 && (
-                <ChartCard title="HEM Active Status" subtitle="active_status" exportData={hemActive}>
+                <ChartCard title="HEM Active Status" exportData={hemActive}>
                   <InteractivePieChart data={hemActive} colors={STATUS_COLORS} innerRadius={55} chartTitle="HEM Active Status" onItemClick={openFromChart} />
                 </ChartCard>
               )}
@@ -737,7 +737,7 @@ export default function Hospitals({ section = 'master' }: { section?: HospitalSe
           {(deempanelType.length > 0 || deempanelTrend.length > 0) && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
               {deempanelType.length > 0 && (
-                <ChartCard title="De-empanelment Action Type" subtitle="type" exportData={deempanelType}>
+                <ChartCard title="De-empanelment Action Type" exportData={deempanelType}>
                   <InteractivePieChart data={deempanelType} colors={DEEMPANEL_COLORS} innerRadius={55} chartTitle="De-empanelment Action Type" onItemClick={openFromChart} />
                 </ChartCard>
               )}
@@ -769,12 +769,12 @@ export default function Hospitals({ section = 'master' }: { section?: HospitalSe
           {(lookupCategory.length > 0 || lookupStatus.length > 0) && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
               {lookupCategory.length > 0 && (
-                <ChartCard title="Lookup Categories" subtitle="lookup_cd" exportData={lookupCategory}>
+                <ChartCard title="Lookup Categories" exportData={lookupCategory}>
                   <InteractivePieChart data={lookupCategory} colors={LOOKUP_COLORS} innerRadius={55} chartTitle="Lookup Categories" onItemClick={openFromChart} />
                 </ChartCard>
               )}
               {lookupStatus.length > 0 && (
-                <ChartCard title="Lookup Status" subtitle="active_yn" exportData={lookupStatus}>
+                <ChartCard title="Lookup Status" exportData={lookupStatus}>
                   <InteractivePieChart data={lookupStatus} colors={STATUS_COLORS} innerRadius={55} chartTitle="Lookup Status" onItemClick={openFromChart} />
                 </ChartCard>
               )}

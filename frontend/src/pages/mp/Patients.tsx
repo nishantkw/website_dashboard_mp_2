@@ -265,7 +265,7 @@ export default function Patients() {
         <>
           <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
             {specialtyData.length > 0 && (
-              <ChartCard title="Treatment Specialty" subtitle="From type_desc · top 8 + Others" exportData={specialtyData}>
+              <ChartCard title="Treatment Specialty" subtitle="Top 8 + Others" exportData={specialtyData}>
                 <InteractivePieChart
                   data={specialtyData}
                   colors={SPECIALTY_COLORS}
@@ -301,7 +301,7 @@ export default function Patients() {
               </ChartCard>
             )}
             {trendData.length > 0 && (
-              <ChartCard title="Treatment Trend" subtitle="Records by month (date_on_which)" exportData={trendData}>
+              <ChartCard title="Treatment Trend" subtitle="Records by month" exportData={trendData}>
                 <InteractiveLineChart
                   data={trendData}
                   chartTitle="Treatment Trend"
@@ -339,7 +339,7 @@ export default function Patients() {
           {(morthSeverity.length > 0 || morthGender.length > 0) && (
             <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
               {morthSeverity.length > 0 && (
-                <ChartCard title="Accident Severity" subtitle="accident_severity" exportData={morthSeverity}>
+                <ChartCard title="Accident Severity" exportData={morthSeverity}>
                   <InteractivePieChart
                     data={morthSeverity}
                     colors={STATUS_COLORS}
@@ -350,7 +350,7 @@ export default function Patients() {
                 </ChartCard>
               )}
               {morthGender.length > 0 && (
-                <ChartCard title="MORTH Gender" subtitle="gender" exportData={morthGender}>
+                <ChartCard title="MORTH Gender" exportData={morthGender}>
                   <InteractivePieChart
                     data={morthGender}
                     colors={['#3b82f6', '#ec4899', '#8b5cf6']}

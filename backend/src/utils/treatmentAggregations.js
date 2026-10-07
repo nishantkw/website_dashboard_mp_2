@@ -60,8 +60,9 @@ export function filterTreatmentRows(rows, q = {}) {
   return rows.filter((row) => {
     if (from || to) {
       const d = parseTreatmentDate(row.date_on_which)
-      if (from && d && d < from) return false
-      if (to && d && d > to) return false
+      if (!d) return false
+      if (from && d < from) return false
+      if (to && d > to) return false
     }
     if (search) {
       const hay = [

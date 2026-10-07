@@ -14,9 +14,12 @@ import Hospitals from './pages/mp/Hospitals'
 import HemManpower from './pages/mp/HemManpower'
 import Patients from './pages/mp/Patients'
 import FraudAudit from './pages/mp/FraudAudit'
+import NafuSafuSource from './pages/mp/NafuSafuSource'
 import SafuMisRoute from './pages/mp/SafuMisRoute'
 import UsersWorkflow from './pages/mp/UsersWorkflow'
 import LmsTraining from './pages/mp/LmsTraining'
+import DoctorDetails from './pages/mp/DoctorDetails'
+import IcdDoctorDetails from './pages/mp/IcdDoctorDetails'
 import Reports from './pages/mp/Reports'
 import ReportDetail from './pages/mp/ReportDetail'
 import UserMaster from './pages/ump/UserMaster'
@@ -53,7 +56,10 @@ export default function App() {
                 <Route path="mp/hospitals/manpower" element={<HemManpower />} />
                 <Route path="mp/hospitals/lookup" element={<Hospitals section="lookup" />} />
                 <Route path="mp/patients" element={<Patients />} />
+                <Route path="mp/doctor-details" element={<DoctorDetails />} />
+                <Route path="mp/icd-doctor-details" element={<IcdDoctorDetails />} />
                 <Route path="mp/fraud-audit" element={<FraudAudit />} />
+                <Route path="mp/fraud-audit/nafu-safu-source" element={<NafuSafuSource />} />
                 <Route path="mp/safu/:view" element={<SafuMisRoute />} />
                 <Route path="mp/users-workflow" element={<UsersWorkflow />} />
                 <Route path="mp/lms-training" element={<LmsTraining />} />

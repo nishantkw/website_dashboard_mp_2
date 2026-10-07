@@ -1,15 +1,14 @@
-import { useRef, useState, useMemo, useEffect, useCallback } from 'react'
+import { useMemo } from 'react'
 import ChartCard from '../components/ui/ChartCard'
 import DashboardReportsBanner from '../components/ui/DashboardReportsBanner'
 import { PageHeader, KPIGrid } from '../components/ui/PageHeader'
 import { InteractiveBarChart, InteractiveLineChart, InteractivePieChart } from '../components/charts/InteractiveCharts'
 import { useDrillDown } from '../hooks/useDrillDown'
 import { useApiResource } from '../hooks/useApiResource'
-import { fetchOverview, fetchOverviewHospitals, fetchClaims, fetchHospitalsExport, fetchBeneficiaries, fetchFraud, fetchPatients, fetchLms, fetchWorkflow, fetchBisCardPrinting } from '../api/endpoints'
+import { fetchOverview, fetchOverviewHospitals, fetchClaims, fetchBeneficiaries, fetchFraud, fetchPatients, fetchLms, fetchWorkflow, fetchBisCardPrinting } from '../api/endpoints'
 import DataSourceBadge from '../components/ui/DataSourceBadge'
 import BackendOfflineNotice from '../components/ui/BackendOfflineNotice'
 import { schemaTableColumns } from '../utils/schemaColumns'
-import { TABLE_PAGE_SIZE } from '../hooks/useTableControls'
 import { useGlobalFilters } from '../context/FilterContext'
 import { monthLabelToRange } from '../utils/chartDrillDown'
 import { canonicalMpDistrict, getDivisionForDistrict } from '../data/filterOptions'
@@ -123,13 +122,6 @@ const HOSPITAL_PREFERRED: TableColumn[] = [
 ]
 
 export default function Overview() {
-  const tableRef = useRef<HTMLDivElement>(null)
-  const [hospitalRows, setHospitalRows] = useState<Record<string, string | number>[]>([])
-  const [hospitalColumns, setHospitalColumns] = useState<TableColumn[]>([])
-  const [hospitalLoading, setHospitalLoading] = useState(false)
-  const [hospitalError, setHospitalError] = useState('')
-  const [hospitalPage, setHospitalPage] = useState(1)
-  const [hospitalTotal, setHospitalTotal] = useState(0)
   const { globalFilters } = useGlobalFilters()
   const overviewQs = useMemo(() => {
     const params = new URLSearchParams()
@@ -138,15 +130,17 @@ export default function Overview() {
       if (globalFilters.division) params.set('division', globalFilters.division)
       if (globalFilters.district) params.set('district', globalFilters.district)
     }
+    if (globalFilters.date_from) params.set('date_from', globalFilters.date_from)
+    if (globalFilters.date_to) params.set('date_to', globalFilters.date_to)
     const s = params.toString()
     return s ? `?${s}` : ''
-  }, [globalFilters.state_type, globalFilters.division, globalFilters.district])
-
-  useEffect(() => {
-    setHospitalPage(1)
-    setHospitalRows([])
-    setHospitalTotal(0)
-  }, [overviewQs])
+  }, [
+    globalFilters.state_type,
+    globalFilters.division,
+    globalFilters.district,
+    globalFilters.date_from,
+    globalFilters.date_to,
+  ])
 
   const { data, source, db, loading, error } = useApiResource(
     () => fetchOverview(overviewQs),
@@ -246,19 +240,14 @@ export default function Overview() {
       : undefined,
   })
 
-  const showHospitalTable = async (title = 'Hospitals', pageNum = 1) => {
-    setHospitalError('')
-    setHospitalLoading(true)
-    if (pageNum === 1) {
-      openDetail({ title, subtitle: 'Loading unique hospitals…', loading: true, source: 'api' })
-    }
+  const showHospitalTable = async (title = 'Hospitals') => {
+    openDetail({ title, subtitle: 'Loading unique hospitals…', loading: true, source: 'api' })
     try {
+      // Load the full unique set (not the 200-row page) so the modal matches the KPI count.
       const params = new URLSearchParams(overviewQs.replace(/^\?/, ''))
-      params.set('limit', String(TABLE_PAGE_SIZE))
-      params.set('offset', String((pageNum - 1) * TABLE_PAGE_SIZE))
-      const res = await fetchOverviewHospitals(`?${params.toString()}`)
+      params.set('detail', '1')
+      const res = await fetchOverviewHospitals(`?${params.toString()}`, 120000)
       if (!res.ok) {
-        setHospitalError(res.error || 'Could not load hospitals')
         openDetail({
           title,
           subtitle: 'Could not load hospitals',
@@ -276,29 +265,24 @@ export default function Overview() {
         preferredFirst: HOSPITAL_PREFERRED.map((c) => c.key),
         demoColumns: HOSPITAL_PREFERRED,
       })
-      setHospitalRows(rows)
-      setHospitalColumns(columns)
-      setHospitalTotal(total)
-      setHospitalPage(pageNum)
       openDetail({
         title,
-        subtitle: `${total.toLocaleString()} unique hospital${total === 1 ? '' : 's'}`,
+        subtitle: `${total.toLocaleString('en-IN')} unique hospital${total === 1 ? '' : 's'}`,
         records: rows,
         columns,
         datasetTitle: 'Hospitals',
         source: 'api',
       })
-    } finally {
-      setHospitalLoading(false)
+    } catch (err) {
+      openDetail({
+        title,
+        subtitle: err instanceof Error ? err.message : 'Could not load hospitals',
+        records: [],
+        columns: [],
+        source: 'api',
+      })
     }
   }
-
-  const fetchOverviewHospitalExport = useCallback(async () => {
-    const res = await fetchHospitalsExport(overviewQs)
-    if (!res.ok) return []
-    return (res.data.table ?? []) as Record<string, string | number>[]
-  }, [overviewQs])
-
   const KPI_FETCH_MS = 60000
 
   const showKpiRecords = async (kpi: KPI) => {

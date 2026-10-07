@@ -105,19 +105,21 @@ function Flyout({
   return createPortal(
     <div
       className={clsx(
-        'fixed z-[80] rounded-lg border border-slate-700 bg-slate-800 shadow-2xl',
+        'fixed z-[80] flex flex-col rounded-lg border border-slate-700 bg-slate-800 shadow-2xl',
         children ? 'min-w-[15rem] max-w-[18rem] py-1' : 'px-2.5 py-1.5'
       )}
-      style={{ top, left: rect.right + 10 }}
+      style={{ top, left: rect.right + 10, maxHeight: window.innerHeight - top - 8 }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
       {children ? (
-        <p className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-400">{title}</p>
+        <p className="shrink-0 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-400">{title}</p>
       ) : (
         <p className="whitespace-nowrap text-sm font-medium text-white">{title}</p>
       )}
-      {children}
+      {children && (
+        <div className="sidebar-flyout-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain pb-1">{children}</div>
+      )}
     </div>,
     document.body
   )
@@ -147,11 +149,7 @@ function CompactLeafLink({ child, onNavigate }: { child: NavItem; onNavigate?: (
 function CompactFlyoutGroup({ item }: { item: NavItem }) {
   const location = useLocation()
   const isChildActive = hasActiveDescendant(item, location.pathname)
-  const [open, setOpen] = useState(isChildActive)
-
-  useEffect(() => {
-    if (isChildActive) setOpen(true)
-  }, [isChildActive])
+  const [open, setOpen] = useState(false)
 
   if (!item.children?.length) {
     return <CompactLeafLink child={item} />
@@ -261,11 +259,7 @@ function NavChildLink({ child, nested = false }: { child: NavItem; nested?: bool
 function NestedNavGroup({ item }: { item: NavItem }) {
   const location = useLocation()
   const isChildActive = hasActiveDescendant(item, location.pathname)
-  const [open, setOpen] = useState(isChildActive)
-
-  useEffect(() => {
-    if (isChildActive) setOpen(true)
-  }, [isChildActive])
+  const [open, setOpen] = useState(false)
 
   return (
     <div className="rounded-lg">

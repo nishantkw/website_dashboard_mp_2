@@ -17,6 +17,7 @@ export default function DashboardLayout() {
   const isUserManagementPage = location.pathname.includes('/user-management')
   const isImportPage = location.pathname.includes('/import-bulk-data')
   const isFraudAuditPage = location.pathname.includes('/mp/fraud-audit')
+  const isNafuSafuSourcePage = location.pathname.includes('/mp/fraud-audit/nafu-safu-source')
   const isClaimsPage =
     location.pathname.includes('/mp/claims-payments') ||
     location.pathname.includes('/mp/claim-payment-details')
@@ -28,12 +29,15 @@ export default function DashboardLayout() {
   const isReportsCatalogPage = /\/mp\/reports\/?$/.test(location.pathname.replace(/\/+$/, '') || '/')
   const isHospitalsPage = location.pathname.includes('/mp/hospitals')
   const isPatientsPage = location.pathname.includes('/mp/patients')
+  const isDoctorsPage = location.pathname.includes('/mp/doctor-details')
+  const isIcdDoctorsPage = location.pathname.includes('/mp/icd-doctor-details')
   const isLmsPage = location.pathname.includes('/mp/lms-training')
   const isWorkflowPage = location.pathname.includes('/mp/users-workflow')
   const hideFilters =
     isUserManagementPage ||
     isImportPage ||
     isFraudAuditPage ||
+    isNafuSafuSourcePage ||
     isFraudReportPage ||
     isClaimsPage ||
     isClaimsReportPage ||
@@ -43,6 +47,8 @@ export default function DashboardLayout() {
     isReportsCatalogPage ||
     isHospitalsPage ||
     isPatientsPage ||
+    isDoctorsPage ||
+    isIcdDoctorsPage ||
     isLmsPage ||
     isWorkflowPage
 

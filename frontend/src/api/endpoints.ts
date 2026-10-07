@@ -368,6 +368,39 @@ export async function fetchPatients(qs = '', timeoutMs = 8000) {
   }>(`/patients${qs}`, {}, timeoutMs)
 }
 
+export async function fetchNafuSafuSource(qs = '', timeoutMs = 8000) {
+  return apiFetch<{
+    kpis: KPI[]
+    charts: Record<string, ChartDataPoint[]>
+    table: Record<string, string | number>[]
+    columns?: string[]
+    schema?: string
+    db?: string
+  }>(`/nafu-safu-source${qs}`, {}, timeoutMs)
+}
+
+export async function fetchDoctors(qs = '', timeoutMs = 8000) {
+  return apiFetch<{
+    kpis: KPI[]
+    charts: Record<string, ChartDataPoint[]>
+    table: Record<string, string | number>[]
+    columns?: string[]
+    schema?: string
+    db?: string
+  }>(`/doctors${qs}`, {}, timeoutMs)
+}
+
+export async function fetchIcdDoctors(qs = '', timeoutMs = 8000) {
+  return apiFetch<{
+    kpis: KPI[]
+    charts: Record<string, ChartDataPoint[]>
+    table: Record<string, string | number>[]
+    columns?: string[]
+    schema?: string
+    db?: string
+  }>(`/icd-doctors${qs}`, {}, timeoutMs)
+}
+
 export async function fetchLms(qs = '', timeoutMs = 8000) {
   return apiFetch<{
     kpis: KPI[]

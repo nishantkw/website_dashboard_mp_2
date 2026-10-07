@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useMemo, useEffect, type ReactNode } from 'react'
 import type { FilterValues } from '../types'
 import { getDistrictsForDivision, getDivisionForDistrict } from '../data/filterOptions'
 
@@ -37,11 +37,43 @@ export const defaultGlobalFilters: FilterValues = {
   date_to: '',
 }
 
+const STORAGE_KEY = 'dashboard_global_filters'
+
+function loadStoredGlobalFilters(): { filters: FilterValues; search: string } {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return { filters: { ...defaultGlobalFilters }, search: '' }
+    const parsed = JSON.parse(raw) as { filters?: Partial<FilterValues>; search?: string }
+    const filters: FilterValues = { ...defaultGlobalFilters }
+    if (parsed.filters && typeof parsed.filters === 'object') {
+      for (const key of Object.keys(defaultGlobalFilters) as (keyof FilterValues)[]) {
+        const val = parsed.filters[key]
+        if (typeof val === 'string') filters[key] = val
+      }
+    }
+    return {
+      filters,
+      search: typeof parsed.search === 'string' ? parsed.search : '',
+    }
+  } catch {
+    return { filters: { ...defaultGlobalFilters }, search: '' }
+  }
+}
+
 const FilterContext = createContext<FilterContextValue | null>(null)
 
 export function FilterProvider({ children }: { children: ReactNode }) {
-  const [globalFilters, setGlobalFilters] = useState<FilterValues>(defaultGlobalFilters)
-  const [search, setSearch] = useState('')
+  const stored = useMemo(() => loadStoredGlobalFilters(), [])
+  const [globalFilters, setGlobalFilters] = useState<FilterValues>(stored.filters)
+  const [search, setSearch] = useState(stored.search)
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ filters: globalFilters, search }))
+    } catch {
+      // Ignore quota / private-mode failures.
+    }
+  }, [globalFilters, search])
 
   const setGlobalFilter = useCallback((key: string, value: string) => {
     setGlobalFilters((prev) => {
@@ -69,8 +101,13 @@ export function FilterProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const clearGlobalFilters = useCallback(() => {
-    setGlobalFilters(defaultGlobalFilters)
+    setGlobalFilters({ ...defaultGlobalFilters })
     setSearch('')
+    try {
+      localStorage.removeItem(STORAGE_KEY)
+    } catch {
+      // ignore
+    }
   }, [])
 
   const activeGlobalCount =

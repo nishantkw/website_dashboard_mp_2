@@ -44,10 +44,26 @@ export const REPORT_CATALOG: Omit<ReportDefinition, 'tables'>[] = [
     description: 'Patient master, treatment details, MORTH patients, and treatment stratification',
   },
   {
+    id: 'doctors',
+    title: 'Doctor Details Report',
+    description:
+      'Doctor name, registration no., qualification and contact',
+  },
+  {
+    id: 'icd-doctors',
+    title: 'ICD Doctor Details Report',
+    description: 'ICD codes and display text by case (separate from Doctor Details)',
+  },
+  {
     id: 'fraud-audit',
     title: 'Fraud and Audit Report',
     description:
       'Fraud case records, trigger details, hospital master, workflow users, and workflow audit trail',
+  },
+  {
+    id: 'nafu-safu-source',
+    title: 'NAFU / SAFU Source Report',
+    description: 'Source feed of suspicious triggers, risk scores, and SAFU actions',
   },
   {
     id: 'users',
@@ -410,6 +426,28 @@ const REPORT_TABLES: Record<string, ReportDefinition['tables']> = {
     columns: FRAUD_DEMO_COLUMNS[spec.tableKey] ?? schemaColumns(spec.columnKeys),
     data: FRAUD_EMPTY_DATA[spec.tableKey] ?? EMPTY_ROWS,
   })),
+  'nafu-safu-source': [
+    {
+      title: 'NAFU / SAFU Source',
+      columns: [
+        { key: 'suspicious_id', label: 'Suspicious ID' },
+        { key: 'pmrssm_id', label: 'PMRSSM ID' },
+        { key: 'status', label: 'Status' },
+        { key: 'trigger_type', label: 'Trigger Type' },
+        { key: 'trigger_reason', label: 'Trigger Reason' },
+        { key: 'suspicious_entity', label: 'Entity' },
+        { key: 'risk_score', label: 'Risk Score', align: 'right' },
+        { key: 'fraud_not_fraud', label: 'Fraud / Not Fraud' },
+        { key: 'safu_action', label: 'SAFU Action' },
+        { key: 'trigger_timestamp', label: 'Trigger Time' },
+        { key: 'state_code', label: 'State Code' },
+        { key: 'file_name', label: 'File Name' },
+        { key: 'updated_by', label: 'Updated By' },
+        { key: 'updated_dt', label: 'Updated At' },
+      ],
+      data: EMPTY_ROWS,
+    },
+  ],
   users: [
     {
       title: 'Workflow User Records',
@@ -488,6 +526,38 @@ const REPORT_TABLES: Record<string, ReportDefinition['tables']> = {
         { key: 'abdm_status', label: 'ABDM Status' },
         { key: 'ab_pmjay_completed', label: 'PMJAY Completed' },
         { key: 'abdm_completed', label: 'ABDM Completed' },
+      ],
+      data: EMPTY_ROWS,
+    },
+  ],
+  doctors: [
+    {
+      title: 'Doctor Details',
+      columns: [
+        { key: 'docregnum', label: 'Doctor Reg. No.' },
+        { key: 'docname', label: 'Doctor Name' },
+        { key: 'docqualification', label: 'Qualification' },
+        { key: 'doccontactnumber', label: 'Contact Number' },
+        { key: 'registration_id', label: 'Doctor Page Registration ID' },
+        { key: 'case_id', label: 'Doctor Page Case ID' },
+        { key: 'patient_state_code', label: 'Doctor Page State Code' },
+      ],
+      data: EMPTY_ROWS,
+    },
+  ],
+  'icd-doctors': [
+    {
+      title: 'ICD Doctor Details',
+      columns: [
+        { key: 'code', label: 'ICD Code' },
+        { key: 'display', label: 'ICD Display' },
+        { key: 'type', label: 'ICD Type' },
+        { key: 'typedescription', label: 'Type Description' },
+        { key: 'id', label: 'ICD Row ID' },
+        { key: 'idpk', label: 'ICD PK' },
+        { key: 'registration_id', label: 'ICD Registration ID' },
+        { key: 'case_id', label: 'ICD Case ID' },
+        { key: 'patient_state_code', label: 'ICD State Code' },
       ],
       data: EMPTY_ROWS,
     },

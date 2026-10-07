@@ -106,6 +106,39 @@ async function fetchExistingByKeys(schema, table, keyCols, rows) {
   return serializeRows(found)
 }
 
+function sqlTypeForRegistryColumn(col) {
+  const t = String(col?.type || 'text').toLowerCase()
+  if (t.includes('smallint')) return 'smallint'
+  if (t.includes('bigint')) return 'bigint'
+  if (t === 'int' || t === 'integer') return 'integer'
+  if (t.includes('bool')) return 'boolean'
+  if (t.includes('timestamptz') || t.includes('timestamp with time zone')) return 'timestamptz'
+  if (t.includes('timestamp')) return 'timestamp'
+  if (t === 'date') return 'date'
+  if (t.includes('numeric') || t.includes('decimal') || t.includes('double') || t.includes('real')) return 'numeric'
+  return 'text'
+}
+
+/** Create missing physical tables from schemaRegistry so import can proceed. */
+async function ensureRegistryTable(tableDef) {
+  assertSafeIdent(tableDef.schema, 'schema')
+  assertSafeIdent(tableDef.table, 'table')
+  await query(`CREATE SCHEMA IF NOT EXISTS ${tableDef.schema}`)
+  const cols = Array.isArray(tableDef.columns) ? tableDef.columns : []
+  if (!cols.length) {
+    throw new Error(`Table ${tableDef.schema}.${tableDef.table} does not exist and has no registry columns to create`)
+  }
+  const parts = []
+  for (const col of cols) {
+    assertSafeIdent(col.name, 'column')
+    parts.push(`${col.name} ${sqlTypeForRegistryColumn(col)}`)
+  }
+  await query(
+    `CREATE TABLE IF NOT EXISTS ${tableDef.schema}.${tableDef.table} (\n  ${parts.join(',\n  ')}\n)`
+  )
+  console.warn(`[import] created missing table ${tableDef.schema}.${tableDef.table}`)
+}
+
 /**
  * Insert mapped rows, automatically skipping file duplicates and rows already in the database.
  */
@@ -113,7 +146,11 @@ export async function insertMappedRows(tableDef, rows) {
   assertSafeIdent(tableDef.schema, 'schema')
   assertSafeIdent(tableDef.table, 'table')
 
-  const tableType = await getTableType(tableDef.schema, tableDef.table)
+  let tableType = await getTableType(tableDef.schema, tableDef.table)
+  if (!tableType) {
+    await ensureRegistryTable(tableDef)
+    tableType = await getTableType(tableDef.schema, tableDef.table)
+  }
   if (!tableType) {
     throw new Error(`Table ${tableDef.schema}.${tableDef.table} does not exist`)
   }

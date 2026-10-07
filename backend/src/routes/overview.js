@@ -5,7 +5,8 @@ import { getPrimaryTableForModule } from '../utils/schemaRegistry.js'
 import { changeFromCounts, isSafeIdent, monthOverMonthChange } from '../utils/kpiChange.js'
 import { loadClaimRows, countClaimRows, monthCountsForClaimTables } from '../utils/claimSources.js'
 import { initiatedAmount } from '../utils/claimStatusMapping.js'
-import { loadHospitalMasterRows } from '../utils/hospitalRows.js'
+import { loadHospitalMasterRows, pushHospitalLinkedGeoSql } from '../utils/hospitalRows.js'
+import { pushGeoSql } from '../data/mpDivisions.js'
 import {
   tableColumnSet,
   hospitalIdentitySql,
@@ -30,10 +31,14 @@ const KPI_META = [
   { mod: 'bis', label: 'Card Printing', color: 'violet' },
 ]
 
-async function countTable(schema, table, { uniqueHospital = false, queryParams = {} } = {}) {
-  if (uniqueHospital) return countUniqueHospitals(queryParams)
-  const res = await query(`SELECT COUNT(*)::int AS c FROM ${schema}.${table}`)
-  return res.rows[0].c
+/** District columns used when overview global division/district filters are set. */
+const MODULE_GEO_COLUMNS = {
+  beneficiaries: ['dist_name', 'district_name', 'district'],
+  patients: ['district_name', 'patient_district_name', 'hosp_district_name'],
+  fraud: ['district_name', 'hosp_district_name', 'patient_district_name'],
+  bis: ['district_name', 'district', 'district_cd', 'sub_district_name'],
+  workflow: ['patient_district_name', 'hosp_district_name', 'district_name'],
+  lms: ['district_name', 'dist_name'],
 }
 
 async function findDateColumn(schema, table) {
@@ -53,6 +58,58 @@ async function findDateColumn(schema, table) {
   )
   const name = res.rows[0]?.column_name
   return isSafeIdent(name) ? name : null
+}
+
+async function pushDateRangeSql(parts, params, schema, table, queryParams) {
+  const from = String(queryParams.date_from || '').slice(0, 10)
+  const to = String(queryParams.date_to || '').slice(0, 10)
+  if (!from && !to) return true
+  const col = await findDateColumn(schema, table)
+  if (!col) return false
+  if (from) {
+    params.push(from)
+    parts.push(`${col}::date >= $${params.length}::date`)
+  }
+  if (to) {
+    params.push(to)
+    parts.push(`${col}::date <= $${params.length}::date`)
+  }
+  return true
+}
+
+async function countTable(schema, table, { uniqueHospital = false, queryParams = {}, geoColumns = [] } = {}) {
+  if (uniqueHospital) return countUniqueHospitals(queryParams)
+
+  const parts = []
+  const params = []
+  const hasGeo = Boolean(queryParams.district || queryParams.division)
+  const hasDate = Boolean(queryParams.date_from || queryParams.date_to)
+
+  if (hasGeo || hasDate) {
+    try {
+      if (hasGeo) {
+        const cols = await tableColumnSet(schema, table)
+        const available = geoColumns.filter((c) => cols.has(c))
+        if (available.length) {
+          pushGeoSql(parts, params, queryParams, available)
+        } else {
+          // t_patient_dtls has district_code / hospital_id only — no name columns.
+          await pushHospitalLinkedGeoSql(parts, params, queryParams, cols)
+        }
+      }
+      if (hasDate) {
+        const applied = await pushDateRangeSql(parts, params, schema, table, queryParams)
+        // No date column → cannot satisfy a selected range (e.g. "Today") → 0.
+        if (!applied) return 0
+      }
+    } catch {
+      // Fall through to unfiltered count if column probe fails.
+    }
+  }
+
+  const where = parts.length ? `WHERE ${parts.join(' AND ')}` : ''
+  const res = await query(`SELECT COUNT(*)::int AS c FROM ${schema}.${table} ${where}`, params)
+  return res.rows[0].c
 }
 
 async function monthCountsForTable(schema, table, { uniqueHospital = false } = {}) {
@@ -148,7 +205,8 @@ router.get('/', async (req, res) => {
         }
         counts[mod] = await countTable(primary.schema, primary.table, {
           uniqueHospital: mod === 'hospitals',
-          queryParams: mod === 'hospitals' ? q : {},
+          queryParams: q,
+          geoColumns: MODULE_GEO_COLUMNS[mod] || [],
         })
         momByMod[mod] = await monthCountsForTable(primary.schema, primary.table, {
           uniqueHospital: mod === 'hospitals',

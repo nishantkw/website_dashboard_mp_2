@@ -13,7 +13,10 @@ import claimsRoutes from './routes/claims.js'
 import beneficiariesRoutes from './routes/beneficiaries.js'
 import hospitalsRoutes from './routes/hospitals.js'
 import fraudRoutes from './routes/fraud.js'
+import nafuSafuSourceRoutes from './routes/nafuSafuSource.js'
 import patientsRoutes from './routes/patients.js'
+import doctorsRoutes from './routes/doctors.js'
+import icdDoctorsRoutes from './routes/icdDoctors.js'
 import lmsRoutes from './routes/lms.js'
 import workflowRoutes from './routes/workflow.js'
 import umpRoutes from './routes/ump.js'
@@ -91,7 +94,10 @@ app.use('/api/claims', requireAuth, requireRole(ROLES.mp), claimsRoutes)
 app.use('/api/beneficiaries', requireAuth, requireRole(ROLES.mp), beneficiariesRoutes)
 app.use('/api/hospitals', requireAuth, requireRole(ROLES.mp), hospitalsRoutes)
 app.use('/api/fraud', requireAuth, requireRole(ROLES.mp), fraudRoutes)
+app.use('/api/nafu-safu-source', requireAuth, requireRole(ROLES.mp), nafuSafuSourceRoutes)
 app.use('/api/patients', requireAuth, requireRole(ROLES.mp), patientsRoutes)
+app.use('/api/doctors', requireAuth, requireRole(ROLES.mp), doctorsRoutes)
+app.use('/api/icd-doctors', requireAuth, requireRole(ROLES.mp), icdDoctorsRoutes)
 app.use('/api/lms', requireAuth, requireRole(ROLES.mp), lmsRoutes)
 app.use('/api/workflow', requireAuth, requireRole(ROLES.mp), workflowRoutes)
 app.use('/api/ump', requireAuth, requireRole(ROLES.ump), umpRoutes)

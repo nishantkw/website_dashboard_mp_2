@@ -128,7 +128,7 @@ export function monthOverMonthChange(rows, options = {}) {
 /**
  * Build a KPI object with MoM change derived from DB rows.
  */
-export function buildKpi({ label, value, color, rows = [], predicate, dateFields }) {
+export function buildKpi({ label, value, color, rows = [], predicate, dateFields, key }) {
   const { change, changeLabel } = monthOverMonthChange(rows, { predicate, dateFields })
   return {
     label,
@@ -136,6 +136,7 @@ export function buildKpi({ label, value, color, rows = [], predicate, dateFields
     change,
     changeLabel,
     color,
+    ...(key ? { key } : {}),
   }
 }
 

@@ -2229,6 +2229,40 @@
       ]
     },
     {
+      "id": "dmart_mp.m_nafu_safu_source",
+      "logicalName": "m_nafu_safu_source",
+      "schema": "dmart_mp",
+      "table": "m_nafu_safu_source",
+      "label": "NAFU / SAFU Source",
+      "source": "m_nafu_safu_source.csv / Neon information_schema",
+      "module": "fraud",
+      "moduleLabel": "Fraud and Audit",
+      "primaryKey": "id",
+      "autoGeneratePk": false,
+      "columns": [
+        { "name": "id", "type": "integer" },
+        { "name": "suspicious_id", "type": "text" },
+        { "name": "state_code", "type": "integer" },
+        { "name": "pmrssm_id", "type": "text" },
+        { "name": "trigger_timestamp", "type": "timestamptz" },
+        { "name": "status", "type": "text" },
+        { "name": "trigger_reason", "type": "text" },
+        { "name": "trigger_description", "type": "text" },
+        { "name": "suspicious_entity", "type": "text" },
+        { "name": "risk_score", "type": "integer" },
+        { "name": "trigger_type", "type": "text" },
+        { "name": "file_name", "type": "text" },
+        { "name": "status_sent_by_state", "type": "text" },
+        { "name": "fraud_not_fraud", "type": "text" },
+        { "name": "flag", "type": "integer" },
+        { "name": "api_response_date", "type": "timestamptz" },
+        { "name": "state_cases_push_date", "type": "timestamptz" },
+        { "name": "safu_action", "type": "text" },
+        { "name": "updated_by", "type": "text" },
+        { "name": "updated_dt", "type": "timestamptz" }
+      ]
+    },
+    {
       "id": "dmart_mp.hospital_master",
       "logicalName": "hospital_master",
       "schema": "dmart_mp",
@@ -2977,11 +3011,11 @@
       "logicalName": "icd_data_doctor_details",
       "schema": "dmart_mp",
       "table": "icd_data_doctor_details",
-      "label": "Icd Data Doctor Details",
-      "source": "database_documentation.docx",
-      "module": "patients",
-      "moduleLabel": "Patients & Treatment",
-      "primaryKey": "registration_id",
+      "label": "ICD Doctor Details (codes)",
+      "source": "icd_data_doctor_details.csv / Neon information_schema",
+      "module": "icd_doctors",
+      "moduleLabel": "ICD Doctor Details",
+      "primaryKey": "idpk",
       "autoGeneratePk": false,
       "columns": [
         {
@@ -3019,6 +3053,48 @@
         {
           "name": "patient_state_code",
           "type": "smallint"
+        }
+      ]
+    },
+    {
+      "id": "dmart_mp.doctor_details_with_registartionandcaseid",
+      "logicalName": "doctor_details_with_registartionandcaseid",
+      "schema": "dmart_mp",
+      "table": "doctor_details_with_registartionandcaseid",
+      "label": "Doctor Details (name / reg. no.)",
+      "source": "Neon dmart_mp — isolated from icd_data_doctor_details",
+      "module": "doctors",
+      "moduleLabel": "Doctor Details",
+      "primaryKey": "docregnum",
+      "autoGeneratePk": false,
+      "columns": [
+        {
+          "name": "patient_state_code",
+          "type": "smallint"
+        },
+        {
+          "name": "registration_id",
+          "type": "text"
+        },
+        {
+          "name": "case_id",
+          "type": "text"
+        },
+        {
+          "name": "docregnum",
+          "type": "text"
+        },
+        {
+          "name": "docname",
+          "type": "text"
+        },
+        {
+          "name": "docqualification",
+          "type": "text"
+        },
+        {
+          "name": "doccontactnumber",
+          "type": "text"
         }
       ]
     },
