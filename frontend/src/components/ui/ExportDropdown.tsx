@@ -63,13 +63,19 @@ export default function ExportDropdown({
     return data
   }
 
-  const runExport = async (fn: (rows: Record<string, any>[]) => void) => {
+  const runExport = async (fn: (rows: Record<string, any>[]) => void | Promise<void>) => {
     if (busy) return
     setBusy(true)
     try {
       const rows = await resolveRows()
-      if (!rows?.length) return
-      fn(rows)
+      if (!rows?.length) {
+        window.alert('No rows to export.')
+        return
+      }
+      await fn(rows)
+    } catch (err) {
+      console.error(err)
+      window.alert('Export failed. Please try again.')
     } finally {
       setBusy(false)
       setOpen(false)
@@ -133,11 +139,22 @@ export default function ExportDropdown({
 
   const handleExportPDF = () => {
     if (isFullPageExport) {
-      exportFullPagePDF(title, subtitle)
-      setOpen(false)
+      if (busy) return
+      setBusy(true)
+      void exportFullPagePDF(title, subtitle)
+        .catch((err) => {
+          console.error(err)
+          window.alert('PDF export failed. Please try again.')
+        })
+        .finally(() => {
+          setBusy(false)
+          setOpen(false)
+        })
       return
     }
-    void runExport((rows) => exportToPDF(title, subtitle, filename, rows, columns))
+    void runExport(async (rows) => {
+      await exportToPDF(title, subtitle, filename, rows, columns)
+    })
   }
 
   const sizeClasses =
@@ -191,7 +208,7 @@ export default function ExportDropdown({
                   ? 'Numbers only — charts cannot go in CSV'
                   : fetchExportData
                     ? 'All matching rows (.csv)'
-                    : 'Comma Separated (.csv)'}
+                    : 'All rows in this table (.csv)'}
               </p>
             </div>
           </button>
@@ -210,7 +227,9 @@ export default function ExportDropdown({
                   ? 'Graphs as pictures + numbers (.xlsx)'
                   : sheets?.length || fetchExportSheets
                     ? 'One sheet per card / graph (.xlsx)'
-                    : 'Microsoft Excel (.xlsx)'}
+                    : fetchExportData
+                      ? 'All matching rows (.xlsx)'
+                      : 'All rows in this table (.xlsx)'}
               </p>
             </div>
           </button>
@@ -224,7 +243,11 @@ export default function ExportDropdown({
             <FileText className="w-4 h-4 text-red-600 shrink-0" />
             <div className="flex flex-col gap-0.5">
               <p className="font-semibold leading-snug">PDF Document</p>
-              <p className="text-[10px] leading-relaxed text-slate-400">Print & Save PDF (.pdf)</p>
+              <p className="text-[10px] leading-relaxed text-slate-400">
+                {fetchExportData
+                  ? 'Downloads all matching rows (.pdf)'
+                  : 'Downloads all rows in this table (.pdf)'}
+              </p>
             </div>
           </button>
         </div>

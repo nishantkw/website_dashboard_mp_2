@@ -89,6 +89,22 @@ export async function resetAuthUserPassword(id: string | number, password: strin
   )
 }
 
+export async function fetchAuditLogs(limit = 200) {
+  return apiFetch<{
+    data: Array<{
+      id: number | string
+      created_at: string
+      username: string | null
+      user_role: string | null
+      action: string
+      module: string | null
+      details: string | null
+      ip_address: string | null
+      status: 'Success' | 'Failed' | 'Denied'
+    }>
+  }>(`/auth/audit-logs?limit=${limit}`)
+}
+
 export async function fetchOverview(qs = '') {
   return apiFetch<{
     kpis: KPI[]

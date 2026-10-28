@@ -19,6 +19,7 @@ import { parseSpreadsheetBuffer, applyMapping } from '../utils/fileParse.js'
 import { insertMappedRows } from '../utils/importInsert.js'
 import { serializeRows } from '../utils/serialize.js'
 import { assertSafeIdent } from '../utils/importRegistryCore.js'
+import { recordAudit } from '../utils/audit.js'
 
 const router = Router()
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -568,6 +569,11 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       preview: previewRows(parsed.rows),
     }
     await saveUploadRecord(meta)
+    await recordAudit(req, {
+      action: 'UPLOAD_FILE',
+      module: 'Import',
+      details: `${meta.fileName} (${meta.rowCount} rows)`,
+    })
 
     res.json({
       upload: serializeUpload(
@@ -675,6 +681,12 @@ router.post('/uploads/:id/commit', async (req, res) => {
     row.status = status
     row.table_id = tableDef.id
     await purgeImportedUpload(row)
+    await recordAudit(req, {
+      action: 'IMPORT_DATA',
+      module: 'Import',
+      details: `${row.file_name} → ${tableDef.id}: ${result.inserted} inserted, ${result.skipped} skipped`,
+      status: result.errors.length ? 'Failed' : 'Success',
+    })
 
     res.json({
       ok: result.errors.length === 0,
@@ -704,6 +716,7 @@ router.delete('/uploads/:id', async (req, res) => {
     if (!row) return res.status(404).json({ error: 'Upload not found' })
     fs.rmSync(uploadDir(row), { recursive: true, force: true })
     await query(`DELETE FROM app_auth.import_uploads WHERE id = $1`, [row.id])
+    await recordAudit(req, { action: 'DELETE_UPLOAD', module: 'Import', details: row.file_name })
     res.json({ ok: true })
   } catch (err) {
     res.status(500).json({ error: clientError(err) })
@@ -722,6 +735,12 @@ router.post('/', async (req, res) => {
     }
 
     const result = await insertMappedRows(tableDef, rows)
+    await recordAudit(req, {
+      action: 'IMPORT_DATA',
+      module: 'Import',
+      details: `${tableDef.id}: ${result.inserted} inserted, ${result.skipped} skipped`,
+      status: result.errors.length ? 'Failed' : 'Success',
+    })
     res.json({
       ok: result.errors.length === 0,
       tableId: tableDef.id,

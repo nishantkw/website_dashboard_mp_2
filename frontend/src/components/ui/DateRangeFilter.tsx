@@ -1,7 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { compactFilterLabelClass, compactSelectClass } from '../layout/compactFilterStyles'
 
-export type DatePreset = '' | 'today' | 'yesterday' | 'last_7' | 'last_30' | 'custom'
+export type DatePreset =
+  | ''
+  | 'today'
+  | 'yesterday'
+  | 'last_7'
+  | 'last_30'
+  | 'this_year'
+  | 'previous_year'
+  | 'custom'
 
 export function formatLocalDate(d: Date) {
   const yyyy = d.getFullYear()
@@ -28,15 +36,29 @@ export function calcDateRange(preset: Exclude<DatePreset, '' | 'custom'>) {
     return { from, to: end }
   }
 
-  const from = new Date(end)
-  from.setDate(from.getDate() - 29)
-  return { from, to: end }
+  if (preset === 'last_30') {
+    const from = new Date(end)
+    from.setDate(from.getDate() - 29)
+    return { from, to: end }
+  }
+
+  if (preset === 'this_year') {
+    const from = new Date(end.getFullYear(), 0, 1)
+    return { from, to: end }
+  }
+
+  // Previous calendar year (e.g. in 2026 → 1 Jan 2025 – 31 Dec 2025)
+  const year = end.getFullYear() - 1
+  return {
+    from: new Date(year, 0, 1),
+    to: new Date(year, 11, 31),
+  }
 }
 
 /** Restore preset label after refresh when stored dates still match a named range. */
 export function inferDatePreset(dateFrom: string, dateTo: string): DatePreset {
   if (!dateFrom && !dateTo) return ''
-  for (const preset of ['today', 'yesterday', 'last_7', 'last_30'] as const) {
+  for (const preset of ['today', 'yesterday', 'last_7', 'last_30', 'this_year', 'previous_year'] as const) {
     const range = calcDateRange(preset)
     if (formatLocalDate(range.from) === dateFrom && formatLocalDate(range.to) === dateTo) {
       return preset
@@ -139,6 +161,8 @@ export default function DateRangeFilter({
           <option value="yesterday">Yesterday</option>
           <option value="last_7">Last 7 days</option>
           <option value="last_30">Last 30 days</option>
+          <option value="this_year">This year</option>
+          <option value="previous_year">Previous year</option>
           <option value="custom">Custom</option>
         </select>
       </div>
@@ -148,6 +172,8 @@ export default function DateRangeFilter({
           <input
             type="date"
             value={dateFrom}
+            min="2015-01-01"
+            max="2099-12-31"
             disabled={disabled}
             onChange={(e) => {
               if (disabled) return
@@ -162,6 +188,8 @@ export default function DateRangeFilter({
           <input
             type="date"
             value={dateTo}
+            min="2015-01-01"
+            max="2099-12-31"
             disabled={disabled}
             onChange={(e) => {
               if (disabled) return
@@ -192,7 +220,19 @@ function toIsoDate(value: unknown): string {
   return ''
 }
 
+function isFraudCaseRow(row: Record<string, string | number>): boolean {
+  return (
+    row.suspicion_id != null ||
+    row.reference_number != null ||
+    row.investigation_status != null ||
+    row.lst_trigger_event_date != null ||
+    (row.entity_type != null && row.crt_date != null && row.amount_risk != null)
+  )
+}
+
 function isHospitalMasterRow(row: Record<string, string | number>): boolean {
+  // Fraud / SAFU case rows also carry hospital_name — do not treat them as hospital master.
+  if (isFraudCaseRow(row)) return false
   const hasHosp =
     row.hosp_id != null ||
     row.facility_id != null ||
@@ -207,6 +247,14 @@ function isHospitalMasterRow(row: Record<string, string | number>): boolean {
 
 /** Event dates only — same order as claims amount/volume trend charts. Never use DOB. */
 export function getRowDateValue(row: Record<string, string | number>): string | null {
+  // Fraud / SAFU cases: created / last trigger (matches Fraud dashboard date filters).
+  if (isFraudCaseRow(row)) {
+    for (const key of ['crt_date', 'lst_trigger_event_date', 'updt_date', 'created_dt', 'created']) {
+      const str = toIsoDate(row[key])
+      if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str
+    }
+  }
+
   // Hospital master: only empanelment date (matches Overview/API hospital date filter).
   // Do not fall back to deempanel_date / created_dt — that empties the drill-down while the KPI stays non-zero.
   if (isHospitalMasterRow(row)) {
@@ -228,6 +276,9 @@ export function getRowDateValue(row: Record<string, string | number>): string | 
     'claim_init_date',
     'preauth_init_date',
     'claim_date',
+    'crt_date',
+    'lst_trigger_event_date',
+    'updt_date',
     'empaneled_date',
     'hosp_empaneled_date',
     'empanelled_date',

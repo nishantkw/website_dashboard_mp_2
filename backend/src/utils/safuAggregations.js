@@ -333,6 +333,11 @@ export function buildSafuCharts(view, cases, triggers, _workflowUsers = []) {
         ? topEntries(countBy(doctorsFilled, (r) => String(r.investigator).trim(), 'cases'), 10, 'cases')
         : [],
       statusBreakdown: statusBreakdownChart(cases),
+      byHospital: topEntries(
+        countBy(cases, (r) => String(r.hospital_name || r.entity_id || '').trim(), 'cases'),
+        10,
+        'cases'
+      ),
       amountByDoctor: doctorsFilled.length
         ? topEntries(sumBy(doctorsFilled, (r) => String(r.investigator).trim(), 'amount_risk'), 8)
         : [],

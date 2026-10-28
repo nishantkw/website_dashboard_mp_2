@@ -1,0 +1,21 @@
+column_name,data_type,character_maximum_length,numeric_precision,numeric_scale,is_nullable,ordinal_position
+id,integer,,32,0,YES,1
+suspicious_id,character varying,65535,,,YES,2
+state_code,integer,,32,0,YES,3
+pmrssm_id,character varying,65535,,,YES,4
+trigger_timestamp,timestamp with time zone,,,,YES,5
+status,character varying,65535,,,YES,6
+trigger_reason,character varying,65535,,,YES,7
+trigger_description,character varying,65535,,,YES,8
+suspicious_entity,character varying,65535,,,YES,9
+risk_score,integer,,32,0,YES,10
+trigger_type,character varying,65535,,,YES,11
+file_name,character varying,65535,,,YES,12
+status_sent_by_state,character varying,65535,,,YES,13
+fraud_not_fraud,character varying,65535,,,YES,14
+flag,integer,,32,0,YES,15
+api_response_date,timestamp with time zone,,,,YES,16
+state_cases_push_date,timestamp with time zone,,,,YES,17
+safu_action,character varying,65535,,,YES,18
+updated_by,character varying,65535,,,YES,19
+updated_dt,timestamp with time zone,,,,YES,20
