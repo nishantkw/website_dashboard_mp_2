@@ -580,17 +580,13 @@ export default function ReportDetail() {
         }))
       : tablesRaw
 
-  const exportSheets = useMemo(
-    () =>
-      tables
-        .filter((table) => table.data.length > 0)
-        .map((table) => ({
-          name: tableDisplayTitle(table.title) || table.title,
-          rows: table.data,
-          columns: table.columns.map((c) => ({ key: c.key, label: c.label })),
-        })),
-    [tables]
-  )
+  const exportSheets = tables
+    .filter((table) => table.data.length > 0)
+    .map((table) => ({
+      name: tableDisplayTitle(table.title) || table.title,
+      rows: table.data,
+      columns: table.columns.map((c) => ({ key: c.key, label: c.label })),
+    }))
 
   return (
     <div>
