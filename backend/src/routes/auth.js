@@ -14,7 +14,10 @@ import {
   signAccessToken,
   setSessionCookie,
   clearSessionCookie,
+  readAccessToken,
+  verifyAccessToken,
 } from '../utils/jwt.js'
+import { recordAudit, listAuditLogs } from '../utils/audit.js'
 
 const ALLOWED_ROLES = new Set(['super_admin', 'state_admin', 'bis_user', 'mp_user', 'ump_user'])
 const MIN_PASSWORD_LENGTH = 10
@@ -71,6 +74,13 @@ router.post('/login', loginRateLimit, async (req, res) => {
 
     if (!allowed) {
       recordLoginFailure(username)
+      await recordAudit(req, {
+        action: 'LOGIN_FAILED',
+        module: 'Authentication',
+        details: `Login attempt as ${role}`,
+        status: 'Failed',
+        user: { id: row?.id, username, role: row?.role || role },
+      })
       return res.status(401).json({ error: 'Invalid username, password, or role' })
     }
 
@@ -78,6 +88,7 @@ router.post('/login', loginRateLimit, async (req, res) => {
     const user = publicUser(row)
     const token = await signAccessToken(user)
     setSessionCookie(res, token)
+    await recordAudit(req, { action: 'LOGIN', module: 'Authentication', user })
     res.json({ user, db: _db })
   } catch (err) {
     console.error('[auth] login failed', err.message)
@@ -85,9 +96,32 @@ router.post('/login', loginRateLimit, async (req, res) => {
   }
 })
 
-router.post('/logout', (_req, res) => {
+router.post('/logout', async (req, res) => {
+  const token = readAccessToken(req)
+  if (token) {
+    try {
+      const payload = await verifyAccessToken(token)
+      const { rows } = await query(
+        `SELECT id, username, full_name, role, department FROM app_auth.dashboard_users WHERE id = $1 LIMIT 1`,
+        [payload.sub]
+      )
+      if (rows[0]) await recordAudit(req, { action: 'LOGOUT', module: 'Authentication', user: publicUser(rows[0]) })
+    } catch {
+      /* expired or invalid session — nothing to attribute */
+    }
+  }
   clearSessionCookie(res)
   res.json({ ok: true })
+})
+
+router.get('/audit-logs', requireAuth, requireRole(ROLES.admin), async (req, res) => {
+  try {
+    const rows = await listAuditLogs({ limit: req.query.limit })
+    res.json({ data: rows })
+  } catch (err) {
+    console.error('[auth] audit logs failed', err.message)
+    res.status(500).json({ error: 'Unable to load audit logs' })
+  }
 })
 
 router.get('/me', requireAuth, async (req, res) => {
@@ -146,6 +180,11 @@ router.post('/users', requireAuth, requireRole(ROLES.admin), async (req, res) =>
        RETURNING id, username, full_name AS name, role, department, active, created_at`,
       [username, passwordHash, fullName, role, department || null]
     )
+    await recordAudit(req, {
+      action: 'CREATE_USER',
+      module: 'User Management',
+      details: `Created user ${username} (${role})`,
+    })
     res.status(201).json({ user: rows[0] })
   } catch (err) {
     if (err?.code === '23505') {
@@ -206,6 +245,12 @@ router.patch('/users/:id', requireAuth, requireRole(ROLES.admin), async (req, re
       params
     )
     if (!rows[0]) return res.status(404).json({ error: 'User not found' })
+    const onlyActive = fields.length === 1 && typeof req.body?.active === 'boolean'
+    await recordAudit(req, {
+      action: onlyActive ? (req.body.active ? 'ACTIVATE_USER' : 'DEACTIVATE_USER') : 'UPDATE_USER',
+      module: 'User Management',
+      details: `User ${rows[0].username}`,
+    })
     res.json({ user: rows[0] })
   } catch (err) {
     console.error('[auth] update user failed', err.message)
@@ -231,6 +276,11 @@ router.post('/users/:id/password', requireAuth, requireRole(ROLES.admin), async 
       [id, passwordHash]
     )
     if (!rows[0]) return res.status(404).json({ error: 'User not found' })
+    await recordAudit(req, {
+      action: 'RESET_PASSWORD',
+      module: 'User Management',
+      details: `Reset password for ${rows[0].username}`,
+    })
     res.json({ ok: true, user: { id: String(rows[0].id), username: rows[0].username } })
   } catch (err) {
     console.error('[auth] reset password failed', err.message)

@@ -1,5 +1,6 @@
 import { query } from '../db/pool.js'
 import { readAccessToken, verifyAccessToken } from '../utils/jwt.js'
+import { recordAudit } from '../utils/audit.js'
 
 export const ROLES = {
   admin: ['super_admin', 'state_admin'],
@@ -53,6 +54,12 @@ export function requireRole(...roles) {
       return res.status(401).json({ error: 'Authentication required' })
     }
     if (!allowed.includes(req.user.role)) {
+      void recordAudit(req, {
+        action: 'ACCESS_DENIED',
+        module: req.baseUrl || req.originalUrl?.split('?')[0] || '',
+        details: `${req.method} ${req.originalUrl?.split('?')[0] || ''}`,
+        status: 'Denied',
+      })
       return res.status(403).json({ error: 'You do not have access to this resource' })
     }
     next()

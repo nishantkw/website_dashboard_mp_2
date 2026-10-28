@@ -107,6 +107,7 @@ export default function SafuMisDashboard({
   const triggerCode = charts.triggerCode ?? []
   const triggerTrend = charts.triggerTrend ?? []
   const hospitalTypeOutcomes = charts.hospitalTypeOutcomes ?? []
+  const byHospital = charts.byHospital ?? []
 
   const viewTables = FRAUD_VIEW_TABLES[view] ?? []
 
@@ -144,7 +145,8 @@ export default function SafuMisDashboard({
     byOfficer.length > 0 ||
     statusBreakdown.length > 0 ||
     triggerCode.length > 0 ||
-    triggerTrend.length > 0
+    triggerTrend.length > 0 ||
+    byHospital.length > 0
 
   const barHeight = (count: number, min = 240, max = 420) =>
     Math.min(max, Math.max(min, count * 36 + 72))
@@ -239,6 +241,28 @@ export default function SafuMisDashboard({
 
       {hasCharts && view === 'doctor-wise' && (
         <>
+          {(byHospital.length > 0 || entityType.length > 0) && (
+            <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {byHospital.length > 0 && (
+                <ChartCard title="Top Hospitals by Suspicious Cases" subtitle="Top 10 hospitals" exportData={byHospital}>
+                  <InteractiveBarChart
+                    data={byHospital}
+                    chartTitle="Hospital Cases"
+                    layout="vertical"
+                    height={barHeight(byHospital.length)}
+                    integerAxis
+                    onItemClick={openFromChart}
+                    bars={[{ dataKey: 'cases', fill: '#dc2626', name: 'Suspicious Cases' }]}
+                  />
+                </ChartCard>
+              )}
+              {entityType.length > 0 && (
+                <ChartCard title="Government vs Private" subtitle="Suspicious cases by entity type" exportData={entityType}>
+                  <InteractivePieChart data={entityType} colors={ENTITY_COLORS} innerRadius={55} chartTitle="Entity Type" onItemClick={openFromChart} />
+                </ChartCard>
+              )}
+            </div>
+          )}
           <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
             {byDoctor.length > 0 && (
               <ChartCard title="Cases by SAFU Doctor" subtitle="Grouped by investigator" exportData={byDoctor}>

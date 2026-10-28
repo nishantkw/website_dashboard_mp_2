@@ -1,0 +1,10 @@
+column_name,data_type,character_maximum_length,numeric_precision,numeric_scale,is_nullable,ordinal_position
+registration_id,character varying,65535,,,YES,1
+case_id,character varying,65535,,,YES,2
+id,bigint,,64,0,YES,3
+code,character varying,65535,,,YES,4
+display,character varying,65535,,,YES,5
+type,character varying,65535,,,YES,6
+typedescription,character varying,65535,,,YES,7
+idpk,character varying,256,,,YES,8
+patient_state_code,smallint,,16,0,YES,9

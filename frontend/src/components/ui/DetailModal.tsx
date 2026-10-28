@@ -510,7 +510,7 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
             />
             <ExportDropdown
               title={dataset.title}
-              subtitle={dataset.subtitle}
+              subtitle={`${dataset.subtitle || ''} · Export includes all ${filteredRecords.length.toLocaleString()} matching rows`}
               filename={`${dataset.title.toLowerCase().replace(/\s+/g, '_')}_export`}
               data={exportRecords}
               columns={visibleColumns}

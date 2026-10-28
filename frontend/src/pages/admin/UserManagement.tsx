@@ -18,6 +18,7 @@ import {
 import clsx from 'clsx'
 import {
   createAuthUser,
+  fetchAuditLogs,
   fetchAuthUsers,
   resetAuthUserPassword,
   updateAuthUser,
@@ -232,19 +233,35 @@ export default function UserManagement() {
   const [newPassword, setNewPassword] = useState('')
   const [showPasswordText, setShowPasswordText] = useState(false)
 
-  const addAuditLog = useCallback((username: string, userRole: string, action: string, details: string) => {
-    const log: AuditLog = {
-      id: `log-${Date.now()}`,
-      username,
-      userRole,
-      action,
-      module: details ? `User Management (${details})` : 'User Management',
-      ip: '—',
-      status: 'Success',
-      timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+  const [loadingAudit, setLoadingAudit] = useState(false)
+  const [auditError, setAuditError] = useState('')
+
+  const loadAuditLogs = useCallback(async () => {
+    setLoadingAudit(true)
+    setAuditError('')
+    const result = await fetchAuditLogs()
+    if (result.ok) {
+      setAuditLogs(
+        result.data.data.map((row) => ({
+          id: String(row.id),
+          username: row.username || '—',
+          userRole: ROLE_LABELS[row.user_role as UserRole] || row.user_role || '—',
+          action: row.action,
+          module: row.details ? `${row.module || '—'} (${row.details})` : row.module || '—',
+          ip: row.ip_address || '—',
+          status: row.status,
+          timestamp: new Date(row.created_at).toLocaleString('en-IN', { hour12: false }),
+        }))
+      )
+    } else {
+      setAuditError(result.error || 'Unable to load audit logs')
     }
-    setAuditLogs((prev) => [log, ...prev])
+    setLoadingAudit(false)
   }, [])
+
+  useEffect(() => {
+    if (activeTab === 'audit') void loadAuditLogs()
+  }, [activeTab, loadAuditLogs])
 
   const loadUsers = useCallback(async () => {
     setLoadingUsers(true)
@@ -287,12 +304,6 @@ export default function UserManagement() {
     }
     const updated = mapApiUser(result.data.user)
     setUsers((prev) => prev.map((u) => (u.id === id ? updated : u)))
-    addAuditLog(
-      currentUser?.username || 'admin',
-      ROLE_LABELS[currentUser?.role as UserRole] || 'Admin',
-      nextActive ? 'ACTIVATE_USER' : 'DEACTIVATE_USER',
-      `User ${target.username} → ${updated.status}`
-    )
   }
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -314,12 +325,6 @@ export default function UserManagement() {
     }
     const created = mapApiUser(result.data.user)
     setUsers((prev) => [created, ...prev])
-    addAuditLog(
-      currentUser?.username || 'admin',
-      ROLE_LABELS[currentUser?.role as UserRole] || 'Admin',
-      'CREATE_USER',
-      `Created user ${created.username}`
-    )
     setNewUser({ username: '', name: '', role: 'state_admin', department: '', password: '' })
     setShowCreateUserModal(false)
   }
@@ -345,12 +350,6 @@ export default function UserManagement() {
       setActionError(result.error)
       return
     }
-    addAuditLog(
-      currentUser?.username || 'admin',
-      ROLE_LABELS[currentUser?.role as UserRole] || 'Admin',
-      'RESET_PASSWORD',
-      `Reset password for ${resetPasswordUser.username}`
-    )
     setResetPasswordUser(null)
     setNewPassword('')
   }
@@ -701,9 +700,21 @@ export default function UserManagement() {
           <div className="flex justify-between items-center">
             <div>
               <h3 className="font-bold text-slate-800 text-lg">System Audit Trails</h3>
-              <p className="text-slate-500 text-sm">Real-time log of administrative and user actions</p>
+              <p className="text-slate-500 text-sm">Logins, user changes, imports and denied access attempts</p>
             </div>
+            <button
+              type="button"
+              onClick={() => void loadAuditLogs()}
+              disabled={loadingAudit}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            >
+              <RotateCcw className={clsx('h-4 w-4', loadingAudit && 'animate-spin')} />
+              Refresh
+            </button>
           </div>
+          {auditError && (
+            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{auditError}</p>
+          )}
 
           <div className="scrollbar-visible overflow-x-auto border border-slate-200 rounded-lg">
             <table className="w-max min-w-full text-left text-sm">
@@ -719,6 +730,13 @@ export default function UserManagement() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 text-slate-700">
+                {auditLogs.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-8 text-center text-sm text-slate-500">
+                      {loadingAudit ? 'Loading audit logs…' : 'No audit events recorded yet.'}
+                    </td>
+                  </tr>
+                )}
                 {auditLogs.map((log) => (
                   <tr key={log.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="px-6 py-3.5 font-mono text-xs text-slate-500">{log.timestamp}</td>
