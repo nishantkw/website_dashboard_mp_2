@@ -1,13 +1,13 @@
 export const compactFilterShellClass =
-  'relative min-w-0 flex-1 overflow-visible rounded-lg border border-[#7dbe94] bg-gradient-to-r from-[#d4eedd] via-[#f7fcf9] to-[#e7f6ee] py-1.5 pl-4 pr-3 shadow-[0_2px_12px_-3px_rgba(26,92,56,0.2)] before:absolute before:inset-y-0 before:left-0 before:w-1 before:bg-gradient-to-b before:from-[#1a5c38] before:via-[#2d8a4e] before:to-[#3aa86a]'
+  'relative min-w-0 flex-1 overflow-visible rounded-xl border border-[#c5e0ce]/80 bg-white/70 py-1.5 pl-3.5 pr-3 shadow-[0_6px_24px_rgba(26,92,56,0.07)] backdrop-blur-xl before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-full before:bg-[#2d8a4e]/80'
 
 export const compactFilterSplitClass = 'flex min-w-0 flex-col gap-2 lg:flex-row lg:items-stretch'
 
 export const compactSearchCardClass =
-  'flex w-full shrink-0 items-center gap-2 rounded-lg border border-[#7dbe94] bg-gradient-to-r from-[#e8f6ee] to-[#d4eedd] px-2.5 py-1.5 shadow-[0_2px_12px_-3px_rgba(26,92,56,0.2)] lg:w-auto'
+  'flex w-full shrink-0 items-center gap-2 rounded-xl border border-[#c5e0ce]/80 bg-white/70 px-2.5 py-1.5 shadow-[0_6px_24px_rgba(26,92,56,0.07)] backdrop-blur-xl lg:w-auto'
 
 export const compactFilterBarClass =
-  'sticky top-0 z-50 min-w-0 -mx-4 mb-3 bg-[#f0f7f2] px-4 pb-2 lg:-mx-6 lg:mb-4 lg:px-6 lg:pb-3'
+  'dashboard-sticky-filters sticky top-0 z-50 min-w-0 -mx-4 mb-3 px-4 pb-2 lg:-mx-6 lg:mb-4 lg:px-6 lg:pb-3'
 
 export const compactFilterTitleClass =
   'flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md bg-gradient-to-r from-[#1a5c38] to-[#2d8a4e] px-2 py-1 text-white shadow-sm'
@@ -26,7 +26,7 @@ export const compactFilterCountClass =
 export const compactFilterLabelClass = 'compact-filter-label'
 
 export const compactSearchWrapClass =
-  'flex h-8 min-w-0 flex-1 items-center gap-1.5 rounded-md border border-[#8ec9a4] bg-white px-2 lg:flex-none'
+  'flex h-8 min-w-0 flex-1 items-center gap-1.5 rounded-md border border-white/70 bg-white/55 px-2 backdrop-blur-md lg:flex-none'
 
 export const compactSearchInputClass =
   'min-w-0 flex-1 bg-transparent text-xs text-slate-700 outline-none placeholder:text-[#6b9e7a] lg:w-36 lg:flex-none'

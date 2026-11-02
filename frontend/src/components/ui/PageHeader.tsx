@@ -149,7 +149,7 @@ export function KPIGrid({
     return (
       <div
         data-export-visual={exportLabel}
-        className="mb-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+        className="mb-6 overflow-hidden rounded-xl border border-white/60 bg-white/45 shadow-[0_8px_32px_rgba(26,92,56,0.08)] backdrop-blur-xl"
       >
         {grid}
       </div>

@@ -120,9 +120,6 @@ export function getPrimaryTableForModule(module) {
     )
   }
 
-  const tables = getImportTables().filter((t) => t.module === module)
-  if (!tables.length) return null
-
   const preferred = {
     claims: 'claim_paid_excel_t',
     hospitals: 'hospital_master_with_quality_certification_final',
@@ -133,10 +130,20 @@ export function getPrimaryTableForModule(module) {
     lms: 'lms_user_course_completion_status',
     doctors: 'doctor_details_with_registartionandcaseid',
     icd_doctors: 'icd_data_doctor_details',
+    hospitals_patients: 'doctor_details_with_registartionandcaseid',
     ump: 'user_master_ump',
     bis: 't_card_printing_status',
   }
   const pick = preferred[module]
+  if (pick) {
+    // Prefer exact table name anywhere in the registry (doctor tables live under Hospitals & Patients).
+    const byName = getImportTables().find((t) => t.table === pick || t.logicalName === pick)
+    if (byName) return byName
+  }
+
+  const tables = getImportTables().filter((t) => t.module === module)
+  if (!tables.length) return null
+
   if (pick) {
     const match = tables.find((t) => t.table === pick)
     if (match) return match

@@ -139,11 +139,12 @@ export default function Login() {
       </aside>
 
       {/* Form panel — only this side scrolls when demo credentials open */}
-      <main className="relative flex min-h-0 flex-1 flex-col overflow-y-auto bg-[#f4faf6]">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(45,138,78,0.08),transparent_50%)]" />
+      <main className="relative flex min-h-0 flex-1 flex-col overflow-y-auto bg-gradient-to-br from-[#e8f6ec] via-[#f3faf5] to-[#e4eef8]">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(45,138,78,0.14),transparent_50%)]" />
+        <div className="pointer-events-none absolute -right-10 top-24 h-56 w-56 rounded-full bg-sky-300/20 blur-3xl" />
 
         {/* Mobile brand strip */}
-        <div className="relative z-10 shrink-0 border-b border-emerald-100 bg-white px-5 py-4 lg:hidden">
+        <div className="relative z-10 shrink-0 border-b border-white/50 bg-white/45 px-5 py-4 backdrop-blur-xl lg:hidden">
           <div className="flex items-center gap-3">
             <img src="/images/ayushman-mp-logo.png" alt="Ayushman MP" className="h-12 w-12 object-contain" />
             <div>
@@ -157,7 +158,7 @@ export default function Login() {
           <div className="w-full max-w-[420px] animate-[fadeUp_0.55s_ease-out] lg:my-auto">
             <form
               onSubmit={handleSubmit}
-              className="rounded-2xl border border-emerald-900/5 bg-white p-6 shadow-[0_20px_50px_-24px_rgba(26,92,56,0.35)] sm:p-7"
+              className="rounded-2xl border border-white/60 bg-white/50 p-6 shadow-[0_20px_50px_-24px_rgba(26,92,56,0.35)] backdrop-blur-2xl sm:p-7"
             >
               {error && (
                 <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700">

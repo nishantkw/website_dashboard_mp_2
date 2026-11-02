@@ -3,9 +3,9 @@ import type { UserRole } from './types'
 const ROLE_ROUTE_ACCESS: Record<UserRole, string[]> = {
   super_admin: ['*'],
   state_admin: ['*'],
-  bis_user: ['/dashboard/bis'],
-  mp_user: ['/dashboard/mp'],
-  ump_user: ['/dashboard/ump'],
+  bis_user: ['/dashboard/bis', '/dashboard/auditgen'],
+  mp_user: ['/dashboard/mp', '/dashboard/auditgen'],
+  ump_user: ['/dashboard/ump', '/dashboard/auditgen'],
 }
 
 export function canAccessRoute(role: UserRole, path: string): boolean {
@@ -17,11 +17,11 @@ export function canAccessRoute(role: UserRole, path: string): boolean {
 
 export function canAccessNavItem(role: UserRole, navId: string): boolean {
   const navAccess: Record<UserRole, string[]> = {
-    super_admin: ['overview', 'user_management', 'import_bulk_data', 'bis', 'mp', 'ump'],
-    state_admin: ['overview', 'user_management', 'import_bulk_data', 'bis', 'mp', 'ump'],
-    bis_user: ['bis'],
-    mp_user: ['mp'],
-    ump_user: ['ump'],
+    super_admin: ['overview', 'user_management', 'import_bulk_data', 'bis', 'mp', 'ump', 'auditgen'],
+    state_admin: ['overview', 'user_management', 'import_bulk_data', 'bis', 'mp', 'ump', 'auditgen'],
+    bis_user: ['bis', 'auditgen'],
+    mp_user: ['mp', 'auditgen'],
+    ump_user: ['ump', 'auditgen'],
   }
   return navAccess[role]?.includes(navId) ?? false
 }

@@ -48,11 +48,11 @@ export default function KPICard({ kpi, onClick, selected = false, embedded = fal
         'w-full cursor-pointer p-5 text-left group relative transition-colors',
         embedded
           ? selected
-            ? 'bg-[#f4fbf6] ring-inset ring-2 ring-[#2d8a4e]/30'
-            : 'bg-white hover:bg-slate-50'
+            ? 'bg-[#2d8a4e]/10 ring-inset ring-2 ring-[#2d8a4e]/30'
+            : 'bg-white/30 hover:bg-white/50'
           : selected
-            ? 'scale-[1.01] rounded-xl border border-[#2d8a4e] bg-white shadow-lg ring-2 ring-[#2d8a4e]/25'
-            : 'rounded-xl border border-gray-100 bg-white shadow-sm hover:scale-[1.02] hover:border-[#2d8a4e]/40 hover:shadow-lg active:scale-[0.99]'
+            ? 'scale-[1.01] rounded-xl border border-[#2d8a4e]/50 bg-white/80 shadow-lg ring-2 ring-[#2d8a4e]/25 backdrop-blur-xl'
+            : 'rounded-xl border border-[#c5e0ce]/80 bg-white/75 shadow-[0_6px_24px_rgba(26,92,56,0.07)] backdrop-blur-xl hover:scale-[1.02] hover:border-[#2d8a4e]/40 hover:bg-white/85 hover:shadow-lg active:scale-[0.99]'
       )}
     >
       <div className="flex items-start justify-between">

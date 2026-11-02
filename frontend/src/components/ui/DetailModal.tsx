@@ -480,9 +480,9 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
       {/* Backdrop */}
       <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+      <div className="relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-white/50 bg-white/70 shadow-2xl backdrop-blur-2xl">
         {/* Modal Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-[#eaf5ed] via-white to-white gap-3 shrink-0">
+        <div className="flex shrink-0 flex-col gap-3 border-b border-white/50 bg-white/40 px-6 py-4 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[#2d8a4e]/10 flex items-center justify-center text-[#2d8a4e] shrink-0">
               <TableIcon className="w-5 h-5" />
@@ -630,7 +630,7 @@ export default function DetailModal({ detail, onClose }: DetailModalProps) {
 
         {/* Tabular View Content Area */}
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 py-3">
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-white/60 bg-white/50 shadow-sm backdrop-blur-md">
             <div className="scrollbar-visible min-h-0 flex-1 overflow-x-auto overflow-y-auto">
               <table className="w-full min-w-full text-left text-xs sm:text-sm">
                 <thead className="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-600 shadow-sm">

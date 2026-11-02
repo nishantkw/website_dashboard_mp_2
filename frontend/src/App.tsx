@@ -25,6 +25,7 @@ import ReportDetail from './pages/mp/ReportDetail'
 import UserMaster from './pages/ump/UserMaster'
 import UserManagement from './pages/admin/UserManagement'
 import ImportBulkData from './pages/admin/ImportBulkData'
+import AuditGen from './pages/AuditGen'
 
 export default function App() {
   return (
@@ -66,6 +67,7 @@ export default function App() {
                 <Route path="mp/reports" element={<Reports />} />
                 <Route path="mp/reports/:reportId" element={<ReportDetail />} />
                 <Route path="ump/users" element={<UserMaster />} />
+                <Route path="auditgen" element={<AuditGen />} />
               </Route>
             </Route>
           </Route>

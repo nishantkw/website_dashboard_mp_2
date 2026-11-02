@@ -16,6 +16,7 @@ export default function DashboardLayout() {
 
   const isUserManagementPage = location.pathname.includes('/user-management')
   const isImportPage = location.pathname.includes('/import-bulk-data')
+  const isAuditGenPage = location.pathname.includes('/auditgen')
   const isFraudAuditPage = location.pathname.includes('/mp/fraud-audit')
   const isNafuSafuSourcePage = location.pathname.includes('/mp/fraud-audit/nafu-safu-source')
   const isClaimsPage =
@@ -36,6 +37,7 @@ export default function DashboardLayout() {
   const hideFilters =
     isUserManagementPage ||
     isImportPage ||
+    isAuditGenPage ||
     isFraudAuditPage ||
     isNafuSafuSourcePage ||
     isFraudReportPage ||
@@ -58,11 +60,11 @@ export default function DashboardLayout() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#eef6f0]">
+    <div className="dashboard-shell flex h-screen overflow-hidden">
       <Sidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="shrink-0 bg-gradient-to-r from-[#1a5c38] via-[#2d8a4e] to-[#1a5c38] px-4 shadow-md lg:px-6">
+        <div className="dashboard-topbar shrink-0 px-4 lg:px-6">
           <div className="flex items-center justify-between py-2.5">
             <div className="flex items-center gap-3">
               <MobileMenuButton onClick={() => setMobileOpen(true)} />
@@ -75,8 +77,8 @@ export default function DashboardLayout() {
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2.5 rounded-lg border border-white/15 bg-white/10 px-2 py-1 sm:px-3">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[#1a5c38] sm:h-8 sm:w-8">
+              <div className="flex items-center gap-2.5 rounded-xl border border-white/20 bg-white/10 px-2 py-1 shadow-sm backdrop-blur-md sm:px-3">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-[#1a5c38] shadow-sm sm:h-8 sm:w-8">
                   <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </div>
                 <div className="hidden min-w-0 flex-col gap-0.5 sm:flex">
@@ -88,7 +90,7 @@ export default function DashboardLayout() {
                 type="button"
                 onClick={handleLogout}
                 title="Logout"
-                className="rounded-lg border border-white/15 bg-white/10 p-2 text-white transition-colors hover:bg-white/20"
+                className="rounded-xl border border-white/20 bg-white/10 p-2 text-white shadow-sm backdrop-blur-md transition-colors hover:bg-white/20"
               >
                 <LogOut className="h-[18px] w-[18px]" />
               </button>
@@ -96,10 +98,13 @@ export default function DashboardLayout() {
           </div>
         </div>
 
-        <main id="dashboard-page-content" className="flex-1 overflow-y-auto overflow-x-hidden bg-[#f0f7f2] px-4 pb-4 pt-0 lg:px-6 lg:pb-6">
+        <main
+          id="dashboard-page-content"
+          className="dashboard-main flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4 pt-0 lg:px-6 lg:pb-6"
+        >
           <div id={PAGE_HEADER_SLOT_ID} />
           {!hideFilters && (
-            <div className="sticky top-0 z-40 min-w-0 -mx-4 mb-3 bg-[#f0f7f2] px-4 pb-2 lg:-mx-6 lg:mb-4 lg:px-6">
+            <div className="dashboard-sticky-filters sticky top-0 z-40 min-w-0 -mx-4 mb-3 px-4 pb-2 lg:-mx-6 lg:mb-4 lg:px-6">
               <GlobalFilterBar />
             </div>
           )}
