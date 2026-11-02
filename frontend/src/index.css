@@ -23,6 +23,108 @@ body {
   line-height: 1.5;
 }
 
+/* ── Site-wide glassmorphism (dashboard) ─────────────────────────── */
+.dashboard-shell {
+  position: relative;
+  isolation: isolate;
+  background-color: #eef6f1;
+  background-image:
+    radial-gradient(ellipse 70% 55% at 12% 8%, rgba(45, 138, 78, 0.14), transparent 70%),
+    radial-gradient(ellipse 55% 45% at 88% 18%, rgba(90, 170, 210, 0.1), transparent 68%),
+    radial-gradient(ellipse 60% 50% at 70% 92%, rgba(45, 138, 78, 0.08), transparent 70%),
+    linear-gradient(165deg, #f2faf5 0%, #eef6f1 48%, #eef4f8 100%);
+}
+
+.dashboard-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(26, 92, 56, 0.035) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.35), transparent 85%);
+}
+
+.dashboard-shell > * {
+  position: relative;
+  z-index: 1;
+}
+
+.dashboard-topbar {
+  background: linear-gradient(
+    105deg,
+    rgba(26, 92, 56, 0.96) 0%,
+    rgba(45, 138, 78, 0.94) 50%,
+    rgba(26, 92, 56, 0.96) 100%
+  ) !important;
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 6px 20px rgba(26, 92, 56, 0.14);
+}
+
+.dashboard-sidebar {
+  background: #0f172a !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-right: 1px solid rgba(15, 23, 42, 0.9);
+  box-shadow: 4px 0 24px rgba(15, 23, 42, 0.12);
+}
+
+.dashboard-main {
+  background: transparent !important;
+}
+
+/* Sticky filter strip: clear canvas, no milky fog band */
+.dashboard-sticky-filters {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Frost common white cards / panels across all pages */
+#dashboard-page-content :is(.rounded-xl, .rounded-2xl, .rounded-lg).bg-white,
+#dashboard-page-content :is(.rounded-xl, .rounded-2xl).bg-white\/95 {
+  background-color: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  box-shadow: 0 6px 24px rgba(26, 92, 56, 0.07) !important;
+}
+
+#dashboard-page-content :is(.border-slate-200, .border-gray-100, .border-gray-200).bg-white,
+#dashboard-page-content :is(.border-slate-200, .border-gray-100).rounded-xl {
+  border-color: rgba(197, 224, 206, 0.75) !important;
+}
+
+/* Table headers stay solid (no glass) for readability */
+#dashboard-page-content thead,
+#dashboard-page-content thead th,
+#dashboard-page-content thead.bg-gray-50,
+#dashboard-page-content thead.bg-slate-50,
+#dashboard-page-content thead.bg-white\/70 {
+  background-color: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.glass-panel {
+  border-radius: 1rem;
+  border: 1px solid rgba(197, 224, 206, 0.8);
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 6px 24px rgba(26, 92, 56, 0.07);
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+}
+
+.glass-soft {
+  border-radius: 0.75rem;
+  border: 1px solid rgba(197, 224, 206, 0.7);
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
 :where(h1, h2, h3, h4, h5, h6, p) {
   line-height: 1.5;
   margin: 0;
@@ -84,14 +186,17 @@ body {
 .compact-filter-label {
   display: inline-block;
   white-space: nowrap;
-  border-radius: 0.25rem;
-  background: #d8f0e2;
+  border-radius: 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: rgba(216, 240, 226, 0.65);
   padding: 2px 6px;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #1a5c38;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 @media (max-width: 1023px) {

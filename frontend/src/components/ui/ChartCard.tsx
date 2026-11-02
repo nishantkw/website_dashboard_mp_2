@@ -37,7 +37,7 @@ export default function ChartCard({ title, subtitle, children, className = '', e
       : CHART_EXPORT_COLUMNS
 
   return (
-    <div className={`flex h-full flex-col rounded-xl border border-gray-100 bg-white p-5 shadow-sm ${className}`}>
+    <div className={`flex h-full flex-col rounded-xl border border-[#c5e0ce]/80 bg-white/75 p-5 shadow-[0_6px_24px_rgba(26,92,56,0.07)] backdrop-blur-xl ${className}`}>
       <div className="mb-5 flex shrink-0 items-start justify-between gap-3">
         <StackedHeading
           size="section"

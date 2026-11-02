@@ -65,7 +65,11 @@ export const navigation: NavItem[] = [
           { id: 'mp-hospitals-manpower', label: 'HEM Manpower', path: '/dashboard/mp/hospitals/manpower' },
           { id: 'mp-hospitals-lookup', label: 'Hospital Lookup', path: '/dashboard/mp/hospitals/lookup' },
           { id: 'mp-patients', label: 'Patients & Treatment', path: '/dashboard/mp/patients' },
-          { id: 'mp-doctor-details', label: 'Doctor Details', path: '/dashboard/mp/doctor-details' },
+          {
+            id: 'mp-doctor-details',
+            label: 'Doctor Details',
+            path: '/dashboard/mp/doctor-details',
+          },
           {
             id: 'mp-icd-doctor-details',
             label: 'ICD Doctor Details',
@@ -109,5 +113,11 @@ export const navigation: NavItem[] = [
     children: [
       { id: 'ump-users', label: 'User Master', path: '/dashboard/ump/users' },
     ],
+  },
+  {
+    id: 'auditgen',
+    label: 'AuditGen',
+    path: '/dashboard/auditgen',
+    icon: 'Shuffle',
   },
 ]

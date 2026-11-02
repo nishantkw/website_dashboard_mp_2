@@ -156,7 +156,7 @@ export default function DataTable({
     : undefined
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-[#c5e0ce]/80 bg-white/75 shadow-[0_6px_24px_rgba(26,92,56,0.07)] backdrop-blur-xl">
       {title && (
         <div className="flex flex-col gap-2 border-b border-gray-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <h3 className="min-w-0 break-words text-base font-semibold text-gray-900">{title}</h3>
@@ -213,7 +213,7 @@ export default function DataTable({
 
       <div className="scrollbar-visible overflow-x-auto overflow-y-auto" style={{ maxHeight }}>
         <table className="w-max min-w-full text-sm">
-          <thead className="sticky top-0 z-10 border-b border-gray-200 bg-gray-50 shadow-sm">
+          <thead className="sticky top-0 z-10 border-b border-slate-200 bg-white shadow-sm">
             <tr>
               {visibleColumns.map((col) => (
                 <th

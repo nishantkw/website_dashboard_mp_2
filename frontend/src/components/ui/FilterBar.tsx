@@ -23,8 +23,8 @@ export default function FilterBar({
   schema,
 }: FilterBarProps) {
   return (
-    <div className="bg-white rounded-xl border border-[#c6e6d0] shadow-sm mb-5 overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-[#e8f5ec] to-white border-b border-[#d4edda]">
+    <div className="mb-5 overflow-hidden rounded-xl border border-white/60 bg-white/45 shadow-[0_8px_32px_rgba(26,92,56,0.08)] backdrop-blur-xl">
+      <div className="flex items-center justify-between border-b border-white/50 bg-white/35 px-4 py-2.5 backdrop-blur-md">
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-[#2d8a4e]" />
           <span className="text-sm font-semibold text-[#1a5c38]">Filters</span>

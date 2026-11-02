@@ -15,6 +15,7 @@ import {
   ChevronsRight,
   Menu,
   X,
+  Shuffle,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { navigation } from '../../data/navigation'
@@ -32,6 +33,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Users,
   UserCog,
   UploadCloud,
+  Shuffle,
 }
 
 function NavIcon({ name, className = 'h-4 w-4 shrink-0' }: { name?: string; className?: string }) {
@@ -69,7 +71,7 @@ function useHoverFlyout() {
   const wrapRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
   const [rect, setRect] = useState<DOMRect | null>(null)
-  const closeTimer = useRef<number>()
+  const closeTimer = useRef<number | undefined>(undefined)
 
   const show = () => {
     window.clearTimeout(closeTimer.current)
@@ -105,7 +107,7 @@ function Flyout({
   return createPortal(
     <div
       className={clsx(
-        'fixed z-[80] flex flex-col rounded-lg border border-slate-700 bg-slate-800 shadow-2xl',
+        'fixed z-[80] flex flex-col rounded-xl border border-slate-700 bg-slate-900 shadow-2xl',
         children ? 'min-w-[15rem] max-w-[18rem] py-1' : 'px-2.5 py-1.5'
       )}
       style={{ top, left: rect.right + 10, maxHeight: window.innerHeight - top - 8 }}
@@ -193,8 +195,10 @@ function CompactNavItem({ item }: { item: NavItem }) {
 
   const iconBtnClass = (active: boolean) =>
     clsx(
-      'flex h-10 w-10 items-center justify-center rounded-lg transition-colors',
-      active ? 'bg-[#2d8a4e] text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+      'flex h-10 w-10 items-center justify-center rounded-xl transition-colors',
+      active
+        ? 'bg-[#2d8a4e]/90 text-white shadow-lg shadow-emerald-900/30 backdrop-blur-md'
+        : 'text-slate-300 hover:bg-white/10 hover:text-white'
     )
 
   if (!hasChildren && item.path) {
@@ -371,14 +375,12 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
       )}
       <aside
         className={clsx(
-          'fixed lg:static inset-y-0 left-0 z-50 flex h-full shrink-0 flex-col bg-slate-900 transition-[width,transform] duration-300',
+          'dashboard-sidebar fixed inset-y-0 left-0 z-50 flex h-full shrink-0 flex-col transition-[width,transform] duration-300 lg:static',
           'lg:translate-x-0 lg:z-auto',
           compact ? 'w-72 lg:w-[72px]' : 'w-72',
           mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
-        <div className="h-1 shrink-0 bg-gradient-to-r from-[#1a5c38] via-[#2d8a4e] to-[#1a5c38]" />
-
         <div className={clsx('shrink-0 border-b border-slate-700', compact ? 'px-2 py-3' : 'px-4 py-3')}>
           {compact ? (
             <div className="flex flex-col items-center gap-2">

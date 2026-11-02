@@ -15,7 +15,7 @@ export default function DashboardReportsBanner({
   hint = 'Row-level detail tables live in Reports. Use KPI cards and charts here for analysis.',
 }: DashboardReportsBannerProps) {
   return (
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-100 bg-white px-4 py-3 shadow-sm">
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/60 bg-white/45 px-4 py-3 shadow-[0_8px_28px_rgba(26,92,56,0.08)] backdrop-blur-xl">
       <div className="flex min-w-0 items-center gap-2 text-sm text-slate-600">
         <FileSpreadsheet className="h-4 w-4 shrink-0 text-[#2d8a4e]" />
         <span>{hint}</span>
