@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Columns3, Search } from 'lucide-react'
 
 interface ColumnOption {
@@ -23,16 +24,46 @@ export default function ColumnSelector({
 }: ColumnSelectorProps) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
-  const ref = useRef<HTMLDivElement>(null)
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number; width: number } | null>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLInputElement>(null)
 
+  useLayoutEffect(() => {
+    if (!open || !buttonRef.current) {
+      setMenuPos(null)
+      return
+    }
+
+    const updatePosition = () => {
+      const rect = buttonRef.current?.getBoundingClientRect()
+      if (!rect) return
+      const width = Math.min(288, Math.max(256, window.innerWidth - 16))
+      const left = Math.min(Math.max(8, rect.right - width), window.innerWidth - width - 8)
+      const top = Math.min(rect.bottom + 6, window.innerHeight - 8)
+      setMenuPos({ top, left, width })
+    }
+
+    updatePosition()
+    window.addEventListener('resize', updatePosition)
+    window.addEventListener('scroll', updatePosition, true)
+    return () => {
+      window.removeEventListener('resize', updatePosition)
+      window.removeEventListener('scroll', updatePosition, true)
+    }
+  }, [open])
+
   useEffect(() => {
+    if (!open) return
     function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+      const target = e.target as Node
+      if (rootRef.current?.contains(target) || menuRef.current?.contains(target)) return
+      setOpen(false)
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+  }, [open])
 
   useEffect(() => {
     if (!open) {
@@ -54,24 +85,17 @@ export default function ColumnSelector({
 
   const filteredKeys = filtered.map((col) => col.key)
 
-  return (
-    <div className="relative" ref={ref}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:border-[#2d8a4e] hover:text-[#1a5c38]"
-      >
-        <Columns3 className="h-3.5 w-3.5 text-[#2d8a4e]" />
-        Columns
-        <span className="rounded-full bg-[#2d8a4e]/10 px-1.5 py-0.5 text-[10px] font-semibold text-[#1a5c38]">
-          {visibleKeys.length}/{columns.length}
-        </span>
-      </button>
-
-      {open && (
-        <div className="absolute right-0 z-30 mt-1.5 w-64 rounded-xl border border-slate-200 bg-white py-2 shadow-lg sm:w-72">
+  const menu = open && menuPos
+    ? createPortal(
+        <div
+          ref={menuRef}
+          className="fixed z-[200] rounded-xl border border-slate-200 bg-white py-2 shadow-xl"
+          style={{ top: menuPos.top, left: menuPos.left, width: menuPos.width }}
+        >
           <div className="border-b border-slate-100 px-3 pb-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Show columns</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+              Show columns
+            </span>
             <div className="mt-2 flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 focus-within:border-[#2d8a4e] focus-within:bg-white">
               <Search className="h-3.5 w-3.5 shrink-0 text-slate-400" />
               <input
@@ -104,7 +128,9 @@ export default function ColumnSelector({
           </div>
           <div className="scrollbar-visible max-h-64 overflow-y-auto px-1 py-1">
             {filtered.length === 0 ? (
-              <p className="px-2 py-3 text-center text-xs text-slate-500">No columns match “{query.trim()}”</p>
+              <p className="px-2 py-3 text-center text-xs text-slate-500">
+                No columns match “{query.trim()}”
+              </p>
             ) : (
               filtered.map((col) => (
                 <label
@@ -122,8 +148,26 @@ export default function ColumnSelector({
               ))
             )}
           </div>
-        </div>
-      )}
+        </div>,
+        document.body
+      )
+    : null
+
+  return (
+    <div className="relative" ref={rootRef}>
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:border-[#2d8a4e] hover:text-[#1a5c38]"
+      >
+        <Columns3 className="h-3.5 w-3.5 text-[#2d8a4e]" />
+        Columns
+        <span className="rounded-full bg-[#2d8a4e]/10 px-1.5 py-0.5 text-[10px] font-semibold text-[#1a5c38]">
+          {visibleKeys.length}/{columns.length}
+        </span>
+      </button>
+      {menu}
     </div>
   )
 }

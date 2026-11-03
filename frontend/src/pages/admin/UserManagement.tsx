@@ -259,10 +259,6 @@ export default function UserManagement() {
     setLoadingAudit(false)
   }, [])
 
-  useEffect(() => {
-    if (activeTab === 'audit') void loadAuditLogs()
-  }, [activeTab, loadAuditLogs])
-
   const loadUsers = useCallback(async () => {
     setLoadingUsers(true)
     setActionError('')
@@ -285,6 +281,12 @@ export default function UserManagement() {
   useEffect(() => {
     void loadUsers()
   }, [loadUsers])
+
+  const handleTabChange = (tab: 'users' | 'roles' | 'permissions' | 'audit') => {
+    setActiveTab(tab)
+    if (tab === 'users' || tab === 'roles') void loadUsers()
+    if (tab === 'audit') void loadAuditLogs()
+  }
 
   const handleToggleUserStatus = async (id: string) => {
     const target = users.find((u) => u.id === id)
@@ -366,7 +368,7 @@ export default function UserManagement() {
   })
 
   return (
-    <div className="space-y-6 pt-4 lg:pt-6">
+    <div className="min-w-0 space-y-4 pt-4 sm:space-y-6 lg:pt-6">
       {actionError ? (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           {actionError}
@@ -378,15 +380,15 @@ export default function UserManagement() {
         </div>
       ) : null}
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-4 sm:p-6 rounded-xl border border-slate-200 shadow-sm">
+      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-6">
         <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-800">User Management</h1>
-          <p className="text-slate-500 text-xs sm:text-sm mt-1 hidden sm:block">
+          <h1 className="text-xl font-bold text-slate-800 sm:text-2xl">User Management</h1>
+          <p className="mt-1 hidden text-xs text-slate-500 sm:block sm:text-sm">
             Manage administrative users. Create, deactivate, and reset passwords against Neon/Postgres.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 shrink-0">
+        <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
           <ExportDropdown
             title={`User Management — ${activeTab.toUpperCase()}`}
             filename={`user_management_${activeTab}_export`}
@@ -398,31 +400,31 @@ export default function UserManagement() {
           {activeTab === 'users' && (
             <button
               onClick={() => setShowCreateUserModal(true)}
-              className="flex items-center gap-2 bg-[#2d8a4e] hover:bg-[#247a42] text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm"
+              className="flex items-center gap-2 rounded-lg bg-[#2d8a4e] px-3 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#247a42] sm:px-4"
             >
-              <UserPlus className="w-4 h-4" />
-              <span className="hidden xs:inline">Create User</span>
+              <UserPlus className="h-4 w-4" />
+              <span className="hidden sm:inline">Create User</span>
             </button>
           )}
 
           {activeTab === 'roles' && (
             <button
               onClick={() => setShowCreateRoleModal(true)}
-              className="flex items-center gap-2 bg-[#2d8a4e] hover:bg-[#247a42] text-white px-3 sm:px-4 py-2 rounded-lg font-medium text-sm transition-colors shadow-sm"
+              className="flex items-center gap-2 rounded-lg bg-[#2d8a4e] px-3 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#247a42] sm:px-4"
             >
-              <Plus className="w-4 h-4" />
-              <span className="hidden xs:inline">Create Role</span>
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">Create Role</span>
             </button>
           )}
         </div>
       </div>
 
       {/* Tabs Navigation */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+      <div className="min-w-0 rounded-xl border border-slate-200 bg-white shadow-sm">
         <div className="scrollbar-visible overflow-x-auto">
-          <nav className="-mb-px flex whitespace-nowrap px-2 sm:px-6 min-w-max">
+          <nav className="-mb-px flex min-w-max whitespace-nowrap px-2 sm:px-6">
             <button
-              onClick={() => setActiveTab('users')}
+              onClick={() => handleTabChange('users')}
               className={clsx(
                 'py-4 px-3 sm:px-4 inline-flex items-center gap-1.5 border-b-2 font-semibold text-xs sm:text-sm transition-colors shrink-0',
                 activeTab === 'users'
@@ -436,7 +438,7 @@ export default function UserManagement() {
             </button>
 
             <button
-              onClick={() => setActiveTab('roles')}
+              onClick={() => handleTabChange('roles')}
               className={clsx(
                 'py-4 px-3 sm:px-4 inline-flex items-center gap-1.5 border-b-2 font-semibold text-xs sm:text-sm transition-colors shrink-0',
                 activeTab === 'roles'
@@ -450,7 +452,7 @@ export default function UserManagement() {
             </button>
 
             <button
-              onClick={() => setActiveTab('permissions')}
+              onClick={() => handleTabChange('permissions')}
               className={clsx(
                 'py-4 px-3 sm:px-4 inline-flex items-center gap-1.5 border-b-2 font-semibold text-xs sm:text-sm transition-colors shrink-0',
                 activeTab === 'permissions'
@@ -463,7 +465,7 @@ export default function UserManagement() {
             </button>
 
             <button
-              onClick={() => setActiveTab('audit')}
+              onClick={() => handleTabChange('audit')}
               className={clsx(
                 'py-4 px-3 sm:px-4 inline-flex items-center gap-1.5 border-b-2 font-semibold text-xs sm:text-sm transition-colors shrink-0',
                 activeTab === 'audit'
@@ -483,23 +485,23 @@ export default function UserManagement() {
       {activeTab === 'users' && (
         <div className="space-y-4">
           {/* Controls Bar */}
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div className="relative w-full md:w-80">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <div className="flex flex-col items-stretch gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4 md:flex-row md:items-center md:justify-between md:gap-4">
+            <div className="relative w-full min-w-0 md:max-w-sm md:flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search username, name, department..."
+                placeholder="Search username, name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-[#2d8a4e] focus:ring-1 focus:ring-[#2d8a4e]"
+                className="w-full rounded-lg border border-slate-300 py-2 pl-9 pr-4 text-sm outline-none focus:border-[#2d8a4e] focus:ring-1 focus:ring-[#2d8a4e]"
               />
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:gap-3 md:w-auto">
               <select
                 value={selectedRoleFilter}
                 onChange={(e) => setSelectedRoleFilter(e.target.value)}
-                className="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white text-slate-700 outline-none focus:border-[#2d8a4e]"
+                className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#2d8a4e] sm:flex-none"
               >
                 <option value="ALL">All Roles</option>
                 {roles.map((r) => (
@@ -512,7 +514,7 @@ export default function UserManagement() {
               <select
                 value={selectedStatusFilter}
                 onChange={(e) => setSelectedStatusFilter(e.target.value)}
-                className="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white text-slate-700 outline-none focus:border-[#2d8a4e]"
+                className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#2d8a4e] sm:flex-none"
               >
                 <option value="ALL">All Status</option>
                 <option value="Active">Active</option>
@@ -522,17 +524,17 @@ export default function UserManagement() {
           </div>
 
           {/* Users Table */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
             <div className="scrollbar-visible overflow-x-auto">
               <table className="w-max min-w-full text-left text-sm">
-                <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-xs">
+                <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase text-slate-600">
                   <tr>
-                    <th className="whitespace-nowrap px-6 py-3.5">Username</th>
-                    <th className="whitespace-nowrap px-6 py-3.5">Full Name</th>
-                    <th className="whitespace-nowrap px-6 py-3.5">Role</th>
-                    <th className="whitespace-nowrap px-6 py-3.5">Department / Organization</th>
-                    <th className="whitespace-nowrap px-6 py-3.5">Status</th>
-                    <th className="whitespace-nowrap px-6 py-3.5 text-right">Actions</th>
+                    <th className="whitespace-nowrap px-3 py-3 sm:px-6 sm:py-3.5">Username</th>
+                    <th className="whitespace-nowrap px-3 py-3 sm:px-6 sm:py-3.5">Full Name</th>
+                    <th className="whitespace-nowrap px-3 py-3 sm:px-6 sm:py-3.5">Role</th>
+                    <th className="whitespace-nowrap px-3 py-3 sm:px-6 sm:py-3.5">Department / Organization</th>
+                    <th className="whitespace-nowrap px-3 py-3 sm:px-6 sm:py-3.5">Status</th>
+                    <th className="whitespace-nowrap px-3 py-3 text-right sm:px-6 sm:py-3.5">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 text-slate-700">

@@ -32,12 +32,14 @@ export async function apiFetch<T>(
   try {
     const res = await fetch(`${API_BASE}${path}`, {
       ...options,
+      cache: 'no-store',
       credentials: 'include',
       signal: controller.signal,
       headers: isForm
         ? { ...(options.headers || {}) }
         : {
             'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
             ...(options.headers || {}),
           },
     })

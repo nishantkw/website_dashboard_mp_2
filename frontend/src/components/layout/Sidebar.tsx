@@ -371,13 +371,16 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   return (
     <>
       {mobileOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />
+        <div
+          className="dashboard-mobile-overlay fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={onClose}
+        />
       )}
       <aside
         className={clsx(
-          'dashboard-sidebar fixed inset-y-0 left-0 z-50 flex h-full shrink-0 flex-col transition-[width,transform] duration-300 lg:static',
-          'lg:translate-x-0 lg:z-auto',
-          compact ? 'w-72 lg:w-[72px]' : 'w-72',
+          'dashboard-sidebar fixed inset-y-0 left-0 z-50 flex h-full w-72 shrink-0 flex-col transition-[width,transform] duration-300',
+          'lg:static lg:translate-x-0 lg:z-auto',
+          compact && 'lg:w-[72px]',
           mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >

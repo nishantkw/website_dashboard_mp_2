@@ -56,7 +56,7 @@ export default function Login() {
 
   return (
     <div
-      className="flex h-screen overflow-hidden"
+      className="flex h-screen w-full max-w-[100vw] overflow-x-hidden overflow-y-hidden"
       style={{ fontFamily: "'Manrope', 'Segoe UI', system-ui, sans-serif" }}
     >
       {/* Brand panel — fixed viewport height, never grows with form */}
@@ -139,9 +139,9 @@ export default function Login() {
       </aside>
 
       {/* Form panel — only this side scrolls when demo credentials open */}
-      <main className="relative flex min-h-0 flex-1 flex-col overflow-y-auto bg-gradient-to-br from-[#e8f6ec] via-[#f3faf5] to-[#e4eef8]">
+      <main className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto bg-gradient-to-br from-[#e8f6ec] via-[#f3faf5] to-[#e4eef8]">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(45,138,78,0.14),transparent_50%)]" />
-        <div className="pointer-events-none absolute -right-10 top-24 h-56 w-56 rounded-full bg-sky-300/20 blur-3xl" />
+        <div className="pointer-events-none absolute right-0 top-24 h-56 w-56 rounded-full bg-sky-300/20 blur-3xl" />
 
         {/* Mobile brand strip */}
         <div className="relative z-10 shrink-0 border-b border-white/50 bg-white/45 px-5 py-4 backdrop-blur-xl lg:hidden">
