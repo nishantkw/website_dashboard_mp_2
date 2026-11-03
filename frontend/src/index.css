@@ -46,9 +46,20 @@ body {
   mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.35), transparent 85%);
 }
 
-.dashboard-shell > * {
+/* Keep main column above the shell background — do NOT force
+   position:relative on the sidebar/overlay or mobile `fixed` breaks
+   (sidebar still occupies w-72 while translated off-screen). */
+.dashboard-shell > *:not(.dashboard-sidebar):not(.dashboard-mobile-overlay) {
   position: relative;
   z-index: 1;
+}
+
+.dashboard-shell > .dashboard-sidebar {
+  z-index: 50;
+}
+
+.dashboard-shell > .dashboard-mobile-overlay {
+  z-index: 40;
 }
 
 .dashboard-topbar {
